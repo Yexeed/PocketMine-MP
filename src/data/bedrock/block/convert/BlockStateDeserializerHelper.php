@@ -45,10 +45,9 @@ use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\block\Stem;
 use pocketmine\block\Trapdoor;
+use pocketmine\block\utils\CopperMaterial;
 use pocketmine\block\utils\CopperOxidation;
-use pocketmine\block\utils\ICopper;
 use pocketmine\block\utils\SlabType;
-use pocketmine\block\VanillaBlocks;
 use pocketmine\block\Wall;
 use pocketmine\block\WallSign;
 use pocketmine\block\WeightedPressurePlate;
@@ -98,24 +97,24 @@ final class BlockStateDeserializerHelper{
 	}
 
 	/**
-	 * @phpstan-template TBlock of ICopper
+	 * @phpstan-template TBlock of CopperMaterial
 	 *
 	 * @phpstan-param TBlock $block
 	 * @phpstan-return TBlock
 	 */
-	public static function decodeCopper(ICopper $block, CopperOxidation $oxidation) : ICopper{
+	public static function decodeCopper(CopperMaterial $block, CopperOxidation $oxidation) : CopperMaterial{
 		$block->setOxidation($oxidation);
 		$block->setWaxed(false);
 		return $block;
 	}
 
 	/**
-	 * @phpstan-template TBlock of ICopper
+	 * @phpstan-template TBlock of CopperMaterial
 	 *
 	 * @phpstan-param TBlock $block
 	 * @phpstan-return TBlock
 	 */
-	public static function decodeWaxedCopper(ICopper $block, CopperOxidation $oxidation) : ICopper{
+	public static function decodeWaxedCopper(CopperMaterial $block, CopperOxidation $oxidation) : CopperMaterial{
 		$block->setOxidation($oxidation);
 		$block->setWaxed(true);
 		return $block;
@@ -208,8 +207,8 @@ final class BlockStateDeserializerHelper{
 	/** @throws BlockStateDeserializeException */
 	public static function decodeMushroomBlock(RedMushroomBlock $block, BlockStateReader $in) : Block{
 		switch($type = $in->readBoundedInt(BlockStateNames::HUGE_MUSHROOM_BITS, 0, 15)){
-			case BlockLegacyMetadata::MUSHROOM_BLOCK_ALL_STEM: return VanillaBlocks::ALL_SIDED_MUSHROOM_STEM();
-			case BlockLegacyMetadata::MUSHROOM_BLOCK_STEM: return VanillaBlocks::MUSHROOM_STEM();
+			case BlockLegacyMetadata::MUSHROOM_BLOCK_ALL_STEM:
+			case BlockLegacyMetadata::MUSHROOM_BLOCK_STEM: throw new BlockStateDeserializeException("This state does not exist");
 			default:
 				//invalid types get left as default
 				$type = MushroomBlockTypeIdMap::getInstance()->fromId($type);

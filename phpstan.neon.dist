@@ -38,6 +38,7 @@ parameters:
 			- build/php
 	dynamicConstantNames:
 		- pocketmine\VersionInfo::IS_DEVELOPMENT_BUILD
+		- pocketmine\VersionInfo::BUILD_CHANNEL
 		- pocketmine\DEBUG
 		- pocketmine\IS_DEVELOPMENT_BUILD
 	stubFiles:

@@ -26,7 +26,6 @@ namespace pocketmine\data\bedrock\item;
 use pocketmine\block\Bed;
 use pocketmine\block\Block;
 use pocketmine\block\CopperDoor;
-use pocketmine\block\MobHead;
 use pocketmine\block\utils\CopperOxidation;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks as Blocks;
@@ -35,7 +34,6 @@ use pocketmine\data\bedrock\DyeColorIdMap;
 use pocketmine\data\bedrock\item\ItemTypeNames as Ids;
 use pocketmine\data\bedrock\item\SavedItemData as Data;
 use pocketmine\data\bedrock\MedicineTypeIdMap;
-use pocketmine\data\bedrock\MobHeadTypeIdMap;
 use pocketmine\data\bedrock\PotionTypeIdMap;
 use pocketmine\data\bedrock\SuspiciousStewTypeIdMap;
 use pocketmine\item\Banner;
@@ -468,14 +466,6 @@ final class ItemSerializerDeserializerRegistrar{
 				$block->setColor(DyeColorIdMap::getInstance()->fromId($meta) ?? throw new ItemTypeDeserializeException("Unknown bed color ID $meta"));
 			},
 			fn(Bed $block) => DyeColorIdMap::getInstance()->toId($block->getColor())
-		);
-		$this->map1to1BlockWithMeta(
-			Ids::SKULL,
-			Blocks::MOB_HEAD(),
-			function(MobHead $block, int $meta) : void{
-				$block->setMobHeadType(MobHeadTypeIdMap::getInstance()->fromId($meta) ?? throw new ItemTypeDeserializeException("Unknown mob head type ID $meta"));
-			},
-			fn(MobHead $block) => MobHeadTypeIdMap::getInstance()->toId($block->getMobHeadType())
 		);
 	}
 
