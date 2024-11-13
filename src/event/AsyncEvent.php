@@ -76,12 +76,13 @@ abstract class AsyncEvent{
 		/** @phpstan-var PromiseResolver<self> $globalResolver */
 		$globalResolver = new PromiseResolver();
 
+		$handlerList = HandlerListManager::global()->getAsyncListFor(static::class);
 		$priorities = EventPriority::ALL;
-		$testResolve = function () use (&$testResolve, &$priorities, $globalResolver){
+		$testResolve = function () use ($handlerList, &$testResolve, &$priorities, $globalResolver){
 			if(count($priorities) === 0){
 				$globalResolver->resolve($this);
 			}else{
-				$this->callPriority(array_shift($priorities))->onCompletion(function() use ($testResolve) : void{
+				$this->callPriority($handlerList, array_shift($priorities))->onCompletion(function() use ($testResolve) : void{
 					$testResolve();
 				}, function () use ($globalResolver) {
 					$globalResolver->reject();
@@ -97,8 +98,8 @@ abstract class AsyncEvent{
 	/**
 	 * @phpstan-return Promise<null>
 	 */
-	private function callPriority(int $priority) : Promise{
-		$handlers = HandlerListManager::global()->getAsyncListFor(static::class)->getListenersByPriority($priority);
+	private function callPriority(AsyncHandlerList $handlerList, int $priority) : Promise{
+		$handlers = $handlerList->getListenersByPriority($priority);
 
 		/** @phpstan-var PromiseResolver<null> $resolver */
 		$resolver = new PromiseResolver();
