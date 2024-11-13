@@ -24,37 +24,35 @@ declare(strict_types=1);
 namespace pocketmine\event;
 
 use pocketmine\plugin\Plugin;
-use pocketmine\promise\Promise;
 use pocketmine\timings\TimingsHandler;
+use function in_array;
 
-class AsyncRegisteredListener extends BaseRegisteredListener{
+abstract class BaseRegisteredListener{
 	public function __construct(
-		\Closure $handler,
-		int $priority,
-		Plugin $plugin,
-		bool $handleCancelled,
-		private bool $exclusiveCall,
-		TimingsHandler $timings
+		protected \Closure $handler,
+		private int $priority,
+		private Plugin $plugin,
+		private bool $handleCancelled,
+		protected TimingsHandler $timings
 	){
-		parent::__construct($handler, $priority, $plugin, $handleCancelled, $timings);
-	}
-
-	/**
-	 * @phpstan-return Promise<null>|null
-	 */
-	public function callAsync(AsyncEvent $event) : ?Promise{
-		if($event instanceof Cancellable && $event->isCancelled() && !$this->isHandlingCancelled()){
-			return null;
-		}
-		$this->timings->startTiming();
-		try{
-			return ($this->handler)($event);
-		}finally{
-			$this->timings->stopTiming();
+		if(!in_array($priority, EventPriority::ALL, true)){
+			throw new \InvalidArgumentException("Invalid priority number $priority");
 		}
 	}
 
-	public function canBeCalledConcurrently() : bool{
-		return !$this->exclusiveCall;
+	public function getHandler() : \Closure{
+		return $this->handler;
+	}
+
+	public function getPlugin() : Plugin{
+		return $this->plugin;
+	}
+
+	public function getPriority() : int{
+		return $this->priority;
+	}
+
+	public function isHandlingCancelled() : bool{
+		return $this->handleCancelled;
 	}
 }

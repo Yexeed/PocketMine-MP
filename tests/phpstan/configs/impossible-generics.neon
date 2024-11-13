@@ -6,17 +6,12 @@ parameters:
 			path: ../../../src/event/AsyncRegisteredListener.php
 
 		-
-			message: "#^Method pocketmine\\\\event\\\\AsyncRegisteredListener\\:\\:getHandler\\(\\) return type has no signature specified for Closure\\.$#"
+			message: "#^Method pocketmine\\\\event\\\\BaseRegisteredListener\\:\\:__construct\\(\\) has parameter \\$handler with no signature specified for Closure\\.$#"
 			count: 1
-			path: ../../../src/event/AsyncRegisteredListener.php
+			path: ../../../src/event/BaseRegisteredListener.php
 
 		-
-			message: "#^Method pocketmine\\\\event\\\\RegisteredListener\\:\\:__construct\\(\\) has parameter \\$handler with no signature specified for Closure\\.$#"
+			message: "#^Method pocketmine\\\\event\\\\BaseRegisteredListener\\:\\:getHandler\\(\\) return type has no signature specified for Closure\\.$#"
 			count: 1
-			path: ../../../src/event/RegisteredListener.php
-
-		-
-			message: "#^Method pocketmine\\\\event\\\\RegisteredListener\\:\\:getHandler\\(\\) return type has no signature specified for Closure\\.$#"
-			count: 1
-			path: ../../../src/event/RegisteredListener.php
+			path: ../../../src/event/BaseRegisteredListener.php
 
