@@ -39,9 +39,7 @@ final class AsyncEventInheritanceTest extends Test{
 		ChildAsyncEvent::class,
 		ParentAsyncEvent::class
 	];
-	/**
-	 * @var string[]
-	 */
+	/** @var string[] */
 	private array $callOrder = [];
 
 	public function getName() : string{
@@ -62,7 +60,6 @@ final class AsyncEventInheritanceTest extends Test{
 			$plugin->getServer()->getPluginManager()->registerAsyncEvent(
 				$class,
 				function(AsyncEvent $event) use ($class) : ?Promise{
-					var_dump($class);
 					$this->callOrder[] = $class;
 					return null;
 				},
