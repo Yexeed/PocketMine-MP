@@ -654,7 +654,10 @@ class PluginManager{
 				}
 			}
 
-			if(is_subclass_of($eventClass, AsyncEvent::class) && $this->canHandleAsyncEvent($handlerClosure)){
+			if(is_subclass_of($eventClass, AsyncEvent::class)){
+				if(!$this->canHandleAsyncEvent($handlerClosure)){
+					throw new PluginException("Event handler " . Utils::getNiceClosureName($handlerClosure) . " must return null|Promise<null> to be able to handle async events");
+				}
 				$this->registerAsyncEvent($eventClass, $handlerClosure, $priority, $plugin, $handleCancelled, $exclusiveCall);
 			}else{
 				$this->registerEvent($eventClass, $handlerClosure, $priority, $plugin, $handleCancelled);
