@@ -30,7 +30,7 @@ use function in_array;
 
 class AsyncRegisteredListener{
 	/**
-	 * @phpstan-param \Closure(AsyncEvent) : Promise<null> $handler
+	 * @phpstan-param \Closure(AsyncEvent) : ?Promise<null> $handler
 	 */
 	public function __construct(
 		private \Closure $handler,
