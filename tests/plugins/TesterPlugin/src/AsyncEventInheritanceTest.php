@@ -58,11 +58,12 @@ final class AsyncEventInheritanceTest extends Test{
 		$plugin = $this->getPlugin();
 		$classes = self::EXPECTED_ORDER;
 		shuffle($classes);
-		foreach($classes as $event){
+		foreach($classes as $class){
 			$plugin->getServer()->getPluginManager()->registerAsyncEvent(
-				$event,
-				function(AsyncEvent $event) : ?Promise{
-					$this->callOrder[] = $event::class;
+				$class,
+				function(AsyncEvent $event) use ($class) : ?Promise{
+					var_dump($class);
+					$this->callOrder[] = $class;
 					return null;
 				},
 				EventPriority::NORMAL,

@@ -38,12 +38,17 @@ class HandlerListManager{
 	private array $allSyncLists = [];
 	/**
 	 * @var RegisteredListenerCache[] event class name => cache
-	 * @phpstan-var array<class-string<Event|AsyncEvent>, RegisteredListenerCache>
+	 * @phpstan-var array<class-string<Event>, RegisteredListenerCache<RegisteredListener>>
 	 */
 	private array $syncHandlerCaches = [];
 
 	/** @var AsyncHandlerList[] classname => AsyncHandlerList */
 	private array $allAsyncLists = [];
+	/**
+	 * @var RegisteredListenerCache[] event class name => cache
+	 * @phpstan-var array<class-string<AsyncEvent>, RegisteredListenerCache<AsyncRegisteredListener>>
+	 */
+	private array $asyncHandlerCaches = [];
 
 	/**
 	 * Unregisters all the listeners
@@ -119,6 +124,7 @@ class HandlerListManager{
 		}
 
 		$parent = self::resolveNearestHandleableParent($class);
+		/** @phpstan-var RegisteredListenerCache<RegisteredListener> $cache */
 		$cache = new RegisteredListenerCache();
 		$this->syncHandlerCaches[$event] = $cache;
 		return $this->allSyncLists[$event] = new HandlerList(
@@ -150,9 +156,13 @@ class HandlerListManager{
 		}
 
 		$parent = self::resolveNearestHandleableParent($class);
+		/** @phpstan-var RegisteredListenerCache<AsyncRegisteredListener> $cache */
+		$cache = new RegisteredListenerCache();
+		$this->asyncHandlerCaches[$event] = $cache;
 		return $this->allAsyncLists[$event] = new AsyncHandlerList(
 			$event,
 			parentList: $parent !== null ? $this->getAsyncListFor($parent->getName()) : null,
+			handlerCache: $cache
 		);
 	}
 
@@ -165,6 +175,17 @@ class HandlerListManager{
 		$cache = $this->syncHandlerCaches[$event] ?? null;
 		//getListFor() will populate the cache for the next call
 		return $cache?->list ?? $this->getListFor($event)->getListenerList();
+	}
+
+	/**
+	 * @phpstan-param class-string<covariant AsyncEvent> $event
+	 *
+	 * @return AsyncRegisteredListener[]
+	 */
+	public function getAsyncHandlersFor(string $event) : array{
+		$cache = $this->asyncHandlerCaches[$event] ?? null;
+		//getListFor() will populate the cache for the next call
+		return $cache?->list ?? $this->getAsyncListFor($event)->getListenerList();
 	}
 
 	/**

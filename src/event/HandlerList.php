@@ -33,11 +33,15 @@ class HandlerList{
 	/** @var RegisteredListener[][] */
 	private array $handlerSlots = [];
 
-	/** @var RegisteredListenerCache[] */
+	/**
+	 * @var RegisteredListenerCache[]
+	 * @phpstan-var array<int, RegisteredListenerCache<RegisteredListener>>
+	 */
 	private array $affectedHandlerCaches = [];
 
 	/**
 	 * @phpstan-param class-string<covariant Event> $class
+	 * @phpstan-param RegisteredListenerCache<RegisteredListener> $handlerCache
 	 */
 	public function __construct(
 		private string $class,

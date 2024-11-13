@@ -26,7 +26,6 @@ namespace pocketmine\event;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use pocketmine\timings\Timings;
-use function array_shift;
 use function count;
 
 /**
@@ -61,7 +60,7 @@ abstract class AsyncEvent{
 			/** @phpstan-var PromiseResolver<static> $globalResolver */
 			$globalResolver = new PromiseResolver();
 
-			$this->asyncEachPriority(HandlerListManager::global()->getAsyncListFor(static::class), EventPriority::ALL, $globalResolver);
+			$this->processRemainingHandlers(HandlerListManager::global()->getAsyncHandlersFor(static::class), $globalResolver);
 
 			return $globalResolver->getPromise();
 		}finally{
@@ -71,84 +70,51 @@ abstract class AsyncEvent{
 	}
 
 	/**
-	 * TODO: this should use EventPriority constants for the list type but it's inconvenient with the current design
-	 * @phpstan-param list<int> $remaining
+	 * @param AsyncRegisteredListener[] $handlers
 	 * @phpstan-param PromiseResolver<static> $globalResolver
 	 */
-	private function asyncEachPriority(AsyncHandlerList $handlerList, array $remaining, PromiseResolver $globalResolver) : void{
-		while(true){
-			$nextPriority = array_shift($remaining);
-			if($nextPriority === null){
-				$globalResolver->resolve($this);
+	private function processRemainingHandlers(array $handlers, PromiseResolver $globalResolver) : void{
+		$currentPriority = null;
+		$awaitPromises = [];
+		foreach($handlers as $k => $handler){
+			$priority = $handler->getPriority();
+			if(count($awaitPromises) > 0 && $currentPriority !== null && $currentPriority !== $priority){
+				//wait for concurrent promises from previous priority to complete
 				break;
 			}
 
-			$promise = $this->callPriority($handlerList, $nextPriority);
-			if($promise !== null){
-				$promise->onCompletion(
-					onSuccess: fn() => $this->asyncEachPriority($handlerList, $remaining, $globalResolver),
-					onFailure: $globalResolver->reject(...)
-				);
-				break;
-			}
-		}
-	}
-
-	/**
-	 * @phpstan-return Promise<null>
-	 */
-	private function callPriority(AsyncHandlerList $handlerList, int $priority) : ?Promise{
-		$handlers = $handlerList->getListenersByPriority($priority);
-		if(count($handlers) === 0){
-			return null;
-		}
-
-		/** @phpstan-var PromiseResolver<null> $resolver */
-		$resolver = new PromiseResolver();
-
-		$concurrentPromises = [];
-		$nonConcurrentHandlers = [];
-		foreach($handlers as $registration){
-			if($registration->canBeCalledConcurrently()){
-				$result = $registration->callAsync($this);
-				if($result !== null) {
-					$concurrentPromises[] = $result;
+			$currentPriority = $priority;
+			if($handler->canBeCalledConcurrently()){
+				unset($handlers[$k]);
+				$promise = $handler->callAsync($this);
+				if($promise !== null){
+					$awaitPromises[] = $promise;
 				}
 			}else{
-				$nonConcurrentHandlers[] = $registration;
+				if(count($awaitPromises) > 0){
+					//wait for concurrent promises to complete
+					break;
+				}
+
+				unset($handlers[$k]);
+				$promise = $handler->callAsync($this);
+				if($promise !== null){
+					$promise->onCompletion(
+						onSuccess: fn() => $this->processRemainingHandlers($handlers, $globalResolver),
+						onFailure: $globalResolver->reject(...)
+					);
+					return;
+				}
 			}
 		}
 
-		Promise::all($concurrentPromises)->onCompletion(
-			onSuccess: fn() => $this->processExclusiveHandlers($nonConcurrentHandlers, $resolver),
-			onFailure: $resolver->reject(...)
-		);
-
-		return $resolver->getPromise();
-	}
-
-	/**
-	 * @param AsyncRegisteredListener[] $handlers
-	 * @phpstan-param PromiseResolver<null> $resolver
-	 */
-	private function processExclusiveHandlers(array $handlers, PromiseResolver $resolver) : void{
-		while(true){
-			$handler = array_shift($handlers);
-			if($handler === null){
-				$resolver->resolve(null);
-				break;
-			}
-			$result = $handler->callAsync($this);
-			if($result instanceof Promise){
-				//wait for this promise to resolve before calling the next handler
-				$result->onCompletion(
-					onSuccess: fn() => $this->processExclusiveHandlers($handlers, $resolver),
-					onFailure: $resolver->reject(...)
-				);
-				break;
-			}
-
-			//this handler didn't return a promise - continue directly to the next one
+		if(count($awaitPromises) > 0){
+			Promise::all($awaitPromises)->onCompletion(
+				onSuccess: fn() => $this->processRemainingHandlers($handlers, $globalResolver),
+				onFailure: $globalResolver->reject(...)
+			);
+		}else{
+			$globalResolver->resolve($this);
 		}
 	}
 }
