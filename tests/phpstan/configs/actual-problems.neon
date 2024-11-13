@@ -546,11 +546,6 @@ parameters:
 			path: ../../../src/entity/projectile/Projectile.php
 
 		-
-			message: "#^Parameter \\#1 \\$promises of static method pocketmine\\\\promise\\\\Promise\\<mixed\\>\\:\\:all\\(\\) expects non\\-empty\\-array\\<int, pocketmine\\\\promise\\\\Promise\\<null\\>\\>, array\\<int, pocketmine\\\\promise\\\\Promise\\<null\\>\\> given\\.$#"
-			count: 1
-			path: ../../../src/event/AsyncEvent.php
-
-		-
 			message: "#^Parameter \\#2 \\$recipe of class pocketmine\\\\event\\\\inventory\\\\CraftItemEvent constructor expects pocketmine\\\\crafting\\\\CraftingRecipe, pocketmine\\\\crafting\\\\CraftingRecipe\\|null given\\.$#"
 			count: 1
 			path: ../../../src/inventory/transaction/CraftingTransaction.php
