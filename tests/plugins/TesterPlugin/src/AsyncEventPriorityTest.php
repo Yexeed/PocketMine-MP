@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace pmmp\TesterPlugin;
 
 use pmmp\TesterPlugin\event\GrandchildAsyncEvent;
+use pocketmine\event\AsyncHandlerListManager;
 use pocketmine\event\EventPriority;
-use pocketmine\event\HandlerListManager;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 
@@ -47,7 +47,7 @@ final class AsyncEventPriorityTest extends Test{
 	}
 
 	public function run() : void{
-		HandlerListManager::global()->unregisterAll();
+		AsyncHandlerListManager::global()->unregisterAll();
 
 		$main = $this->getPlugin();
 		$pluginManager = $main->getServer()->getPluginManager();

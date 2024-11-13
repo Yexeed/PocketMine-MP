@@ -24,9 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\event;
 
 /**
- * @phpstan-extends BaseHandlerListManager<Event, RegisteredListener>
+ * @phpstan-extends BaseHandlerListManager<AsyncEvent, AsyncRegisteredListener>
  */
-class HandlerListManager extends BaseHandlerListManager{
+final class AsyncHandlerListManager extends BaseHandlerListManager{
 	private static ?self $globalInstance = null;
 
 	public static function global() : self{
@@ -34,10 +34,10 @@ class HandlerListManager extends BaseHandlerListManager{
 	}
 
 	protected function getBaseEventClass() : string{
-		return Event::class;
+		return AsyncEvent::class;
 	}
 
 	protected function createHandlerList(string $event, ?BaseHandlerList $parentList, RegisteredListenerCache $handlerCache) : BaseHandlerList{
-		return new HandlerList($event, $parentList, $handlerCache);
+		return new AsyncHandlerList($event, $parentList, $handlerCache);
 	}
 }

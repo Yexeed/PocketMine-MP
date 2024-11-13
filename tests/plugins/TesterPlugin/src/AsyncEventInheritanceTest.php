@@ -27,8 +27,8 @@ use pmmp\TesterPlugin\event\ChildAsyncEvent;
 use pmmp\TesterPlugin\event\GrandchildAsyncEvent;
 use pmmp\TesterPlugin\event\ParentAsyncEvent;
 use pocketmine\event\AsyncEvent;
+use pocketmine\event\AsyncHandlerListManager;
 use pocketmine\event\EventPriority;
-use pocketmine\event\HandlerListManager;
 use pocketmine\promise\Promise;
 use function implode;
 use function shuffle;
@@ -51,7 +51,7 @@ final class AsyncEventInheritanceTest extends Test{
 	}
 
 	public function run() : void{
-		HandlerListManager::global()->unregisterAll();
+		AsyncHandlerListManager::global()->unregisterAll();
 
 		$plugin = $this->getPlugin();
 		$classes = self::EXPECTED_ORDER;

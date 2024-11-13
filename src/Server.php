@@ -38,6 +38,7 @@ use pocketmine\crash\CrashDump;
 use pocketmine\crash\CrashDumpRenderer;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\Location;
+use pocketmine\event\AsyncHandlerListManager;
 use pocketmine\event\HandlerListManager;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerDataSaveEvent;
@@ -1485,6 +1486,7 @@ class Server{
 
 			$this->logger->debug("Removing event handlers");
 			HandlerListManager::global()->unregisterAll();
+			AsyncHandlerListManager::global()->unregisterAll();
 
 			if(isset($this->asyncPool)){
 				$this->logger->debug("Shutting down async task worker pool");

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\plugin;
 
 use pocketmine\event\AsyncEvent;
+use pocketmine\event\AsyncHandlerListManager;
 use pocketmine\event\AsyncRegisteredListener;
 use pocketmine\event\Cancellable;
 use pocketmine\event\Event;
@@ -525,6 +526,7 @@ class PluginManager{
 			$plugin->onEnableStateChange(false);
 			$plugin->getScheduler()->shutdown();
 			HandlerListManager::global()->unregisterAll($plugin);
+			AsyncHandlerListManager::global()->unregisterAll($plugin);
 		}
 	}
 
@@ -721,7 +723,7 @@ class PluginManager{
 		$timings = Timings::getEventHandlerTimings($event, $handlerName, $plugin->getDescription()->getFullName());
 
 		$registeredListener = new AsyncRegisteredListener($handler, $priority, $plugin, $handleCancelled, $exclusiveCall, $timings);
-		HandlerListManager::global()->getAsyncListFor($event)->register($registeredListener);
+		AsyncHandlerListManager::global()->getListFor($event)->register($registeredListener);
 		return $registeredListener;
 	}
 

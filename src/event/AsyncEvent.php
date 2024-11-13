@@ -60,7 +60,7 @@ abstract class AsyncEvent{
 			/** @phpstan-var PromiseResolver<static> $globalResolver */
 			$globalResolver = new PromiseResolver();
 
-			$this->processRemainingHandlers(HandlerListManager::global()->getAsyncHandlersFor(static::class), $globalResolver);
+			$this->processRemainingHandlers(AsyncHandlerListManager::global()->getHandlersFor(static::class), $globalResolver);
 
 			return $globalResolver->getPromise();
 		}finally{
