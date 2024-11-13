@@ -26,28 +26,35 @@ namespace pocketmine\event;
 use pocketmine\plugin\Plugin;
 use pocketmine\promise\Promise;
 use pocketmine\timings\TimingsHandler;
+use function in_array;
 
-class RegisteredAsyncListener extends RegisteredListener{
+class AsyncRegisteredListener{
 	/**
 	 * @phpstan-param \Closure(AsyncEvent) : Promise<null> $handler
 	 */
 	public function __construct(
-		protected \Closure $handler,
-		int $priority,
-		Plugin $plugin,
-		bool $handleCancelled,
+		private \Closure $handler,
+		private int $priority,
+		private Plugin $plugin,
+		private bool $handleCancelled,
 		private bool $exclusiveCall,
-		protected TimingsHandler $timings
+		private TimingsHandler $timings
 	){
-		parent::__construct($handler, $priority, $plugin, $handleCancelled, $timings);
+		if(!in_array($priority, EventPriority::ALL, true)){
+			throw new \InvalidArgumentException("Invalid priority number $priority");
+		}
 	}
 
-	public function canBeCalledConcurrently() : bool{
-		return !$this->exclusiveCall;
+	public function getHandler() : \Closure{
+		return $this->handler;
 	}
 
-	public function callEvent(Event $event) : void{
-		throw new \BadMethodCallException("Cannot call async event synchronously, use callAsync() instead");
+	public function getPlugin() : Plugin{
+		return $this->plugin;
+	}
+
+	public function getPriority() : int{
+		return $this->priority;
 	}
 
 	/**
@@ -63,5 +70,12 @@ class RegisteredAsyncListener extends RegisteredListener{
 		}finally{
 			$this->timings->stopTiming();
 		}
+	}
+
+	public function isHandlingCancelled() : bool{
+		return $this->handleCancelled;
+	}
+	public function canBeCalledConcurrently() : bool{
+		return !$this->exclusiveCall;
 	}
 }

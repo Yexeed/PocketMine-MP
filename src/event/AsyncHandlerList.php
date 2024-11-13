@@ -24,53 +24,38 @@ declare(strict_types=1);
 namespace pocketmine\event;
 
 use pocketmine\plugin\Plugin;
-use function array_merge;
-use function krsort;
 use function spl_object_id;
-use const SORT_NUMERIC;
 
-class HandlerList{
-	/** @var RegisteredListener[][] */
+class AsyncHandlerList{
+	/** @var AsyncRegisteredListener[][] */
 	private array $handlerSlots = [];
 
-	/** @var RegisteredListenerCache[] */
-	private array $affectedHandlerCaches = [];
-
 	/**
-	 * @phpstan-param class-string<covariant Event> $class
+	 * @phpstan-param class-string<AsyncEvent> $class
 	 */
 	public function __construct(
 		private string $class,
-		private ?HandlerList $parentList,
-		private RegisteredListenerCache $handlerCache = new RegisteredListenerCache()
-	){
-		for($list = $this; $list !== null; $list = $list->parentList){
-			$list->affectedHandlerCaches[spl_object_id($this->handlerCache)] = $this->handlerCache;
-		}
-	}
+		private ?AsyncHandlerList $parentList,
+	){}
 
-	/**
-	 * @throws \Exception
-	 */
-	public function register(RegisteredListener $listener) : void{
+	public function register(AsyncRegisteredListener $listener) : void{
 		if(isset($this->handlerSlots[$listener->getPriority()][spl_object_id($listener)])){
 			throw new \InvalidArgumentException("This listener is already registered to priority {$listener->getPriority()} of event {$this->class}");
 		}
 		$this->handlerSlots[$listener->getPriority()][spl_object_id($listener)] = $listener;
-		$this->invalidateAffectedCaches();
 	}
 
 	/**
-	 * @param RegisteredListener[] $listeners
+	 * @param AsyncRegisteredListener[] $listeners
 	 */
 	public function registerAll(array $listeners) : void{
 		foreach($listeners as $listener){
 			$this->register($listener);
 		}
-		$this->invalidateAffectedCaches();
 	}
 
-	public function unregister(RegisteredListener|Plugin|Listener $object) : void{
+	public function unregister(AsyncRegisteredListener|Plugin|Listener $object) : void{
+		//TODO: Not loving the duplication here
 		if($object instanceof Plugin || $object instanceof Listener){
 			foreach($this->handlerSlots as $priority => $list){
 				foreach($list as $hash => $listener){
@@ -84,58 +69,20 @@ class HandlerList{
 		}else{
 			unset($this->handlerSlots[$object->getPriority()][spl_object_id($object)]);
 		}
-		$this->invalidateAffectedCaches();
 	}
 
 	public function clear() : void{
 		$this->handlerSlots = [];
-		$this->invalidateAffectedCaches();
 	}
 
 	/**
-	 * @return RegisteredListener[]
+	 * @return AsyncRegisteredListener[]
 	 */
 	public function getListenersByPriority(int $priority) : array{
 		return $this->handlerSlots[$priority] ?? [];
 	}
 
-	public function getParent() : ?HandlerList{
+	public function getParent() : ?AsyncHandlerList{
 		return $this->parentList;
-	}
-
-	/**
-	 * Invalidates all known caches which might be affected by this list's contents.
-	 */
-	private function invalidateAffectedCaches() : void{
-		foreach($this->affectedHandlerCaches as $cache){
-			$cache->list = null;
-		}
-	}
-
-	/**
-	 * @return RegisteredListener[]
-	 * @phpstan-return list<RegisteredListener>
-	 */
-	public function getListenerList() : array{
-		if($this->handlerCache->list !== null){
-			return $this->handlerCache->list;
-		}
-
-		$handlerLists = [];
-		for($currentList = $this; $currentList !== null; $currentList = $currentList->parentList){
-			$handlerLists[] = $currentList;
-		}
-
-		$listenersByPriority = [];
-		foreach($handlerLists as $currentList){
-			foreach($currentList->handlerSlots as $priority => $listeners){
-				$listenersByPriority[$priority] = array_merge($listenersByPriority[$priority] ?? [], $listeners);
-			}
-		}
-
-		//TODO: why on earth do the priorities have higher values for lower priority?
-		krsort($listenersByPriority, SORT_NUMERIC);
-
-		return $this->handlerCache->list = array_merge(...$listenersByPriority);
 	}
 }

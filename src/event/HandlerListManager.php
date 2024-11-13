@@ -35,24 +35,37 @@ class HandlerListManager{
 	}
 
 	/** @var HandlerList[] classname => HandlerList */
-	private array $allLists = [];
+	private array $allSyncLists = [];
 	/**
 	 * @var RegisteredListenerCache[] event class name => cache
 	 * @phpstan-var array<class-string<Event|AsyncEvent>, RegisteredListenerCache>
 	 */
-	private array $handlerCaches = [];
+	private array $syncHandlerCaches = [];
+
+	/** @var AsyncHandlerList[] classname => AsyncHandlerList */
+	private array $allAsyncLists = [];
 
 	/**
 	 * Unregisters all the listeners
 	 * If a Plugin or Listener is passed, all the listeners with that object will be removed
 	 */
-	public function unregisterAll(RegisteredListener|Plugin|Listener|null $object = null) : void{
-		if($object instanceof Listener || $object instanceof Plugin || $object instanceof RegisteredListener){
-			foreach($this->allLists as $h){
-				$h->unregister($object);
+	public function unregisterAll(RegisteredListener|AsyncRegisteredListener|Plugin|Listener|null $object = null) : void{
+		if($object !== null){
+			if(!$object instanceof AsyncRegisteredListener){
+				foreach($this->allSyncLists as $h){
+					$h->unregister($object);
+				}
+			}
+			if(!$object instanceof RegisteredListener){
+				foreach($this->allAsyncLists as $h){
+					$h->unregister($object);
+				}
 			}
 		}else{
-			foreach($this->allLists as $h){
+			foreach($this->allSyncLists as $h){
+				$h->clear();
+			}
+			foreach($this->allAsyncLists as $h){
 				$h->clear();
 			}
 		}
@@ -67,9 +80,10 @@ class HandlerListManager{
 	}
 
 	/**
-	 * @phpstan-param \ReflectionClass<Event|AsyncEvent> $class
+	 * @phpstan-template TEvent of Event|AsyncEvent
+	 * @phpstan-param \ReflectionClass<TEvent> $class
 	 *
-	 * @phpstan-return \ReflectionClass<Event|AsyncEvent>|null
+	 * @phpstan-return \ReflectionClass<TEvent>|null
 	 */
 	private static function resolveNearestHandleableParent(\ReflectionClass $class) : ?\ReflectionClass{
 		for($parent = $class->getParentClass(); $parent !== false; $parent = $parent->getParentClass()){
@@ -86,26 +100,28 @@ class HandlerListManager{
 	 *
 	 * Calling this method also lazily initializes the $classMap inheritance tree of handler lists.
 	 *
-	 * @phpstan-template TEvent of Event|AsyncEvent
-	 * @phpstan-param class-string<TEvent> $event
+	 * @phpstan-param class-string<covariant Event> $event
 	 *
 	 * @throws \ReflectionException
 	 * @throws \InvalidArgumentException
 	 */
 	public function getListFor(string $event) : HandlerList{
-		if(isset($this->allLists[$event])){
-			return $this->allLists[$event];
+		if(isset($this->allSyncLists[$event])){
+			return $this->allSyncLists[$event];
 		}
 
 		$class = new \ReflectionClass($event);
+		if(!$class->isSubclassOf(Event::class)){
+			throw new \InvalidArgumentException("Cannot get sync handler list for async event");
+		}
 		if(!self::isValidClass($class)){
 			throw new \InvalidArgumentException("Event must be non-abstract or have the @allowHandle annotation");
 		}
 
 		$parent = self::resolveNearestHandleableParent($class);
 		$cache = new RegisteredListenerCache();
-		$this->handlerCaches[$event] = $cache;
-		return $this->allLists[$event] = new HandlerList(
+		$this->syncHandlerCaches[$event] = $cache;
+		return $this->allSyncLists[$event] = new HandlerList(
 			$event,
 			parentList: $parent !== null ? $this->getListFor($parent->getName()) : null,
 			handlerCache: $cache
@@ -113,12 +129,40 @@ class HandlerListManager{
 	}
 
 	/**
-	 * @phpstan-param class-string<Event|AsyncEvent> $event
+	 * Returns the HandlerList for async listeners that explicitly handle this event.
+	 *
+	 * @phpstan-param class-string<covariant AsyncEvent> $event
+	 *
+	 * @throws \ReflectionException
+	 * @throws \InvalidArgumentException
+	 */
+	public function getAsyncListFor(string $event) : AsyncHandlerList{
+		if(isset($this->allAsyncLists[$event])){
+			return $this->allAsyncLists[$event];
+		}
+
+		$class = new \ReflectionClass($event);
+		if(!$class->isSubclassOf(AsyncEvent::class)){
+			throw new \InvalidArgumentException("Cannot get async handler list for sync event");
+		}
+		if(!self::isValidClass($class)){
+			throw new \InvalidArgumentException("Event must be non-abstract or have the @allowHandle annotation");
+		}
+
+		$parent = self::resolveNearestHandleableParent($class);
+		return $this->allAsyncLists[$event] = new AsyncHandlerList(
+			$event,
+			parentList: $parent !== null ? $this->getAsyncListFor($parent->getName()) : null,
+		);
+	}
+
+	/**
+	 * @phpstan-param class-string<covariant Event> $event
 	 *
 	 * @return RegisteredListener[]
 	 */
 	public function getHandlersFor(string $event) : array{
-		$cache = $this->handlerCaches[$event] ?? null;
+		$cache = $this->syncHandlerCaches[$event] ?? null;
 		//getListFor() will populate the cache for the next call
 		return $cache?->list ?? $this->getListFor($event)->getListenerList();
 	}
@@ -127,6 +171,6 @@ class HandlerListManager{
 	 * @return HandlerList[]
 	 */
 	public function getAll() : array{
-		return $this->allLists;
+		return $this->allSyncLists;
 	}
 }

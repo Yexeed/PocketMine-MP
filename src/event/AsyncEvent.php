@@ -28,7 +28,6 @@ use pocketmine\promise\PromiseResolver;
 use pocketmine\timings\Timings;
 use pocketmine\utils\ObjectSet;
 use function array_shift;
-use function assert;
 use function count;
 
 /**
@@ -99,14 +98,13 @@ abstract class AsyncEvent{
 	 * @phpstan-return Promise<null>
 	 */
 	private function callPriority(int $priority) : Promise{
-		$handlers = HandlerListManager::global()->getListFor(static::class)->getListenersByPriority($priority);
+		$handlers = HandlerListManager::global()->getAsyncListFor(static::class)->getListenersByPriority($priority);
 
 		/** @phpstan-var PromiseResolver<null> $resolver */
 		$resolver = new PromiseResolver();
 
 		$nonConcurrentHandlers = [];
 		foreach($handlers as $registration){
-			assert($registration instanceof RegisteredAsyncListener);
 			if($registration->canBeCalledConcurrently()){
 				$result = $registration->callAsync($this);
 				if($result !== null) {
@@ -127,7 +125,6 @@ abstract class AsyncEvent{
 			}else{
 				$this->waitForPromises()->onCompletion(function() use (&$nonConcurrentHandlers, $testResolve){
 					$handler = array_shift($nonConcurrentHandlers);
-					assert($handler instanceof RegisteredAsyncListener);
 					$result = $handler->callAsync($this);
 					if($result !== null) {
 						$this->promises->add($result);

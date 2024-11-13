@@ -32,7 +32,7 @@ use pocketmine\event\Listener;
 use pocketmine\event\ListenerMethodTags;
 use pocketmine\event\plugin\PluginDisableEvent;
 use pocketmine\event\plugin\PluginEnableEvent;
-use pocketmine\event\RegisteredAsyncListener;
+use pocketmine\event\AsyncRegisteredListener;
 use pocketmine\event\RegisteredListener;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissions;
@@ -702,7 +702,8 @@ class PluginManager{
 	 *
 	 * @throws \ReflectionException
 	 */
-	public function registerAsyncEvent(string $event, \Closure $handler, int $priority, Plugin $plugin, bool $handleCancelled = false, bool $exclusiveCall = false) : RegisteredAsyncListener{
+	public function registerAsyncEvent(string $event, \Closure $handler, int $priority, Plugin $plugin, bool $handleCancelled = false, bool $exclusiveCall = false) : AsyncRegisteredListener{
+		//TODO: Not loving the code duplication here
 		if(!is_subclass_of($event, AsyncEvent::class)){
 			throw new PluginException($event . " is not an AsyncEvent");
 		}
@@ -715,8 +716,8 @@ class PluginManager{
 
 		$timings = Timings::getEventHandlerTimings($event, $handlerName, $plugin->getDescription()->getFullName());
 
-		$registeredListener = new RegisteredAsyncListener($handler, $priority, $plugin, $handleCancelled, $exclusiveCall, $timings);
-		HandlerListManager::global()->getListFor($event)->register($registeredListener);
+		$registeredListener = new AsyncRegisteredListener($handler, $priority, $plugin, $handleCancelled, $exclusiveCall, $timings);
+		HandlerListManager::global()->getAsyncListFor($event)->register($registeredListener);
 		return $registeredListener;
 	}
 
