@@ -29,9 +29,6 @@ use pocketmine\timings\TimingsHandler;
 use function in_array;
 
 class AsyncRegisteredListener{
-	/**
-	 * @phpstan-param \Closure(AsyncEvent) : ?Promise<null> $handler
-	 */
 	public function __construct(
 		private \Closure $handler,
 		private int $priority,

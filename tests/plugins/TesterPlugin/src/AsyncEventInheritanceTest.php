@@ -39,6 +39,9 @@ final class AsyncEventInheritanceTest extends Test{
 		ChildAsyncEvent::class,
 		ParentAsyncEvent::class
 	];
+	/**
+	 * @var string[]
+	 */
 	private array $callOrder = [];
 
 	public function getName() : string{
