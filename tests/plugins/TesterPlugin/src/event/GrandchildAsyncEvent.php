@@ -23,6 +23,6 @@ declare(strict_types=1);
 
 namespace pmmp\TesterPlugin\event;
 
-class GrandchildAsyncEvent extends \pocketmine\event\AsyncEvent{
+class GrandchildAsyncEvent extends ChildAsyncEvent{
 
 }

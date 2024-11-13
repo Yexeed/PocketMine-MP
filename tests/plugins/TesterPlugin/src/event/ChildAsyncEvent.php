@@ -23,6 +23,6 @@ declare(strict_types=1);
 
 namespace pmmp\TesterPlugin\event;
 
-final class ChildAsyncEvent extends ParentAsyncEvent{
+class ChildAsyncEvent extends ParentAsyncEvent{
 
 }
