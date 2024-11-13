@@ -173,4 +173,11 @@ class HandlerListManager{
 	public function getAll() : array{
 		return $this->allSyncLists;
 	}
+
+	/**
+	 * @return AsyncHandlerList[]
+	 */
+	public function getAllAsync() : array{
+		return $this->allAsyncLists;
+	}
 }
