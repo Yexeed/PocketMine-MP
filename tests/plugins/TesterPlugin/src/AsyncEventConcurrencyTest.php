@@ -28,7 +28,6 @@ use pocketmine\event\EventPriority;
 use pocketmine\event\HandlerListManager;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
-use function var_dump;
 
 final class AsyncEventConcurrencyTest extends Test{
 	/**

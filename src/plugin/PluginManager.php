@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\plugin;
 
 use pocketmine\event\AsyncEvent;
+use pocketmine\event\AsyncRegisteredListener;
 use pocketmine\event\Cancellable;
 use pocketmine\event\Event;
 use pocketmine\event\EventPriority;
@@ -32,7 +33,6 @@ use pocketmine\event\Listener;
 use pocketmine\event\ListenerMethodTags;
 use pocketmine\event\plugin\PluginDisableEvent;
 use pocketmine\event\plugin\PluginEnableEvent;
-use pocketmine\event\AsyncRegisteredListener;
 use pocketmine\event\RegisteredListener;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\permission\DefaultPermissions;
