@@ -93,7 +93,7 @@ final class AsyncEventConcurrencyTest extends Test{
 					fn() => $this->complete($this->activeExclusiveHandler, "exclusive 1"),
 					fn() => $main->getLogger()->error("Not expecting this to be rejected")
 				);
-				return null;
+				return $resolver->getPromise();
 			},
 			EventPriority::NORMAL,
 			$main,
