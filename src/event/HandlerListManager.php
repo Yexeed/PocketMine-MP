@@ -37,7 +37,7 @@ class HandlerListManager extends BaseHandlerListManager{
 		return Event::class;
 	}
 
-	protected function createHandlerList(string $event, ?BaseHandlerList $parentList, RegisteredListenerCache $handlerCache) : BaseHandlerList{
+	protected function createHandlerList(string $event, ?HandlerList $parentList, RegisteredListenerCache $handlerCache) : HandlerList{
 		return new HandlerList($event, $parentList, $handlerCache);
 	}
 }

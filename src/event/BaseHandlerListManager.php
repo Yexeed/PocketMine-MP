@@ -30,11 +30,11 @@ use pocketmine\utils\Utils;
  * @phpstan-template TEvent of Event|AsyncEvent
  * @phpstan-template TRegisteredListener of BaseRegisteredListener
  *
- * @phpstan-type THandlerList BaseHandlerList<TRegisteredListener, TEvent>
+ * @phpstan-type THandlerList HandlerList<TRegisteredListener>
  */
 abstract class BaseHandlerListManager{
 	/**
-	 * @var BaseHandlerList[] classname => BaseHandlerList
+	 * @var HandlerList[] classname => HandlerList
 	 * @phpstan-var array<class-string<covariant TEvent>, THandlerList>
 	 */
 	private array $allLists = [];
@@ -92,12 +92,12 @@ abstract class BaseHandlerListManager{
 
 	/**
 	 * @phpstan-param class-string<covariant TEvent> $event
-	 * @phpstan-param THandlerList|null $parentList
+	 * @phpstan-param HandlerList<TRegisteredListener>|null $parentList
 	 * @phpstan-param RegisteredListenerCache<TRegisteredListener> $handlerCache
 	 *
 	 * @phpstan-return THandlerList
 	 */
-	abstract protected function createHandlerList(string $event, ?BaseHandlerList $parentList, RegisteredListenerCache $handlerCache) : BaseHandlerList;
+	abstract protected function createHandlerList(string $event, ?HandlerList $parentList, RegisteredListenerCache $handlerCache) : HandlerList;
 
 	/**
 	 * Returns the HandlerList for listeners that explicitly handle this event.
@@ -110,7 +110,7 @@ abstract class BaseHandlerListManager{
 	 * @throws \ReflectionException
 	 * @throws \InvalidArgumentException
 	 */
-	public function getListFor(string $event) : BaseHandlerList{
+	public function getListFor(string $event) : HandlerList{
 		if(isset($this->allLists[$event])){
 			return $this->allLists[$event];
 		}

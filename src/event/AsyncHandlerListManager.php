@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\event;
 
+use function uasort;
+
 /**
  * @phpstan-extends BaseHandlerListManager<AsyncEvent, AsyncRegisteredListener>
  */
@@ -37,7 +39,23 @@ final class AsyncHandlerListManager extends BaseHandlerListManager{
 		return AsyncEvent::class;
 	}
 
-	protected function createHandlerList(string $event, ?BaseHandlerList $parentList, RegisteredListenerCache $handlerCache) : BaseHandlerList{
-		return new AsyncHandlerList($event, $parentList, $handlerCache);
+	/**
+	 * @phpstan-param array<int, AsyncRegisteredListener> $listeners
+	 * @phpstan-return array<int, AsyncRegisteredListener>
+	 */
+	private static function sortSamePriorityHandlers(array $listeners) : array{
+		uasort($listeners, function(AsyncRegisteredListener $left, AsyncRegisteredListener $right) : int{
+			//While the system can handle these in any order, it's better for latency if concurrent handlers
+			//are processed together. It doesn't matter whether they are processed before or after exclusive handlers.
+			if($right->canBeCalledConcurrently()){
+				return $left->canBeCalledConcurrently() ? 0 : 1;
+			}
+			return -1;
+		});
+		return $listeners;
+	}
+
+	protected function createHandlerList(string $event, ?HandlerList $parentList, RegisteredListenerCache $handlerCache) : HandlerList{
+		return new HandlerList($event, $parentList, $handlerCache, self::sortSamePriorityHandlers(...));
 	}
 }
