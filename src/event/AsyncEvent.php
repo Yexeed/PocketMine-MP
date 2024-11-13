@@ -60,7 +60,12 @@ abstract class AsyncEvent{
 			/** @phpstan-var PromiseResolver<static> $globalResolver */
 			$globalResolver = new PromiseResolver();
 
-			$this->processRemainingHandlers(AsyncHandlerListManager::global()->getHandlersFor(static::class), $globalResolver);
+			$handlers = AsyncHandlerListManager::global()->getHandlersFor(static::class);
+			if(count($handlers) > 0){
+				$this->processRemainingHandlers($handlers, fn() => $globalResolver->resolve($this), $globalResolver->reject(...));
+			}else{
+				$globalResolver->resolve($this);
+			}
 
 			return $globalResolver->getPromise();
 		}finally{
@@ -71,9 +76,10 @@ abstract class AsyncEvent{
 
 	/**
 	 * @param AsyncRegisteredListener[] $handlers
-	 * @phpstan-param PromiseResolver<static> $globalResolver
+	 * @phpstan-param \Closure() : void $resolve
+	 * @phpstan-param \Closure() : void $reject
 	 */
-	private function processRemainingHandlers(array $handlers, PromiseResolver $globalResolver) : void{
+	private function processRemainingHandlers(array $handlers, \Closure $resolve, \Closure $reject) : void{
 		$currentPriority = null;
 		$awaitPromises = [];
 		foreach($handlers as $k => $handler){
@@ -100,8 +106,8 @@ abstract class AsyncEvent{
 				$promise = $handler->callAsync($this);
 				if($promise !== null){
 					$promise->onCompletion(
-						onSuccess: fn() => $this->processRemainingHandlers($handlers, $globalResolver),
-						onFailure: $globalResolver->reject(...)
+						onSuccess: fn() => $this->processRemainingHandlers($handlers, $resolve, $reject),
+						onFailure: $reject
 					);
 					return;
 				}
@@ -110,11 +116,11 @@ abstract class AsyncEvent{
 
 		if(count($awaitPromises) > 0){
 			Promise::all($awaitPromises)->onCompletion(
-				onSuccess: fn() => $this->processRemainingHandlers($handlers, $globalResolver),
-				onFailure: $globalResolver->reject(...)
+				onSuccess: fn() => $this->processRemainingHandlers($handlers, $resolve, $reject),
+				onFailure: $reject
 			);
 		}else{
-			$globalResolver->resolve($this);
+			$resolve();
 		}
 	}
 }
