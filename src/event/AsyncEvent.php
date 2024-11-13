@@ -117,24 +117,20 @@ abstract class AsyncEvent{
 		}
 
 		$testResolve = function() use (&$nonConcurrentHandlers, &$testResolve, $resolver){
-			if(count($nonConcurrentHandlers) === 0){
-				$this->waitForPromises()->onCompletion(function() use ($resolver){
-					$resolver->resolve(null);
-				}, function() use ($resolver){
-					$resolver->reject();
-				});
-			}else{
-				$this->waitForPromises()->onCompletion(function() use (&$nonConcurrentHandlers, $testResolve){
-					$handler = array_shift($nonConcurrentHandlers);
+			$this->waitForPromises()->onCompletion(function() use (&$nonConcurrentHandlers, $testResolve, $resolver){
+				$handler = array_shift($nonConcurrentHandlers);
+				if($handler !== null){
 					$result = $handler->callAsync($this);
 					if($result !== null) {
 						$this->promises->add($result);
 					}
 					$testResolve();
-				}, function() use ($resolver) {
-					$resolver->reject();
-				});
-			}
+				}else{
+					$resolver->resolve(null);
+				}
+			}, function() use ($resolver) {
+				$resolver->reject();
+			});
 		};
 
 		$testResolve();
