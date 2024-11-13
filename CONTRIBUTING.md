@@ -56,6 +56,7 @@ PocketMine-MP has three primary branches of development.
 | Deprecating API classes, methods or constants                                               |    ❌     |               ✔️                |      ✔️      |
 | Adding optional parameters to an API method                                                 |    ❌     |               ✔️                |      ✔️      |
 | Changing API behaviour                                                                      |    ❌     | 🟡 Only if backwards-compatible |      ✔️      |
+| Changing an event from sync to async or vice versa                                          |    ❌     |                ❌                |      ✔️      |
 | Removal of API                                                                              |    ❌     |                ❌                |      ✔️      |
 | Backwards-incompatible API change (e.g. renaming a method)                                  |    ❌     |                ❌                |      ✔️      |
 | Backwards-incompatible internals change (e.g. changing things in `pocketmine\network\mcpe`) |    ❌     |               ✔️                |      ✔️      |
