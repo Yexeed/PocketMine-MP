@@ -45,12 +45,9 @@ final class AsyncHandlerListManager extends BaseHandlerListManager{
 	 */
 	private static function sortSamePriorityHandlers(array $listeners) : array{
 		uasort($listeners, function(AsyncRegisteredListener $left, AsyncRegisteredListener $right) : int{
-			//While the system can handle these in any order, it's better for latency if concurrent handlers
-			//are processed together. It doesn't matter whether they are processed before or after exclusive handlers.
-			if($right->canBeCalledConcurrently()){
-				return $left->canBeCalledConcurrently() ? 0 : 1;
-			}
-			return -1;
+			//Promise::all() can be used more efficiently if concurrent handlers are grouped together.
+			//It's not important whether they are grouped before or after exclusive handlers.
+			return $left->canBeCalledConcurrently() <=> $right->canBeCalledConcurrently();
 		});
 		return $listeners;
 	}
