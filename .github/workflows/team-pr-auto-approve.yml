@@ -14,8 +14,8 @@ on:
       - ready_for_review
 
 jobs:
-  approve:
-    name: Auto approve
+  dispatch:
+    name: Request approval
     runs-on: ubuntu-latest
 
     steps:
