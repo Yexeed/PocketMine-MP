@@ -26,7 +26,6 @@ namespace pocketmine\block\anvil;
 use pocketmine\item\Item;
 
 abstract class AnvilAction{
-	/** @phpstan-var int<0, max>  */
 	protected int $xpCost = 0;
 
 	final public function __construct(
@@ -38,8 +37,6 @@ abstract class AnvilAction{
 	/**
 	 * Returns the XP cost requested for this action.
 	 * This XP cost will be summed up to the total XP cost of the anvil operation.
-	 *
-	 * @phpstan-return int<0, max>
 	 */
 	final public function getXpCost() : int{
 		return $this->xpCost;
