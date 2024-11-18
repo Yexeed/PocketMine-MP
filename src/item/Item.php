@@ -85,7 +85,7 @@ class Item implements \JsonSerializable{
 	protected string $customName = "";
 	/** @var string[] */
 	protected array $lore = [];
-	protected int $repairCost = 0;
+	protected int $anvilRepairCost = 0;
 	/** TODO: this needs to die in a fire */
 	protected ?CompoundTag $blockEntityTag = null;
 
@@ -285,19 +285,26 @@ class Item implements \JsonSerializable{
 	}
 
 	/**
-	 * Returns the repair cost of the item.
+	 * Returns the anvil repair cost of the item.
+	 * This value is used in anvil to determine the XP cost of repairing the item.
+	 *
+	 * In vanilla, this value is stored in the "RepairCost" tag.
 	 */
-	public function getRepairCost() : int{
-		return $this->repairCost;
+	public function getAnvilRepairCost() : int{
+		return $this->anvilRepairCost;
 	}
 
 	/**
-	 * Sets the repair cost of the item.
+	 * Sets the anvil repair cost value of the item.
+	 * This value is used in anvil to determine the XP cost of repairing the item.
+	 * Higher cost means more XP is required to repair the item.
+	 *
+	 * In vanilla, this value is stored in the "RepairCost" tag.
 	 *
 	 * @return $this
 	 */
-	public function setRepairCost(int $cost) : self{
-		$this->repairCost = $cost;
+	public function setAnvilRepairCost(int $cost) : self{
+		$this->anvilRepairCost = $cost;
 		return $this;
 	}
 
@@ -357,7 +364,7 @@ class Item implements \JsonSerializable{
 		}
 
 		$this->keepOnDeath = $tag->getByte(self::TAG_KEEP_ON_DEATH, 0) !== 0;
-		$this->repairCost = $tag->getInt(self::TAG_REPAIR_COST, 0);
+		$this->anvilRepairCost = $tag->getInt(self::TAG_REPAIR_COST, 0);
 	}
 
 	protected function serializeCompoundTag(CompoundTag $tag) : void{
@@ -427,8 +434,8 @@ class Item implements \JsonSerializable{
 			$tag->removeTag(self::TAG_KEEP_ON_DEATH);
 		}
 
-		if($this->repairCost > 0){
-			$tag->setInt(self::TAG_REPAIR_COST, $this->repairCost);
+		if($this->anvilRepairCost > 0){
+			$tag->setInt(self::TAG_REPAIR_COST, $this->anvilRepairCost);
 		}else{
 			$tag->removeTag(self::TAG_REPAIR_COST);
 		}

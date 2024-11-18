@@ -51,10 +51,10 @@ final class AnvilHelper{
 			$xpCost += $action->getXpCost();
 		}
 
-		$xpCost += 2 ** $resultItem->getRepairCost() - 1;
-		$xpCost += 2 ** $material->getRepairCost() - 1;
-		$resultItem->setRepairCost(
-			max($resultItem->getRepairCost(), $material->getRepairCost()) + $additionnalRepairCost
+		$xpCost += 2 ** $resultItem->getAnvilRepairCost() - 1;
+		$xpCost += 2 ** $material->getAnvilRepairCost() - 1;
+		$resultItem->setAnvilRepairCost(
+			max($resultItem->getAnvilRepairCost(), $material->getAnvilRepairCost()) + $additionnalRepairCost
 		);
 
 		if($xpCost <= 0 || ($xpCost > self::COST_LIMIT && !$player->isCreative())){

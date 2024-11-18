@@ -53,6 +53,6 @@ final class RepairWithMaterialAction extends AnvilAction{
 		}
 		$resultItem->setDamage(max(0, $damage));
 
-		$this->xpCost = $numberRepair * self::COST;
+		$this->xpCost = (int) floor($numberRepair * self::COST);
 	}
 }

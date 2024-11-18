@@ -29,6 +29,7 @@ use pocketmine\item\enchantment\AvailableEnchantmentRegistry;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\enchantment\Rarity;
 use pocketmine\item\Item;
+use function floor;
 use function max;
 use function min;
 
@@ -74,7 +75,7 @@ final class CombineEnchantmentsAction extends AnvilAction{
 				$costAddition = max(1, $costAddition / 2);
 			}
 			$levelDifference = $instance->getLevel() - $this->base->getEnchantmentLevel($instance->getType());
-			$this->xpCost += $costAddition * $levelDifference;
+			$this->xpCost += (int) floor($costAddition * $levelDifference);
 			$resultItem->addEnchantment($instance);
 		}
 	}
