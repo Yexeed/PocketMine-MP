@@ -25,11 +25,8 @@ namespace pocketmine\event;
 
 use PHPUnit\Framework\TestCase;
 use pocketmine\event\fixtures\TestChildAsyncEvent;
-use pocketmine\event\fixtures\TestChildEvent;
 use pocketmine\event\fixtures\TestGrandchildAsyncEvent;
-use pocketmine\event\fixtures\TestGrandchildEvent;
 use pocketmine\event\fixtures\TestParentAsyncEvent;
-use pocketmine\event\fixtures\TestParentEvent;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginManager;
 use pocketmine\promise\Promise;

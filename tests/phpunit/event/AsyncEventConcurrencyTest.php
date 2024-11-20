@@ -30,6 +30,7 @@ use pocketmine\plugin\PluginManager;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use pocketmine\Server;
+use function count;
 
 final class AsyncEventConcurrencyTest extends TestCase{
 
