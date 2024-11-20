@@ -21,8 +21,8 @@
 
 declare(strict_types=1);
 
-namespace pmmp\TesterPlugin\event;
+namespace pocketmine\event\fixtures;
 
-class ParentAsyncEvent extends \pocketmine\event\AsyncEvent{
+class TestChildAsyncEvent extends TestParentAsyncEvent{
 
 }
