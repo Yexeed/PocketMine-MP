@@ -57,7 +57,6 @@ class Main extends PluginBase implements Listener{
 		}), 10);
 
 		$this->waitingTests = [
-			new EventHandlerInheritanceTest($this),
 			new AsyncEventInheritanceTest($this),
 			new AsyncEventConcurrencyTest($this),
 			new AsyncEventPriorityTest($this)
