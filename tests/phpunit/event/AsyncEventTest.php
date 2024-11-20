@@ -35,8 +35,6 @@ use pocketmine\Server;
 use function shuffle;
 
 final class AsyncEventTest extends TestCase{
-
-	private Server $mockServer;
 	private Plugin $mockPlugin;
 	private PluginManager $pluginManager;
 
@@ -45,10 +43,10 @@ final class AsyncEventTest extends TestCase{
 
 		//TODO: this is a really bad hack and could break any time if PluginManager decides to access its Server field
 		//we really need to make it possible to register events without a Plugin or Server context
-		$this->mockServer = $this->createMock(Server::class);
+		$mockServer = $this->createMock(Server::class);
 		$this->mockPlugin = self::createStub(Plugin::class);
 		$this->mockPlugin->method('isEnabled')->willReturn(true);
-		$this->pluginManager = new PluginManager($this->mockServer, null);
+		$this->pluginManager = new PluginManager($mockServer, null);
 	}
 
 	public static function tearDownAfterClass() : void{
