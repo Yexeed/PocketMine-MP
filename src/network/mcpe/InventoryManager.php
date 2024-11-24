@@ -37,10 +37,12 @@ use pocketmine\block\inventory\StonecutterInventory;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\inventory\Inventory;
+use pocketmine\inventory\InventoryListener;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\item\enchantment\EnchantingOption;
 use pocketmine\item\enchantment\EnchantmentInstance;
+use pocketmine\item\Item;
 use pocketmine\network\mcpe\cache\CreativeInventoryCache;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
@@ -78,7 +80,7 @@ use function spl_object_id;
 /**
  * @phpstan-type ContainerOpenClosure \Closure(int $id, Inventory $inventory) : (list<ClientboundPacket>|null)
  */
-class InventoryManager{
+class InventoryManager implements InventoryListener{
 	/**
 	 * @var InventoryManagerEntry[] spl_object_id(Inventory) => InventoryManagerEntry
 	 * @phpstan-var array<int, InventoryManagerEntry>
@@ -149,6 +151,7 @@ class InventoryManager{
 			throw new \InvalidArgumentException("Inventory " . get_class($inventory) . " is already tracked");
 		}
 		$this->inventories[spl_object_id($inventory)] = new InventoryManagerEntry($inventory);
+		$inventory->getListeners()->add($this);
 		$this->associateIdWithInventory($id, $inventory);
 	}
 
@@ -171,6 +174,7 @@ class InventoryManager{
 			$inventory,
 			$complexSlotMap
 		);
+		$inventory->getListeners()->add($this);
 		foreach($complexSlotMap->getSlotMap() as $netSlot => $coreSlot){
 			$this->complexSlotToInventoryMap[$netSlot] = $complexSlotMap;
 		}
@@ -191,6 +195,7 @@ class InventoryManager{
 		$inventory = $this->networkIdToInventoryMap[$id];
 		unset($this->networkIdToInventoryMap[$id]);
 		if($this->getWindowId($inventory) === null){
+			$inventory->getListeners()->remove($this);
 			unset($this->inventories[spl_object_id($inventory)]);
 			foreach($this->complexSlotToInventoryMap as $netSlot => $entry){
 				if($entry->getInventory() === $inventory){
@@ -468,7 +473,7 @@ class InventoryManager{
 			$this->itemStackExtraDataEqual($left, $right);
 	}
 
-	public function onSlotChange(Inventory $inventory, int $slot) : void{
+	public function onSlotChange(Inventory $inventory, int $slot, Item $oldItem) : void{
 		$inventoryEntry = $this->inventories[spl_object_id($inventory)] ?? null;
 		if($inventoryEntry === null){
 			//this can happen when an inventory changed during InventoryCloseEvent, or when a temporary inventory
@@ -568,6 +573,10 @@ class InventoryManager{
 			$this->sendInventorySlotPackets($windowId, $netSlot, $itemStackWrapper);
 		}
 		unset($entry->predictions[$slot], $entry->pendingSyncs[$slot]);
+	}
+
+	public function onContentChange(Inventory $inventory, array $oldContents) : void{
+		$this->syncContents($inventory);
 	}
 
 	public function syncContents(Inventory $inventory) : void{

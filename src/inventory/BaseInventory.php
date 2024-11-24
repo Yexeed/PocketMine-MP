@@ -99,15 +99,10 @@ abstract class BaseInventory implements Inventory, SlotValidatedInventory{
 
 		$listeners = $this->listeners->toArray();
 		$this->listeners->clear();
-		$viewers = $this->viewers;
-		$this->viewers = [];
 
 		$this->internalSetContents($items);
 
 		$this->listeners->add(...$listeners); //don't directly write, in case listeners were added while operation was in progress
-		foreach($viewers as $id => $viewer){
-			$this->viewers[$id] = $viewer;
-		}
 
 		$this->onContentChange($oldContents);
 	}
@@ -369,13 +364,6 @@ abstract class BaseInventory implements Inventory, SlotValidatedInventory{
 		foreach($this->listeners as $listener){
 			$listener->onSlotChange($this, $index, $before);
 		}
-		foreach($this->viewers as $viewer){
-			$invManager = $viewer->getNetworkSession()->getInvManager();
-			if($invManager === null){
-				continue;
-			}
-			$invManager->onSlotChange($this, $index);
-		}
 	}
 
 	/**
@@ -385,14 +373,6 @@ abstract class BaseInventory implements Inventory, SlotValidatedInventory{
 	protected function onContentChange(array $itemsBefore) : void{
 		foreach($this->listeners as $listener){
 			$listener->onContentChange($this, $itemsBefore);
-		}
-
-		foreach($this->getViewers() as $viewer){
-			$invManager = $viewer->getNetworkSession()->getInvManager();
-			if($invManager === null){
-				continue;
-			}
-			$invManager->syncContents($this);
 		}
 	}
 
