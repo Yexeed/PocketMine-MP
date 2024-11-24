@@ -347,7 +347,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	}
 
 	private function callDummyItemHeldEvent() : void{
-		$slot = $this->inventory->getHeldItemIndex();
+		$slot = $this->hotbar->getSelectedIndex();
 
 		$event = new PlayerItemHeldEvent($this, $this->inventory->getItem($slot), $slot);
 		$event->call();
@@ -362,7 +362,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 		$this->inventory->getListeners()->add(new CallbackInventoryListener(
 			function(Inventory $unused, int $slot) : void{
-				if($slot === $this->inventory->getHeldItemIndex()){
+				if($slot === $this->hotbar->getSelectedIndex()){
 					$this->setUsingItem(false);
 
 					$this->callDummyItemHeldEvent();
@@ -1540,10 +1540,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	}
 
 	public function selectHotbarSlot(int $hotbarSlot) : bool{
-		if(!$this->inventory->isHotbarSlot($hotbarSlot)){ //TODO: exception here?
+		if(!$this->hotbar->isHotbarSlot($hotbarSlot)){ //TODO: exception here?
 			return false;
 		}
-		if($hotbarSlot === $this->inventory->getHeldItemIndex()){
+		if($hotbarSlot === $this->hotbar->getSelectedIndex()){
 			return true;
 		}
 
@@ -1553,7 +1553,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			return false;
 		}
 
-		$this->inventory->setHeldItemIndex($hotbarSlot);
+		$this->hotbar->setSelectedIndex($hotbarSlot);
 		$this->setUsingItem(false);
 
 		return true;
@@ -1565,7 +1565,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	private function returnItemsFromAction(Item $oldHeldItem, Item $newHeldItem, array $extraReturnedItems) : void{
 		$heldItemChanged = false;
 
-		if(!$newHeldItem->equalsExact($oldHeldItem) && $oldHeldItem->equalsExact($this->inventory->getItemInHand())){
+		if(!$newHeldItem->equalsExact($oldHeldItem) && $oldHeldItem->equalsExact($this->hotbar->getHeldItem())){
 			//determine if the item was changed in some meaningful way, or just damaged/changed count
 			//if it was really changed we always need to set it, whether we have finite resources or not
 			$newReplica = clone $oldHeldItem;
@@ -1579,7 +1579,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 				if($newHeldItem instanceof Durable && $newHeldItem->isBroken()){
 					$this->broadcastSound(new ItemBreakSound());
 				}
-				$this->inventory->setItemInHand($newHeldItem);
+				$this->hotbar->setHeldItem($newHeldItem);
 				$heldItemChanged = true;
 			}
 		}
@@ -1589,7 +1589,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		}
 
 		if($heldItemChanged && count($extraReturnedItems) > 0 && $newHeldItem->isNull()){
-			$this->inventory->setItemInHand(array_shift($extraReturnedItems));
+			$this->hotbar->setHeldItem(array_shift($extraReturnedItems));
 		}
 		foreach($this->inventory->addItem(...$extraReturnedItems) as $drop){
 			//TODO: we can't generate a transaction for this since the items aren't coming from an inventory :(
@@ -1611,7 +1611,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 */
 	public function useHeldItem() : bool{
 		$directionVector = $this->getDirectionVector();
-		$item = $this->inventory->getItemInHand();
+		$item = $this->hotbar->getHeldItem();
 		$oldItem = clone $item;
 
 		$ev = new PlayerItemUseEvent($this, $item, $directionVector);
@@ -1645,7 +1645,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 * @return bool if the consumption succeeded.
 	 */
 	public function consumeHeldItem() : bool{
-		$slot = $this->inventory->getItemInHand();
+		$slot = $this->hotbar->getHeldItem();
 		if($slot instanceof ConsumableItem){
 			$oldItem = clone $slot;
 
@@ -1678,7 +1678,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 */
 	public function releaseHeldItem() : bool{
 		try{
-			$item = $this->inventory->getItemInHand();
+			$item = $this->hotbar->getHeldItem();
 			if(!$this->isUsingItem() || $this->hasItemCooldown($item)){
 				return false;
 			}
@@ -1748,21 +1748,21 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 	private function equipOrAddPickedItem(int $existingSlot, Item $item) : void{
 		if($existingSlot !== -1){
-			if($existingSlot < $this->inventory->getHotbarSize()){
-				$this->inventory->setHeldItemIndex($existingSlot);
+			if($existingSlot < $this->hotbar->getSize()){
+				$this->hotbar->setSelectedIndex($existingSlot);
 			}else{
-				$this->inventory->swap($this->inventory->getHeldItemIndex(), $existingSlot);
+				$this->inventory->swap($this->hotbar->getSelectedIndex(), $existingSlot);
 			}
 		}else{
 			$firstEmpty = $this->inventory->firstEmpty();
 			if($firstEmpty === -1){ //full inventory
-				$this->inventory->setItemInHand($item);
-			}elseif($firstEmpty < $this->inventory->getHotbarSize()){
+				$this->hotbar->setHeldItem($item);
+			}elseif($firstEmpty < $this->hotbar->getSize()){
 				$this->inventory->setItem($firstEmpty, $item);
-				$this->inventory->setHeldItemIndex($firstEmpty);
+				$this->hotbar->setSelectedIndex($firstEmpty);
 			}else{
-				$this->inventory->swap($this->inventory->getHeldItemIndex(), $firstEmpty);
-				$this->inventory->setItemInHand($item);
+				$this->inventory->swap($this->hotbar->getSelectedIndex(), $firstEmpty);
+				$this->hotbar->setHeldItem($item);
 			}
 		}
 	}
@@ -1779,7 +1779,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 		$target = $this->getWorld()->getBlock($pos);
 
-		$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, null, $face, PlayerInteractEvent::LEFT_CLICK_BLOCK);
+		$ev = new PlayerInteractEvent($this, $this->hotbar->getHeldItem(), $target, null, $face, PlayerInteractEvent::LEFT_CLICK_BLOCK);
 		if($this->isSpectator()){
 			$ev->cancel();
 		}
@@ -1788,7 +1788,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			return false;
 		}
 		$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
-		if($target->onAttack($this->inventory->getItemInHand(), $face, $this)){
+		if($target->onAttack($this->hotbar->getHeldItem(), $face, $this)){
 			return true;
 		}
 
@@ -1829,7 +1829,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		if($this->canInteract($pos->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
 			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
 			$this->stopBreakBlock($pos);
-			$item = $this->inventory->getItemInHand();
+			$item = $this->hotbar->getHeldItem();
 			$oldItem = clone $item;
 			$returnedItems = [];
 			if($this->getWorld()->useBreakOn($pos, $item, $this, true, $returnedItems)){
@@ -1854,7 +1854,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 		if($this->canInteract($pos->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
 			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
-			$item = $this->inventory->getItemInHand(); //this is a copy of the real item
+			$item = $this->hotbar->getHeldItem(); //this is a copy of the real item
 			$oldItem = clone $item;
 			$returnedItems = [];
 			if($this->getWorld()->useItemOn($pos, $item, $face, $clickOffset, $this, true, $returnedItems)){
@@ -1883,7 +1883,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			return false;
 		}
 
-		$heldItem = $this->inventory->getItemInHand();
+		$heldItem = $this->hotbar->getHeldItem();
 		$oldItem = clone $heldItem;
 
 		$ev = new EntityDamageByEntityEvent($this, $entity, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $heldItem->getAttackPoints());
@@ -1969,15 +1969,15 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 		$ev->call();
 
-		$item = $this->inventory->getItemInHand();
+		$item = $this->hotbar->getHeldItem();
 		$oldItem = clone $item;
 		if(!$ev->isCancelled()){
 			if($item->onInteractEntity($this, $entity, $clickPos)){
-				if($this->hasFiniteResources() && !$item->equalsExact($oldItem) && $oldItem->equalsExact($this->inventory->getItemInHand())){
+				if($this->hasFiniteResources() && !$item->equalsExact($oldItem) && $oldItem->equalsExact($this->hotbar->getHeldItem())){
 					if($item instanceof Durable && $item->isBroken()){
 						$this->broadcastSound(new ItemBreakSound());
 					}
-					$this->inventory->setItemInHand($item);
+					$this->hotbar->setHeldItem($item);
 				}
 			}
 			return $entity->onInteract($this, $clickPos);
@@ -2405,8 +2405,8 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 				$this->getWorld()->dropItem($this->location, $item);
 			}
 
+			$this->hotbar->setSelectedIndex(0);
 			$clearInventory = fn(Inventory $inventory) => $inventory->setContents(array_filter($inventory->getContents(), fn(Item $item) => $item->keepOnDeath()));
-			$this->inventory->setHeldItemIndex(0);
 			$clearInventory($this->inventory);
 			$clearInventory($this->armorInventory);
 			$clearInventory($this->offHandInventory);

@@ -66,7 +66,7 @@ final class SurvivalBlockBreakHandler{
 			return 0.0;
 		}
 		//TODO: improve this to take stuff like swimming, ladders, enchanted tools into account, fix wrong tool break time calculations for bad tools (pmmp/PocketMine-MP#211)
-		$breakTimePerTick = $this->block->getBreakInfo()->getBreakTime($this->player->getInventory()->getItemInHand()) * 20;
+		$breakTimePerTick = $this->block->getBreakInfo()->getBreakTime($this->player->getHotbar()->getHeldItem()) * 20;
 
 		if($breakTimePerTick > 0){
 			return 1 / $breakTimePerTick;

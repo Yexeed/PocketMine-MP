@@ -132,7 +132,7 @@ class InventoryManager{
 		$this->addComplex(UIInventorySlotOffset::CURSOR, $this->player->getCursorInventory());
 		$this->addComplex(UIInventorySlotOffset::CRAFTING2X2_INPUT, $this->player->getCraftingGrid());
 
-		$this->player->getInventory()->getHeldItemIndexChangeListeners()->add($this->syncSelectedHotbarSlot(...));
+		$this->player->getHotbar()->getSelectedIndexChangeListeners()->add($this->syncSelectedHotbarSlot(...));
 	}
 
 	private function associateIdWithInventory(int $id, Inventory $inventory) : void{
@@ -668,7 +668,7 @@ class InventoryManager{
 
 	public function syncSelectedHotbarSlot() : void{
 		$playerInventory = $this->player->getInventory();
-		$selected = $playerInventory->getHeldItemIndex();
+		$selected = $this->player->getHotbar()->getSelectedIndex();
 		if($selected !== $this->clientSelectedHotbarSlot){
 			$inventoryEntry = $this->inventories[spl_object_id($playerInventory)] ?? null;
 			if($inventoryEntry === null){
@@ -681,7 +681,7 @@ class InventoryManager{
 
 			$this->session->sendDataPacket(MobEquipmentPacket::create(
 				$this->player->getId(),
-				new ItemStackWrapper($itemStackInfo->getStackId(), $this->session->getTypeConverter()->coreItemStackToNet($playerInventory->getItemInHand())),
+				new ItemStackWrapper($itemStackInfo->getStackId(), $this->session->getTypeConverter()->coreItemStackToNet($playerInventory->getItem($selected))),
 				$selected,
 				$selected,
 				ContainerIds::INVENTORY

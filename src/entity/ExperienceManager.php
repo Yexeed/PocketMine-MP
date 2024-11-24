@@ -243,7 +243,7 @@ class ExperienceManager{
 		//TODO: replace this with a more generic equipment getting/setting interface
 		$equipment = [];
 
-		if(($item = $this->entity->getInventory()->getItemInHand()) instanceof Durable && $item->hasEnchantment(VanillaEnchantments::MENDING())){
+		if(($item = $this->entity->getHotbar()->getHeldItem()) instanceof Durable && $item->hasEnchantment(VanillaEnchantments::MENDING())){
 			$equipment[$mainHandIndex] = $item;
 		}
 		if(($item = $this->entity->getOffHandInventory()->getItem(0)) instanceof Durable && $item->hasEnchantment(VanillaEnchantments::MENDING())){
@@ -263,7 +263,7 @@ class ExperienceManager{
 				$xpValue -= (int) ceil($repairAmount / 2);
 
 				if($k === $mainHandIndex){
-					$this->entity->getInventory()->setItemInHand($repairItem);
+					$this->entity->getHotbar()->setHeldItem($repairItem);
 				}elseif($k === $offHandIndex){
 					$this->entity->getOffHandInventory()->setItem(0, $repairItem);
 				}else{
