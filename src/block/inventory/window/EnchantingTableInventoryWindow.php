@@ -21,7 +21,7 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
 use pocketmine\event\player\PlayerEnchantingOptionsRequestEvent;
 use pocketmine\inventory\CallbackInventoryListener;

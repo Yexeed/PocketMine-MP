@@ -21,32 +21,23 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
-use pocketmine\inventory\Inventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\player\Player;
+use pocketmine\player\TemporaryInventoryWindow;
 use pocketmine\world\Position;
 
-final class DoubleChestInventoryWindow extends ChestInventoryWindow{
+final class LoomInventoryWindow extends BlockInventoryWindow implements TemporaryInventoryWindow{
+
+	public const SLOT_BANNER = 0;
+	public const SLOT_DYE = 1;
+	public const SLOT_PATTERN = 2;
 
 	public function __construct(
 		Player $viewer,
-		Inventory $inventory,
-		private Position $left,
-		private Position $right
+		Position $holder
 	){
-		parent::__construct($viewer, $inventory, $this->left);
-	}
-
-	public function getLeft() : Position{ return $this->left; }
-
-	public function getRight() : Position{ return $this->right; }
-
-	protected function doBlockEffects(bool $isOpen) : void{
-		$this->animateBlock($this->left, $isOpen);
-		$this->animateBlock($this->right, $isOpen);
-
-		$this->playSound($this->left, $isOpen);
-		$this->playSound($this->right, $isOpen);
+		parent::__construct($viewer, new SimpleInventory(3), $holder);
 	}
 }

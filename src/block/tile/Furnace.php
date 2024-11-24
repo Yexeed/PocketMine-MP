@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\block\tile;
 
 use pocketmine\block\Furnace as BlockFurnace;
-use pocketmine\block\inventory\FurnaceInventoryWindow;
+use pocketmine\block\inventory\window\FurnaceInventoryWindow;
 use pocketmine\crafting\FurnaceRecipe;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\event\inventory\FurnaceBurnEvent;

@@ -21,19 +21,29 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
-use pocketmine\crafting\CraftingGrid;
-use pocketmine\player\Player;
+use pocketmine\block\Barrel;
 use pocketmine\world\Position;
+use pocketmine\world\sound\BarrelCloseSound;
+use pocketmine\world\sound\BarrelOpenSound;
+use pocketmine\world\sound\Sound;
 
-final class CraftingTableInventoryWindow extends BlockInventoryWindow{
+final class BarrelInventoryWindow extends AnimatedBlockInventoryWindow{
 
-	public function __construct(
-		Player $viewer,
-		Position $holder
-	){
-		//TODO: generics would be good for this, since it has special methods
-		parent::__construct($viewer, new CraftingGrid(CraftingGrid::SIZE_BIG), $holder);
+	protected function getOpenSound() : Sound{
+		return new BarrelOpenSound();
+	}
+
+	protected function getCloseSound() : Sound{
+		return new BarrelCloseSound();
+	}
+
+	protected function animateBlock(Position $position, bool $isOpen) : void{
+		$world = $position->getWorld();
+		$block = $world->getBlock($position);
+		if($block instanceof Barrel){
+			$world->setBlock($position, $block->setOpen($isOpen));
+		}
 	}
 }

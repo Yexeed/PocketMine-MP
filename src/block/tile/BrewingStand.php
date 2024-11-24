@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\block\inventory\BrewingStandInventoryWindow;
+use pocketmine\block\inventory\window\BrewingStandInventoryWindow;
 use pocketmine\crafting\BrewingRecipe;
 use pocketmine\event\block\BrewingFuelUseEvent;
 use pocketmine\event\block\BrewItemEvent;

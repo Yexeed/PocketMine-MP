@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\BarrelInventoryWindow;
+use pocketmine\block\inventory\window\BarrelInventoryWindow;
 use pocketmine\block\tile\Barrel as TileBarrel;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;

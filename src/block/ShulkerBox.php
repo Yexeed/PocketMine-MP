@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\ShulkerBoxInventoryWindow;
+use pocketmine\block\inventory\window\ShulkerBoxInventoryWindow;
 use pocketmine\block\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\block\utils\SupportType;

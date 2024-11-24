@@ -21,29 +21,26 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
-use pocketmine\block\Barrel;
+use pocketmine\network\mcpe\protocol\BlockEventPacket;
+use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\world\Position;
-use pocketmine\world\sound\BarrelCloseSound;
-use pocketmine\world\sound\BarrelOpenSound;
+use pocketmine\world\sound\ShulkerBoxCloseSound;
+use pocketmine\world\sound\ShulkerBoxOpenSound;
 use pocketmine\world\sound\Sound;
 
-final class BarrelInventoryWindow extends AnimatedBlockInventoryWindow{
-
+final class ShulkerBoxInventoryWindow extends AnimatedBlockInventoryWindow{
 	protected function getOpenSound() : Sound{
-		return new BarrelOpenSound();
+		return new ShulkerBoxOpenSound();
 	}
 
 	protected function getCloseSound() : Sound{
-		return new BarrelCloseSound();
+		return new ShulkerBoxCloseSound();
 	}
 
 	protected function animateBlock(Position $position, bool $isOpen) : void{
-		$world = $position->getWorld();
-		$block = $world->getBlock($position);
-		if($block instanceof Barrel){
-			$world->setBlock($position, $block->setOpen($isOpen));
-		}
+		//event ID is always 1 for a chest
+		$position->getWorld()->broadcastPacketToViewers($position, BlockEventPacket::create(BlockPosition::fromVector3($position), 1, $isOpen ? 1 : 0));
 	}
 }

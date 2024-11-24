@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
-use pocketmine\block\inventory\EnchantingTableInventoryWindow;
+use pocketmine\block\inventory\window\EnchantingTableInventoryWindow;
 use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
 use pocketmine\item\enchantment\EnchantingOption;

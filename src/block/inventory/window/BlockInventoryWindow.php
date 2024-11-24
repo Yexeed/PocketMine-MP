@@ -21,17 +21,22 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
-use pocketmine\inventory\SimpleInventory;
+use pocketmine\inventory\Inventory;
+use pocketmine\player\InventoryWindow;
 use pocketmine\player\Player;
-use pocketmine\player\TemporaryInventoryWindow;
 use pocketmine\world\Position;
 
-final class StonecutterInventoryWindow extends BlockInventoryWindow implements TemporaryInventoryWindow{
-	public const SLOT_INPUT = 0;
+class BlockInventoryWindow extends InventoryWindow{
 
-	public function __construct(Player $viewer, Position $holder){
-		parent::__construct($viewer, new SimpleInventory(1), $holder);
+	public function __construct(
+		Player $viewer,
+		Inventory $inventory,
+		protected Position $holder
+	){
+		parent::__construct($viewer, $inventory);
 	}
+
+	public function getHolder() : Position{ return $this->holder; }
 }

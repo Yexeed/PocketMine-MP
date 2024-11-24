@@ -21,7 +21,7 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
 use pocketmine\crafting\FurnaceType;
 use pocketmine\inventory\Inventory;

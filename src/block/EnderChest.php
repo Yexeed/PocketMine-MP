@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\EnderChestInventoryWindow;
+use pocketmine\block\inventory\window\EnderChestInventoryWindow;
 use pocketmine\block\tile\EnderChest as TileEnderChest;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\SupportType;

@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\BrewingStandInventoryWindow;
+use pocketmine\block\inventory\window\BrewingStandInventoryWindow;
 use pocketmine\block\tile\BrewingStand as TileBrewingStand;
 use pocketmine\block\utils\BrewingStandSlot;
 use pocketmine\block\utils\SupportType;

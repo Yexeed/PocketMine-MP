@@ -21,7 +21,7 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
 use pocketmine\world\Position;
 use pocketmine\world\sound\Sound;

@@ -21,12 +21,8 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
-final class BrewingStandInventoryWindow extends BlockInventoryWindow{
-	public const SLOT_INGREDIENT = 0;
-	public const SLOT_BOTTLE_LEFT = 1;
-	public const SLOT_BOTTLE_MIDDLE = 2;
-	public const SLOT_BOTTLE_RIGHT = 3;
-	public const SLOT_FUEL = 4;
+final class HopperInventoryWindow extends BlockInventoryWindow{
+
 }

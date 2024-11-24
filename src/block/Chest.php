@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\ChestInventoryWindow;
 use pocketmine\block\inventory\DoubleChestInventory;
-use pocketmine\block\inventory\DoubleChestInventoryWindow;
+use pocketmine\block\inventory\window\ChestInventoryWindow;
+use pocketmine\block\inventory\window\DoubleChestInventoryWindow;
 use pocketmine\block\tile\Chest as TileChest;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\SupportType;

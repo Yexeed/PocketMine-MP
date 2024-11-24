@@ -21,23 +21,19 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\player\Player;
 use pocketmine\player\TemporaryInventoryWindow;
 use pocketmine\world\Position;
 
-final class LoomInventoryWindow extends BlockInventoryWindow implements TemporaryInventoryWindow{
-
-	public const SLOT_BANNER = 0;
-	public const SLOT_DYE = 1;
-	public const SLOT_PATTERN = 2;
+final class CartographyTableInventoryWindow extends BlockInventoryWindow implements TemporaryInventoryWindow{
 
 	public function __construct(
 		Player $viewer,
 		Position $holder
 	){
-		parent::__construct($viewer, new SimpleInventory(3), $holder);
+		parent::__construct($viewer, new SimpleInventory(2), $holder);
 	}
 }

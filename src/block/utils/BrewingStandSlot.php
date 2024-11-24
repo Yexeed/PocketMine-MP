@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\utils;
 
-use pocketmine\block\inventory\BrewingStandInventoryWindow;
+use pocketmine\block\inventory\window\BrewingStandInventoryWindow;
 
 enum BrewingStandSlot{
 	case EAST;

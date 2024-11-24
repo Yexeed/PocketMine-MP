@@ -23,8 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\handler;
 
-use pocketmine\block\inventory\EnchantingTableInventoryWindow;
-use pocketmine\inventory\Inventory;
+use pocketmine\block\inventory\window\EnchantingTableInventoryWindow;
 use pocketmine\inventory\transaction\action\CreateItemAction;
 use pocketmine\inventory\transaction\action\DestroyItemAction;
 use pocketmine\inventory\transaction\action\DropItemAction;

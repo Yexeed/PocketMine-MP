@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\LoomInventoryWindow;
+use pocketmine\block\inventory\window\LoomInventoryWindow;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;

@@ -21,26 +21,28 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\inventory;
+namespace pocketmine\block\inventory\window;
 
 use pocketmine\network\mcpe\protocol\BlockEventPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\world\Position;
-use pocketmine\world\sound\ShulkerBoxCloseSound;
-use pocketmine\world\sound\ShulkerBoxOpenSound;
+use pocketmine\world\sound\ChestCloseSound;
+use pocketmine\world\sound\ChestOpenSound;
 use pocketmine\world\sound\Sound;
 
-final class ShulkerBoxInventoryWindow extends AnimatedBlockInventoryWindow{
+class ChestInventoryWindow extends AnimatedBlockInventoryWindow{
+
 	protected function getOpenSound() : Sound{
-		return new ShulkerBoxOpenSound();
+		return new ChestOpenSound();
 	}
 
 	protected function getCloseSound() : Sound{
-		return new ShulkerBoxCloseSound();
+		return new ChestCloseSound();
 	}
 
 	protected function animateBlock(Position $position, bool $isOpen) : void{
 		//event ID is always 1 for a chest
+		//TODO: we probably shouldn't be sending a packet directly here, but it doesn't fit anywhere into existing systems
 		$position->getWorld()->broadcastPacketToViewers($position, BlockEventPacket::create(BlockPosition::fromVector3($position), 1, $isOpen ? 1 : 0));
 	}
 }

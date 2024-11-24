@@ -23,17 +23,17 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe;
 
-use pocketmine\block\inventory\AnvilInventoryWindow;
-use pocketmine\block\inventory\BlockInventoryWindow;
-use pocketmine\block\inventory\BrewingStandInventoryWindow;
-use pocketmine\block\inventory\CartographyTableInventoryWindow;
-use pocketmine\block\inventory\CraftingTableInventoryWindow;
-use pocketmine\block\inventory\EnchantingTableInventoryWindow;
-use pocketmine\block\inventory\FurnaceInventoryWindow;
-use pocketmine\block\inventory\HopperInventoryWindow;
-use pocketmine\block\inventory\LoomInventoryWindow;
-use pocketmine\block\inventory\SmithingTableInventoryWindow;
-use pocketmine\block\inventory\StonecutterInventoryWindow;
+use pocketmine\block\inventory\window\AnvilInventoryWindow;
+use pocketmine\block\inventory\window\BlockInventoryWindow;
+use pocketmine\block\inventory\window\BrewingStandInventoryWindow;
+use pocketmine\block\inventory\window\CartographyTableInventoryWindow;
+use pocketmine\block\inventory\window\CraftingTableInventoryWindow;
+use pocketmine\block\inventory\window\EnchantingTableInventoryWindow;
+use pocketmine\block\inventory\window\FurnaceInventoryWindow;
+use pocketmine\block\inventory\window\HopperInventoryWindow;
+use pocketmine\block\inventory\window\LoomInventoryWindow;
+use pocketmine\block\inventory\window\SmithingTableInventoryWindow;
+use pocketmine\block\inventory\window\StonecutterInventoryWindow;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\inventory\Inventory;

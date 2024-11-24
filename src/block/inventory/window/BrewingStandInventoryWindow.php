@@ -21,24 +21,12 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block;
+namespace pocketmine\block\inventory\window;
 
-use pocketmine\block\inventory\window\CartographyTableInventoryWindow;
-use pocketmine\item\Item;
-use pocketmine\math\Vector3;
-use pocketmine\player\Player;
-
-final class CartographyTable extends Opaque{
-
-	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
-		if($player !== null){
-			$player->setCurrentWindow(new CartographyTableInventoryWindow($player, $this->position));
-		}
-
-		return true;
-	}
-
-	public function getFuelTime() : int{
-		return 300;
-	}
+final class BrewingStandInventoryWindow extends BlockInventoryWindow{
+	public const SLOT_INGREDIENT = 0;
+	public const SLOT_BOTTLE_LEFT = 1;
+	public const SLOT_BOTTLE_MIDDLE = 2;
+	public const SLOT_BOTTLE_RIGHT = 3;
+	public const SLOT_FUEL = 4;
 }
