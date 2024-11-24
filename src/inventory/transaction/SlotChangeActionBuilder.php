@@ -106,9 +106,10 @@ final class SlotChangeActionBuilder extends BaseInventory{
 	 */
 	public function generateActions() : array{
 		$result = [];
+		$inventory = $this->inventoryWindow->getInventory();
 		foreach($this->changedSlots as $index => $newItem){
 			if($newItem !== null){
-				$oldItem = $this->inventoryWindow->getInventory()->getItem($index);
+				$oldItem = $inventory->getItem($index);
 				if(!$newItem->equalsExact($oldItem)){
 					$result[] = new SlotChangeAction($this->inventoryWindow, $index, $oldItem, $newItem);
 				}

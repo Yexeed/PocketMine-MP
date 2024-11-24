@@ -615,7 +615,8 @@ class InventoryManager implements InventoryListener{
 	}
 
 	private function syncContents(InventoryWindow $window) : void{
-		$entry = $this->getEntry($window->getInventory());
+		$inventory = $window->getInventory();
+		$entry = $this->getEntry($inventory);
 		if($entry === null){
 			//this can happen when an inventory changed during InventoryCloseEvent, or when a temporary inventory
 			//is cleared before removal.
@@ -631,7 +632,7 @@ class InventoryManager implements InventoryListener{
 			$entry->pendingSyncs = [];
 			$contents = [];
 			$typeConverter = $this->session->getTypeConverter();
-			foreach($window->getInventory()->getContents(true) as $slot => $item){
+			foreach($inventory->getContents(true) as $slot => $item){
 				$itemStack = $typeConverter->coreItemStackToNet($item);
 				$info = $this->trackItemStack($entry, $slot, $itemStack, null);
 				$contents[] = new ItemStackWrapper($info->getStackId(), $itemStack);
