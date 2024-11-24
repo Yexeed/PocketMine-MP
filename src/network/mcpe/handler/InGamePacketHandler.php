@@ -462,8 +462,8 @@ class InGamePacketHandler extends PacketHandler{
 		$droppedItem = $sourceSlotItem->pop($droppedCount);
 
 		$builder = new TransactionBuilder();
-		//TODO: this probably shouldn't be creating an ephemeral window here - it works, but no idea what side effects it might have on the permanent window
-		$builder->getActionBuilder(new PlayerInventoryWindow($this->player, $inventory, PlayerInventoryWindow::TYPE_INVENTORY))->setItem($sourceSlot, $sourceSlotItem);
+		$window = $this->inventoryManager->getInventoryWindow($inventory) ?? throw new AssumptionFailedError("This should never happen");
+		$builder->getActionBuilder($window)->setItem($sourceSlot, $sourceSlotItem);
 		$builder->addAction(new DropItemAction($droppedItem));
 
 		$transaction = new InventoryTransaction($this->player, $builder->generateActions());
