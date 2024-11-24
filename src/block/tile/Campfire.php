@@ -53,7 +53,7 @@ class Campfire extends Spawnable implements Container{
 
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
-		$this->inventory = new CampfireInventory($this->position);
+		$this->inventory = new CampfireInventory();
 		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(
 			static function(Inventory $unused) use ($world, $pos) : void{
 				$block = $world->getBlock($pos);

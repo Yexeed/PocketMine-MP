@@ -101,6 +101,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
+use pocketmine\player\PlayerInventoryWindow;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Limits;
 use pocketmine\utils\TextFormat;
@@ -355,7 +356,7 @@ class InGamePacketHandler extends PacketHandler{
 				[$windowId, $slot] = ItemStackContainerIdTranslator::translate($containerInfo->getContainerId(), $this->inventoryManager->getCurrentWindowId(), $netSlot);
 				$inventoryAndSlot = $this->inventoryManager->locateWindowAndSlot($windowId, $slot);
 				if($inventoryAndSlot !== null){ //trigger the normal slot sync logic
-					$this->inventoryManager->onSlotChange($inventoryAndSlot[0], $inventoryAndSlot[1]);
+					$this->inventoryManager->requestSyncSlot($inventoryAndSlot[0], $inventoryAndSlot[1]);
 				}
 			}
 		}
@@ -461,7 +462,8 @@ class InGamePacketHandler extends PacketHandler{
 		$droppedItem = $sourceSlotItem->pop($droppedCount);
 
 		$builder = new TransactionBuilder();
-		$builder->getInventory($inventory)->setItem($sourceSlot, $sourceSlotItem);
+		//TODO: this probably shouldn't be creating an ephemeral window here - it works, but no idea what side effects it might have on the permanent window
+		$builder->getActionBuilder(new PlayerInventoryWindow($this->player, $inventory, PlayerInventoryWindow::TYPE_INVENTORY))->setItem($sourceSlot, $sourceSlotItem);
 		$builder->addAction(new DropItemAction($droppedItem));
 
 		$transaction = new InventoryTransaction($this->player, $builder->generateActions());

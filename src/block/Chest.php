@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\inventory\ChestInventoryWindow;
+use pocketmine\block\inventory\DoubleChestInventoryWindow;
 use pocketmine\block\tile\Chest as TileChest;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\SupportType;
@@ -74,8 +76,8 @@ class Chest extends Transparent{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player instanceof Player){
-
-			$chest = $this->position->getWorld()->getTile($this->position);
+			$world = $this->position->getWorld();
+			$chest = $world->getTile($this->position);
 			if($chest instanceof TileChest){
 				if(
 					!$this->getSide(Facing::UP)->isTransparent() ||
@@ -85,7 +87,22 @@ class Chest extends Transparent{
 					return true;
 				}
 
-				$player->setCurrentWindow($chest->getInventory());
+				foreach([false, true] as $clockwise){
+					$sideFacing = Facing::rotateY($this->facing, $clockwise);
+					$side = $this->position->getSide($sideFacing);
+					$pair = $world->getTile($side);
+					if($pair instanceof TileChest && $pair->getPair() === $chest){
+						[$left, $right] = $clockwise ? [$side, $this->position] : [$this->position, $side];
+
+						//TODO: we should probably construct DoubleChestInventory here directly too using the same logic
+						//right now it uses some weird logic in TileChest which produces incorrect results
+						//however I'm not sure if this is currently possible
+						$window = new DoubleChestInventoryWindow($player, $chest->getInventory(), $left, $right);
+						break;
+					}
+				}
+
+				$player->setCurrentWindow($window ?? new ChestInventoryWindow($player, $chest->getInventory(), $this->position));
 			}
 		}
 

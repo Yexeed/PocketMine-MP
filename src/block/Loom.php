@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\LoomInventory;
+use pocketmine\block\inventory\LoomInventoryWindow;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
@@ -34,7 +34,7 @@ final class Loom extends Opaque{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player !== null){
-			$player->setCurrentWindow(new LoomInventory($this->position));
+			$player->setCurrentWindow(new LoomInventoryWindow($player, $this->position));
 			return true;
 		}
 		return false;

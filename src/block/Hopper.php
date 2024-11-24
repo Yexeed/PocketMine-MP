@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\inventory\HopperInventoryWindow;
 use pocketmine\block\tile\Hopper as TileHopper;
 use pocketmine\block\utils\PoweredByRedstoneTrait;
 use pocketmine\block\utils\SupportType;
@@ -84,7 +85,7 @@ class Hopper extends Transparent{
 		if($player !== null){
 			$tile = $this->position->getWorld()->getTile($this->position);
 			if($tile instanceof TileHopper){ //TODO: find a way to have inventories open on click without this boilerplate in every block
-				$player->setCurrentWindow($tile->getInventory());
+				$player->setCurrentWindow(new HopperInventoryWindow($player, $tile->getInventory(), $this->position));
 			}
 			return true;
 		}

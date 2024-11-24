@@ -23,20 +23,30 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
-use pocketmine\inventory\SimpleInventory;
+use pocketmine\inventory\Inventory;
+use pocketmine\player\Player;
 use pocketmine\world\Position;
 
-class BrewingStandInventory extends SimpleInventory implements BlockInventory{
-	use BlockInventoryTrait;
+final class DoubleChestInventoryWindow extends ChestInventoryWindow{
 
-	public const SLOT_INGREDIENT = 0;
-	public const SLOT_BOTTLE_LEFT = 1;
-	public const SLOT_BOTTLE_MIDDLE = 2;
-	public const SLOT_BOTTLE_RIGHT = 3;
-	public const SLOT_FUEL = 4;
+	public function __construct(
+		Player $viewer,
+		Inventory $inventory,
+		private Position $left,
+		private Position $right
+	){
+		parent::__construct($viewer, $inventory, $this->left);
+	}
 
-	public function __construct(Position $holder, int $size = 5){
-		$this->holder = $holder;
-		parent::__construct($size);
+	public function getLeft() : Position{ return $this->left; }
+
+	public function getRight() : Position{ return $this->right; }
+
+	protected function doBlockEffects(bool $isOpen) : void{
+		$this->animateBlock($this->left, $isOpen);
+		$this->animateBlock($this->right, $isOpen);
+
+		$this->playSound($this->left, $isOpen);
+		$this->playSound($this->right, $isOpen);
 	}
 }

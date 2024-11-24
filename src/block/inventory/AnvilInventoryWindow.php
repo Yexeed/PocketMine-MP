@@ -24,14 +24,18 @@ declare(strict_types=1);
 namespace pocketmine\block\inventory;
 
 use pocketmine\inventory\SimpleInventory;
-use pocketmine\inventory\TemporaryInventory;
+use pocketmine\player\Player;
+use pocketmine\player\TemporaryInventoryWindow;
 use pocketmine\world\Position;
 
-final class SmithingTableInventory extends SimpleInventory implements BlockInventory, TemporaryInventory{
-	use BlockInventoryTrait;
+final class AnvilInventoryWindow extends BlockInventoryWindow implements TemporaryInventoryWindow{
+	public const SLOT_INPUT = 0;
+	public const SLOT_MATERIAL = 1;
 
-	public function __construct(Position $holder){
-		$this->holder = $holder;
-		parent::__construct(3);
+	public function __construct(
+		Player $viewer,
+		Position $holder
+	){
+		parent::__construct($viewer, new SimpleInventory(2), $holder);
 	}
 }

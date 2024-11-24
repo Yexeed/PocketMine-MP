@@ -21,17 +21,22 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\inventory;
+namespace pocketmine\block\inventory;
 
-use pocketmine\entity\Human;
+use pocketmine\inventory\Inventory;
+use pocketmine\player\InventoryWindow;
+use pocketmine\player\Player;
+use pocketmine\world\Position;
 
-final class PlayerOffHandInventory extends SimpleInventory{
-	private Human $holder;
+class BlockInventoryWindow extends InventoryWindow{
 
-	public function __construct(Human $player){
-		$this->holder = $player;
-		parent::__construct(1);
+	public function __construct(
+		Player $viewer,
+		Inventory $inventory,
+		protected Position $holder
+	){
+		parent::__construct($viewer, $inventory);
 	}
 
-	public function getHolder() : Human{ return $this->holder; }
+	public function getHolder() : Position{ return $this->holder; }
 }

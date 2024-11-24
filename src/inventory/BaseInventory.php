@@ -107,15 +107,6 @@ abstract class BaseInventory implements Inventory, SlotValidatedInventory{
 		$this->onContentChange($oldContents);
 	}
 
-	/**
-	 * Helper for utility functions which search the inventory.
-	 * TODO: make this abstract instead of providing a slow default implementation (BC break)
-	 */
-	protected function getMatchingItemCount(int $slot, Item $test, bool $checkTags) : int{
-		$item = $this->getItem($slot);
-		return $item->equals($test, true, $checkTags) ? $item->getCount() : 0;
-	}
-
 	public function contains(Item $item) : bool{
 		$count = max(1, $item->getCount());
 		$checkTags = $item->hasNamedTag();
@@ -345,7 +336,7 @@ abstract class BaseInventory implements Inventory, SlotValidatedInventory{
 	 */
 	public function removeAllViewers() : void{
 		foreach($this->viewers as $hash => $viewer){
-			if($viewer->getCurrentWindow() === $this){ //this might not be the case for the player's own inventory
+			if($viewer->getCurrentWindow()?->getInventory() === $this){ //this might not be the case for the player's own inventory
 				$viewer->removeCurrentWindow();
 			}
 			unset($this->viewers[$hash]);

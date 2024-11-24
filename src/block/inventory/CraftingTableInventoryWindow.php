@@ -23,17 +23,17 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
-use pocketmine\inventory\SimpleInventory;
-use pocketmine\inventory\TemporaryInventory;
+use pocketmine\crafting\CraftingGrid;
+use pocketmine\player\Player;
 use pocketmine\world\Position;
 
-class StonecutterInventory extends SimpleInventory implements BlockInventory, TemporaryInventory{
-	use BlockInventoryTrait;
+final class CraftingTableInventoryWindow extends BlockInventoryWindow{
 
-	public const SLOT_INPUT = 0;
-
-	public function __construct(Position $holder){
-		$this->holder = $holder;
-		parent::__construct(1);
+	public function __construct(
+		Player $viewer,
+		Position $holder
+	){
+		//TODO: generics would be good for this, since it has special methods
+		parent::__construct($viewer, new CraftingGrid(CraftingGrid::SIZE_BIG), $holder);
 	}
 }

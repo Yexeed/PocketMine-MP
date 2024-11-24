@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\block\inventory\BarrelInventory;
+use pocketmine\inventory\Inventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\world\World;
@@ -32,11 +33,11 @@ class Barrel extends Spawnable implements Container, Nameable{
 	use NameableTrait;
 	use ContainerTrait;
 
-	protected BarrelInventory $inventory;
+	protected Inventory $inventory;
 
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
-		$this->inventory = new BarrelInventory($this->position);
+		$this->inventory = new SimpleInventory(27);
 	}
 
 	public function readSaveData(CompoundTag $nbt) : void{
@@ -56,11 +57,11 @@ class Barrel extends Spawnable implements Container, Nameable{
 		}
 	}
 
-	public function getInventory() : BarrelInventory{
+	public function getInventory() : Inventory{
 		return $this->inventory;
 	}
 
-	public function getRealInventory() : BarrelInventory{
+	public function getRealInventory() : Inventory{
 		return $this->inventory;
 	}
 

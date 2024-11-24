@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\inventory\BarrelInventoryWindow;
 use pocketmine\block\tile\Barrel as TileBarrel;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
@@ -81,7 +82,7 @@ class Barrel extends Opaque{
 					return true;
 				}
 
-				$player->setCurrentWindow($barrel->getInventory());
+				$player->setCurrentWindow(new BarrelInventoryWindow($player, $barrel->getInventory(), $this->position));
 			}
 		}
 

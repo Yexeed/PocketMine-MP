@@ -85,9 +85,7 @@ use pocketmine\form\FormValidationException;
 use pocketmine\inventory\CallbackInventoryListener;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\inventory\Inventory;
-use pocketmine\inventory\PlayerCraftingInventory;
-use pocketmine\inventory\PlayerCursorInventory;
-use pocketmine\inventory\TemporaryInventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionBuilder;
@@ -218,11 +216,11 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	protected bool $authenticated;
 	protected PlayerInfo $playerInfo;
 
-	protected ?Inventory $currentWindow = null;
-	/** @var Inventory[] */
+	protected ?InventoryWindow $currentWindow = null;
+	/** @var PlayerInventoryWindow[] */
 	protected array $permanentWindows = [];
-	protected PlayerCursorInventory $cursorInventory;
-	protected PlayerCraftingInventory $craftingGrid;
+	protected Inventory $cursorInventory;
+	protected CraftingGrid $craftingGrid;
 	protected CreativeInventory $creativeInventory;
 
 	protected int $messageCounter = 2;
@@ -2318,7 +2316,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$this->loadQueue = [];
 
 		$this->removeCurrentWindow();
-		$this->removePermanentInventories();
+		$this->removePermanentWindows();
 
 		$this->perm->getPermissionRecalculationCallbacks()->clear();
 
@@ -2334,8 +2332,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 	protected function destroyCycles() : void{
 		$this->networkSession = null;
-		unset($this->cursorInventory);
-		unset($this->craftingGrid);
 		$this->spawnPosition = null;
 		$this->blockBreakHandler = null;
 		parent::destroyCycles();
@@ -2589,15 +2585,19 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	}
 
 	protected function addDefaultWindows() : void{
-		$this->cursorInventory = new PlayerCursorInventory($this);
-		$this->craftingGrid = new PlayerCraftingInventory($this);
+		$this->cursorInventory = new SimpleInventory(1);
+		$this->craftingGrid = new CraftingGrid(CraftingGrid::SIZE_SMALL);
 
-		$this->addPermanentInventories($this->inventory, $this->armorInventory, $this->cursorInventory, $this->offHandInventory, $this->craftingGrid);
-
-		//TODO: more windows
+		$this->addPermanentWindows([
+			new PlayerInventoryWindow($this, $this->inventory, PlayerInventoryWindow::TYPE_INVENTORY),
+			new PlayerInventoryWindow($this, $this->armorInventory, PlayerInventoryWindow::TYPE_ARMOR),
+			new PlayerInventoryWindow($this, $this->cursorInventory, PlayerInventoryWindow::TYPE_CURSOR),
+			new PlayerInventoryWindow($this, $this->offHandInventory, PlayerInventoryWindow::TYPE_OFFHAND),
+			new PlayerInventoryWindow($this, $this->craftingGrid, PlayerInventoryWindow::TYPE_CRAFTING),
+		]);
 	}
 
-	public function getCursorInventory() : PlayerCursorInventory{
+	public function getCursorInventory() : Inventory{
 		return $this->cursorInventory;
 	}
 
@@ -2628,22 +2628,37 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 * inventory.
 	 */
 	private function doCloseInventory() : void{
-		$inventories = [$this->craftingGrid, $this->cursorInventory];
-		if($this->currentWindow instanceof TemporaryInventory){
-			$inventories[] = $this->currentWindow;
+		$windowsToClear = [];
+		$mainInventoryWindow = null;
+		foreach($this->permanentWindows as $window){
+			if($window->getType() === PlayerInventoryWindow::TYPE_CRAFTING || $window->getType() === PlayerInventoryWindow::TYPE_CURSOR){
+				$windowsToClear[] = $window;
+			}elseif($window->getType() === PlayerInventoryWindow::TYPE_INVENTORY){
+				$mainInventoryWindow = $window;
+			}
+		}
+		if($mainInventoryWindow === null){
+			//TODO: in the future this might not be the case, if we implement support for the player closing their
+			//inventory window outside the protocol layer
+			//in that case we'd have to create a new ephemeral window here
+			throw new AssumptionFailedError("This should never be null");
+		}
+
+		if($this->currentWindow instanceof TemporaryInventoryWindow){
+			$windowsToClear[] = $this->currentWindow;
 		}
 
 		$builder = new TransactionBuilder();
-		foreach($inventories as $inventory){
-			$contents = $inventory->getContents();
+		foreach($windowsToClear as $window){
+			$contents = $window->getInventory()->getContents();
 
 			if(count($contents) > 0){
-				$drops = $builder->getInventory($this->inventory)->addItem(...$contents);
+				$drops = $builder->getActionBuilder($mainInventoryWindow)->addItem(...$contents);
 				foreach($drops as $drop){
 					$builder->addAction(new DropItemAction($drop));
 				}
 
-				$builder->getInventory($inventory)->clearAll();
+				$builder->getActionBuilder($window)->clearAll();
 			}
 		}
 
@@ -2655,8 +2670,8 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 				$this->logger->debug("Successfully evacuated items from temporary inventories");
 			}catch(TransactionCancelledException){
 				$this->logger->debug("Plugin cancelled transaction evacuating items from temporary inventories; items will be destroyed");
-				foreach($inventories as $inventory){
-					$inventory->clearAll();
+				foreach($windowsToClear as $window){
+					$window->getInventory()->clearAll();
 				}
 			}catch(TransactionValidationException $e){
 				throw new AssumptionFailedError("This server-generated transaction should never be invalid", 0, $e);
@@ -2667,18 +2682,18 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	/**
 	 * Returns the inventory the player is currently viewing. This might be a chest, furnace, or any other container.
 	 */
-	public function getCurrentWindow() : ?Inventory{
+	public function getCurrentWindow() : ?InventoryWindow{
 		return $this->currentWindow;
 	}
 
 	/**
 	 * Opens an inventory window to the player. Returns if it was successful.
 	 */
-	public function setCurrentWindow(Inventory $inventory) : bool{
-		if($inventory === $this->currentWindow){
+	public function setCurrentWindow(InventoryWindow $window) : bool{
+		if($window === $this->currentWindow){
 			return true;
 		}
-		$ev = new InventoryOpenEvent($inventory, $this);
+		$ev = new InventoryOpenEvent($window, $this);
 		$ev->call();
 		if($ev->isCancelled()){
 			return false;
@@ -2689,10 +2704,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		if(($inventoryManager = $this->getNetworkSession()->getInvManager()) === null){
 			throw new \InvalidArgumentException("Player cannot open inventories in this state");
 		}
-		$this->logger->debug("Opening inventory " . get_class($inventory) . "#" . spl_object_id($inventory));
-		$inventoryManager->onCurrentWindowChange($inventory);
-		$inventory->onOpen($this);
-		$this->currentWindow = $inventory;
+		$this->logger->debug("Opening inventory " . get_class($window) . "#" . spl_object_id($window));
+		$inventoryManager->onCurrentWindowChange($window);
+		$window->onOpen();
+		$this->currentWindow = $window;
 		return true;
 	}
 
@@ -2701,7 +2716,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		if($this->currentWindow !== null){
 			$currentWindow = $this->currentWindow;
 			$this->logger->debug("Closing inventory " . get_class($this->currentWindow) . "#" . spl_object_id($this->currentWindow));
-			$this->currentWindow->onClose($this);
+			$this->currentWindow->onClose();
 			if(($inventoryManager = $this->getNetworkSession()->getInvManager()) !== null){
 				$inventoryManager->onCurrentWindowRemove();
 			}
@@ -2710,18 +2725,29 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		}
 	}
 
-	protected function addPermanentInventories(Inventory ...$inventories) : void{
-		foreach($inventories as $inventory){
-			$inventory->onOpen($this);
-			$this->permanentWindows[spl_object_id($inventory)] = $inventory;
+	/**
+	 * @param PlayerInventoryWindow[] $windows
+	 */
+	protected function addPermanentWindows(array $windows) : void{
+		foreach($windows as $window){
+			$window->onOpen();
+			$this->permanentWindows[spl_object_id($window)] = $window;
 		}
 	}
 
-	protected function removePermanentInventories() : void{
-		foreach($this->permanentWindows as $inventory){
-			$inventory->onClose($this);
+	protected function removePermanentWindows() : void{
+		foreach($this->permanentWindows as $window){
+			$window->onClose();
 		}
 		$this->permanentWindows = [];
+	}
+
+	/**
+	 * @return PlayerInventoryWindow[]
+	 * @internal
+	 */
+	public function getPermanentWindows() : array{
+		return $this->permanentWindows;
 	}
 
 	/**

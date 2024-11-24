@@ -21,16 +21,19 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\inventory;
+namespace pocketmine\block\inventory;
 
-use pocketmine\crafting\CraftingGrid;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\player\Player;
+use pocketmine\player\TemporaryInventoryWindow;
+use pocketmine\world\Position;
 
-final class PlayerCraftingInventory extends CraftingGrid implements TemporaryInventory{
+final class CartographyTableInventoryWindow extends BlockInventoryWindow implements TemporaryInventoryWindow{
 
-	public function __construct(private Player $holder){
-		parent::__construct(CraftingGrid::SIZE_SMALL);
+	public function __construct(
+		Player $viewer,
+		Position $holder
+	){
+		parent::__construct($viewer, new SimpleInventory(2), $holder);
 	}
-
-	public function getHolder() : Player{ return $this->holder; }
 }

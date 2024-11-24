@@ -21,18 +21,29 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\inventory;
+namespace pocketmine\block\inventory;
 
-use pocketmine\player\Player;
+use pocketmine\block\Barrel;
+use pocketmine\world\Position;
+use pocketmine\world\sound\BarrelCloseSound;
+use pocketmine\world\sound\BarrelOpenSound;
+use pocketmine\world\sound\Sound;
 
-class PlayerCursorInventory extends SimpleInventory implements TemporaryInventory{
-	public function __construct(
-		protected Player $holder
-	){
-		parent::__construct(1);
+final class BarrelInventoryWindow extends AnimatedBlockInventoryWindow{
+
+	protected function getOpenSound() : Sound{
+		return new BarrelOpenSound();
 	}
 
-	public function getHolder() : Player{
-		return $this->holder;
+	protected function getCloseSound() : Sound{
+		return new BarrelCloseSound();
+	}
+
+	protected function animateBlock(Position $position, bool $isOpen) : void{
+		$world = $position->getWorld();
+		$block = $world->getBlock($position);
+		if($block instanceof Barrel){
+			$world->setBlock($position, $block->setOpen($isOpen));
+		}
 	}
 }

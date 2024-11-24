@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\StonecutterInventory;
+use pocketmine\block\inventory\StonecutterInventoryWindow;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\item\Item;
@@ -37,7 +37,7 @@ class Stonecutter extends Transparent{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player !== null){
-			$player->setCurrentWindow(new StonecutterInventory($this->position));
+			$player->setCurrentWindow(new StonecutterInventoryWindow($player, $this->position));
 		}
 		return true;
 	}

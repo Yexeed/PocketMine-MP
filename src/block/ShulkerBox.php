@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\inventory\ShulkerBoxInventoryWindow;
 use pocketmine\block\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\block\utils\SupportType;
@@ -105,7 +106,7 @@ class ShulkerBox extends Opaque{
 					return true;
 				}
 
-				$player->setCurrentWindow($shulker->getInventory());
+				$player->setCurrentWindow(new ShulkerBoxInventoryWindow($player, $shulker->getInventory(), $this->position));
 			}
 		}
 

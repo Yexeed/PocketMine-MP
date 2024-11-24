@@ -85,6 +85,10 @@ class DelegateInventory extends BaseInventory{
 		$this->backingInventory->setContents($items);
 	}
 
+	public function getMatchingItemCount(int $slot, Item $test, bool $checkTags) : int{
+		return $this->backingInventory->getMatchingItemCount($slot, $test, $checkTags);
+	}
+
 	public function isSlotEmpty(int $index) : bool{
 		return $this->backingInventory->isSlotEmpty($index);
 	}

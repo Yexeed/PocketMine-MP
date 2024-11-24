@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\SmithingTableInventory;
+use pocketmine\block\inventory\SmithingTableInventoryWindow;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
@@ -32,7 +32,7 @@ final class SmithingTable extends Opaque{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player !== null){
-			$player->setCurrentWindow(new SmithingTableInventory($this->position));
+			$player->setCurrentWindow(new SmithingTableInventoryWindow($player, $this->position));
 		}
 
 		return true;

@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\EnderChestInventory;
+use pocketmine\block\inventory\EnderChestInventoryWindow;
 use pocketmine\block\tile\EnderChest as TileEnderChest;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\SupportType;
@@ -56,8 +56,7 @@ class EnderChest extends Transparent{
 		if($player instanceof Player){
 			$enderChest = $this->position->getWorld()->getTile($this->position);
 			if($enderChest instanceof TileEnderChest && $this->getSide(Facing::UP)->isTransparent()){
-				$enderChest->setViewerCount($enderChest->getViewerCount() + 1);
-				$player->setCurrentWindow(new EnderChestInventory($this->position, $player->getEnderInventory()));
+				$player->setCurrentWindow(new EnderChestInventoryWindow($player, $player->getEnderInventory(), $this->position));
 			}
 		}
 

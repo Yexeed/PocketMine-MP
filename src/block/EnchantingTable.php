@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\EnchantInventory;
+use pocketmine\block\inventory\EnchantingTableInventoryWindow;
 use pocketmine\block\utils\SupportType;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
@@ -48,7 +48,7 @@ class EnchantingTable extends Transparent{
 		if($player instanceof Player){
 			//TODO lock
 
-			$player->setCurrentWindow(new EnchantInventory($this->position));
+			$player->setCurrentWindow(new EnchantingTableInventoryWindow($player, $this->position));
 		}
 
 		return true;

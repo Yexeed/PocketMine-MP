@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
-use pocketmine\inventory\SimpleInventory;
 use pocketmine\network\mcpe\protocol\BlockEventPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\world\Position;
@@ -31,13 +30,7 @@ use pocketmine\world\sound\ChestCloseSound;
 use pocketmine\world\sound\ChestOpenSound;
 use pocketmine\world\sound\Sound;
 
-class ChestInventory extends SimpleInventory implements BlockInventory{
-	use AnimatedBlockInventoryTrait;
-
-	public function __construct(Position $holder){
-		$this->holder = $holder;
-		parent::__construct(27);
-	}
+class ChestInventoryWindow extends AnimatedBlockInventoryWindow{
 
 	protected function getOpenSound() : Sound{
 		return new ChestOpenSound();
@@ -47,10 +40,9 @@ class ChestInventory extends SimpleInventory implements BlockInventory{
 		return new ChestCloseSound();
 	}
 
-	public function animateBlock(bool $isOpen) : void{
-		$holder = $this->getHolder();
-
+	protected function animateBlock(Position $position, bool $isOpen) : void{
 		//event ID is always 1 for a chest
-		$holder->getWorld()->broadcastPacketToViewers($holder, BlockEventPacket::create(BlockPosition::fromVector3($holder), 1, $isOpen ? 1 : 0));
+		//TODO: we probably shouldn't be sending a packet directly here, but it doesn't fit anywhere into existing systems
+		$position->getWorld()->broadcastPacketToViewers($position, BlockEventPacket::create(BlockPosition::fromVector3($position), 1, $isOpen ? 1 : 0));
 	}
 }

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\block\inventory\FurnaceInventoryWindow;
 use pocketmine\block\tile\Furnace as TileFurnace;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
 use pocketmine\block\utils\LightableTrait;
@@ -61,7 +62,7 @@ class Furnace extends Opaque{
 		if($player instanceof Player){
 			$furnace = $this->position->getWorld()->getTile($this->position);
 			if($furnace instanceof TileFurnace && $furnace->canOpenWith($item->getCustomName())){
-				$player->setCurrentWindow($furnace->getInventory());
+				$player->setCurrentWindow(new FurnaceInventoryWindow($player, $furnace->getInventory(), $this->position, $this->furnaceType));
 			}
 		}
 

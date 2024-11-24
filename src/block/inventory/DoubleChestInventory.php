@@ -24,25 +24,15 @@ declare(strict_types=1);
 namespace pocketmine\block\inventory;
 
 use pocketmine\inventory\BaseInventory;
-use pocketmine\inventory\InventoryHolder;
+use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
-use pocketmine\world\sound\ChestCloseSound;
-use pocketmine\world\sound\ChestOpenSound;
-use pocketmine\world\sound\Sound;
 
-class DoubleChestInventory extends BaseInventory implements BlockInventory, InventoryHolder{
-	use AnimatedBlockInventoryTrait;
-
+final class DoubleChestInventory extends BaseInventory{
 	public function __construct(
-		private ChestInventory $left,
-		private ChestInventory $right
+		private Inventory $left,
+		private Inventory $right
 	){
-		$this->holder = $this->left->getHolder();
 		parent::__construct();
-	}
-
-	public function getInventory() : self{
-		return $this;
 	}
 
 	public function getSize() : int{
@@ -85,7 +75,7 @@ class DoubleChestInventory extends BaseInventory implements BlockInventory, Inve
 		$this->right->setContents($rightContents);
 	}
 
-	protected function getMatchingItemCount(int $slot, Item $test, bool $checkTags) : int{
+	public function getMatchingItemCount(int $slot, Item $test, bool $checkTags) : int{
 		$leftSize = $this->left->getSize();
 		return $slot < $leftSize ?
 			$this->left->getMatchingItemCount($slot, $test, $checkTags) :
@@ -99,20 +89,11 @@ class DoubleChestInventory extends BaseInventory implements BlockInventory, Inve
 			$this->right->isSlotEmpty($index - $leftSize);
 	}
 
-	protected function getOpenSound() : Sound{ return new ChestOpenSound(); }
-
-	protected function getCloseSound() : Sound{ return new ChestCloseSound(); }
-
-	protected function animateBlock(bool $isOpen) : void{
-		$this->left->animateBlock($isOpen);
-		$this->right->animateBlock($isOpen);
-	}
-
-	public function getLeftSide() : ChestInventory{
+	public function getLeftSide() : Inventory{
 		return $this->left;
 	}
 
-	public function getRightSide() : ChestInventory{
+	public function getRightSide() : Inventory{
 		return $this->right;
 	}
 }

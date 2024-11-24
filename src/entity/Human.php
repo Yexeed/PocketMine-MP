@@ -35,9 +35,7 @@ use pocketmine\inventory\CallbackInventoryListener;
 use pocketmine\inventory\Hotbar;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\InventoryHolder;
-use pocketmine\inventory\PlayerEnderInventory;
-use pocketmine\inventory\PlayerInventory;
-use pocketmine\inventory\PlayerOffHandInventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\enchantment\EnchantingHelper;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\item\Item;
@@ -102,9 +100,9 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 	public function getNetworkTypeId() : string{ return EntityIds::PLAYER; }
 
 	protected Hotbar $hotbar;
-	protected PlayerInventory $inventory;
-	protected PlayerOffHandInventory $offHandInventory;
-	protected PlayerEnderInventory $enderInventory;
+	protected Inventory $inventory;
+	protected Inventory $offHandInventory;
+	protected Inventory $enderInventory;
 
 	protected UuidInterface $uuid;
 
@@ -234,13 +232,13 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 		return $this->hotbar;
 	}
 
-	public function getInventory() : PlayerInventory{
+	public function getInventory() : Inventory{
 		return $this->inventory;
 	}
 
-	public function getOffHandInventory() : PlayerOffHandInventory{ return $this->offHandInventory; }
+	public function getOffHandInventory() : Inventory{ return $this->offHandInventory; }
 
-	public function getEnderInventory() : PlayerEnderInventory{
+	public function getEnderInventory() : Inventory{
 		return $this->enderInventory;
 	}
 
@@ -271,7 +269,7 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 		$this->hungerManager = new HungerManager($this);
 		$this->xpManager = new ExperienceManager($this);
 
-		$this->inventory = new PlayerInventory($this);
+		$this->inventory = new SimpleInventory(36);
 		$this->hotbar = new Hotbar($this->inventory);
 
 		$syncHeldItem = fn() => NetworkBroadcastUtils::broadcastEntityEvent(
@@ -290,8 +288,8 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 				}
 			}
 		));
-		$this->offHandInventory = new PlayerOffHandInventory($this);
-		$this->enderInventory = new PlayerEnderInventory($this);
+		$this->offHandInventory = new SimpleInventory(1);
+		$this->enderInventory = new SimpleInventory(27);
 		$this->initHumanData($nbt);
 
 		$inventoryTag = $nbt->getListTag(self::TAG_INVENTORY);
@@ -335,6 +333,7 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 		}
 
 		$this->hotbar->setSelectedIndex($nbt->getInt(self::TAG_SELECTED_INVENTORY_SLOT, 0));
+		//TODO: cyclic reference
 		$this->hotbar->getSelectedIndexChangeListeners()->add(fn() => NetworkBroadcastUtils::broadcastEntityEvent(
 			$this->getViewers(),
 			fn(EntityEventBroadcaster $broadcaster, array $recipients) => $broadcaster->onMobMainHandItemChange($recipients, $this)
@@ -546,9 +545,6 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 
 	protected function destroyCycles() : void{
 		unset(
-			$this->inventory,
-			$this->offHandInventory,
-			$this->enderInventory,
 			$this->hungerManager,
 			$this->xpManager
 		);

@@ -23,8 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\block\inventory\ChestInventory;
 use pocketmine\block\inventory\DoubleChestInventory;
+use pocketmine\inventory\Inventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
@@ -44,7 +45,7 @@ class Chest extends Spawnable implements Container, Nameable{
 	public const TAG_PAIRZ = "pairz";
 	public const TAG_PAIR_LEAD = "pairlead";
 
-	protected ChestInventory $inventory;
+	protected Inventory $inventory;
 	protected ?DoubleChestInventory $doubleInventory = null;
 
 	private ?int $pairX = null;
@@ -52,7 +53,7 @@ class Chest extends Spawnable implements Container, Nameable{
 
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
-		$this->inventory = new ChestInventory($this->position);
+		$this->inventory = new SimpleInventory(27);
 	}
 
 	public function readSaveData(CompoundTag $nbt) : void{
@@ -114,14 +115,14 @@ class Chest extends Spawnable implements Container, Nameable{
 		$this->containerTraitBlockDestroyedHook();
 	}
 
-	public function getInventory() : ChestInventory|DoubleChestInventory{
+	public function getInventory() : Inventory|DoubleChestInventory{
 		if($this->isPaired() && $this->doubleInventory === null){
 			$this->checkPairing();
 		}
 		return $this->doubleInventory instanceof DoubleChestInventory ? $this->doubleInventory : $this->inventory;
 	}
 
-	public function getRealInventory() : ChestInventory{
+	public function getRealInventory() : Inventory{
 		return $this->inventory;
 	}
 

@@ -71,6 +71,13 @@ class Campfire extends Transparent{
 
 	protected CampfireInventory $inventory;
 
+	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
+		parent::__construct($idInfo, $name, $typeInfo);
+		//TODO: this should never have been in the block - it creates problems for setting blocks in different positions
+		//as inventories aren't designed to be cloned
+		$this->inventory = new CampfireInventory();
+	}
+
 	/**
 	 * @var int[] slot => ticks
 	 * @phpstan-var array<int, int>
@@ -89,7 +96,7 @@ class Campfire extends Transparent{
 			$this->inventory = $tile->getInventory();
 			$this->cookingTimes = $tile->getCookingTimes();
 		}else{
-			$this->inventory = new CampfireInventory($this->position);
+			$this->inventory = new CampfireInventory();
 		}
 
 		return $this;

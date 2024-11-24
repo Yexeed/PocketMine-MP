@@ -21,8 +21,8 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\inventory;
+namespace pocketmine\block\inventory;
 
-interface TemporaryInventory extends Inventory{
+final class HopperInventoryWindow extends BlockInventoryWindow{
 
 }
