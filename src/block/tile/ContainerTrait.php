@@ -25,7 +25,6 @@ namespace pocketmine\block\tile;
 
 use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\data\SavedDataLoadingException;
-use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
@@ -40,11 +39,9 @@ trait ContainerTrait{
 	/** @var string|null */
 	private $lock = null;
 
-	abstract public function getRealInventory() : Inventory;
-
 	protected function loadItems(CompoundTag $tag) : void{
 		if(($inventoryTag = $tag->getTag(Container::TAG_ITEMS)) instanceof ListTag && $inventoryTag->getTagType() === NBT::TAG_Compound){
-			$inventory = $this->getRealInventory();
+			$inventory = $this->getInventory();
 			$listeners = $inventory->getListeners()->toArray();
 			$inventory->getListeners()->remove(...$listeners); //prevent any events being fired by initialization
 
@@ -71,7 +68,7 @@ trait ContainerTrait{
 
 	protected function saveItems(CompoundTag $tag) : void{
 		$items = [];
-		foreach($this->getRealInventory()->getContents() as $slot => $item){
+		foreach($this->getInventory()->getContents() as $slot => $item){
 			$items[] = $item->nbtSerialize($slot);
 		}
 
@@ -98,7 +95,7 @@ trait ContainerTrait{
 	 * @see Tile::onBlockDestroyedHook()
 	 */
 	protected function onBlockDestroyedHook() : void{
-		$inv = $this->getRealInventory();
+		$inv = $this->getInventory();
 		$pos = $this->getPosition();
 
 		$world = $pos->getWorld();

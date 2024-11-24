@@ -68,10 +68,6 @@ class Campfire extends Spawnable implements Container{
 		return $this->inventory;
 	}
 
-	public function getRealInventory() : CampfireInventory{
-		return $this->inventory;
-	}
-
 	/**
 	 * @return int[]
 	 * @phpstan-return array<int, int>

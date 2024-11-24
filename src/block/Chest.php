@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\block\inventory\ChestInventoryWindow;
+use pocketmine\block\inventory\DoubleChestInventory;
 use pocketmine\block\inventory\DoubleChestInventoryWindow;
 use pocketmine\block\tile\Chest as TileChest;
 use pocketmine\block\utils\FacesOppositePlacingPlayerTrait;
@@ -87,18 +88,25 @@ class Chest extends Transparent{
 					return true;
 				}
 
-				foreach([false, true] as $clockwise){
-					$sideFacing = Facing::rotateY($this->facing, $clockwise);
-					$side = $this->position->getSide($sideFacing);
-					$pair = $world->getTile($side);
-					if($pair instanceof TileChest && $pair->getPair() === $chest){
-						[$left, $right] = $clockwise ? [$side, $this->position] : [$this->position, $side];
+				$window = null;
+				if($chest->isPaired()){
+					foreach([false, true] as $clockwise){
+						$sideFacing = Facing::rotateY($this->facing, $clockwise);
+						$side = $this->position->getSide($sideFacing);
+						$pair = $world->getTile($side);
+						if($pair instanceof TileChest && $pair->getPair() === $chest){
+							[$left, $right] = $clockwise ? [$pair, $chest] : [$chest, $pair];
 
-						//TODO: we should probably construct DoubleChestInventory here directly too using the same logic
-						//right now it uses some weird logic in TileChest which produces incorrect results
-						//however I'm not sure if this is currently possible
-						$window = new DoubleChestInventoryWindow($player, $chest->getInventory(), $left, $right);
-						break;
+							$doubleInventory = $left->getDoubleInventory() ?? $right->getDoubleInventory();
+							if($doubleInventory === null){
+								$doubleInventory = new DoubleChestInventory($left->getInventory(), $right->getInventory());
+								$left->setDoubleInventory($doubleInventory);
+								$right->setDoubleInventory($doubleInventory);
+							}
+
+							$window = new DoubleChestInventoryWindow($player, $doubleInventory, $left->getPosition(), $right->getPosition());
+							break;
+						}
 					}
 				}
 

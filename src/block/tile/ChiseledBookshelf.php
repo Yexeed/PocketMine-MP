@@ -55,10 +55,6 @@ class ChiseledBookshelf extends Tile implements Container{
 		return $this->inventory;
 	}
 
-	public function getRealInventory() : SimpleInventory{
-		return $this->inventory;
-	}
-
 	public function getLastInteractedSlot() : ?ChiseledBookshelfSlot{
 		return $this->lastInteractedSlot;
 	}
@@ -87,7 +83,7 @@ class ChiseledBookshelf extends Tile implements Container{
 
 	protected function loadItems(CompoundTag $tag) : void{
 		if(($inventoryTag = $tag->getTag(Container::TAG_ITEMS)) instanceof ListTag && $inventoryTag->getTagType() === NBT::TAG_Compound){
-			$inventory = $this->getRealInventory();
+			$inventory = $this->inventory;
 			$listeners = $inventory->getListeners()->toArray();
 			$inventory->getListeners()->remove(...$listeners); //prevent any events being fired by initialization
 
@@ -118,7 +114,7 @@ class ChiseledBookshelf extends Tile implements Container{
 
 	protected function saveItems(CompoundTag $tag) : void{
 		$items = [];
-		foreach($this->getRealInventory()->getContents(true) as $slot => $item){
+		foreach($this->inventory->getContents(true) as $slot => $item){
 			if($item->isNull()){
 				$items[$slot] = CompoundTag::create()
 					->setByte(SavedItemStackData::TAG_COUNT, 0)

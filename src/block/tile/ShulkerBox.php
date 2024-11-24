@@ -111,10 +111,6 @@ class ShulkerBox extends Spawnable implements Container, Nameable{
 		return $this->inventory;
 	}
 
-	public function getRealInventory() : Inventory{
-		return $this->inventory;
-	}
-
 	public function getDefaultName() : string{
 		return "Shulker Box";
 	}

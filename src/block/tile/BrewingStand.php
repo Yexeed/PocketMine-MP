@@ -117,10 +117,6 @@ class BrewingStand extends Spawnable implements Container, Nameable{
 		return $this->inventory;
 	}
 
-	public function getRealInventory() : Inventory{
-		return $this->inventory;
-	}
-
 	private function checkFuel(Item $item) : void{
 		$ev = new BrewingFuelUseEvent($this);
 		if(!$item->equals(VanillaItems::BLAZE_POWDER(), true, false)){
