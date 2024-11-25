@@ -69,10 +69,16 @@ use function strtolower;
  * Manages all the plugins
  */
 class PluginManager{
-	/** @var Plugin[] */
+	/**
+	 * @var Plugin[]
+	 * @phpstan-var array<string, Plugin>
+	 */
 	protected array $plugins = [];
 
-	/** @var Plugin[] */
+	/**
+	 * @var Plugin[]
+	 * @phpstan-var array<string, Plugin>
+	 */
 	protected array $enabledPlugins = [];
 
 	/** @var array<string, array<string, true>> */
@@ -114,6 +120,7 @@ class PluginManager{
 
 	/**
 	 * @return Plugin[]
+	 * @phpstan-return array<string, Plugin>
 	 */
 	public function getPlugins() : array{
 		return $this->plugins;
@@ -524,7 +531,7 @@ class PluginManager{
 	}
 
 	public function tickSchedulers(int $currentTick) : void{
-		foreach($this->enabledPlugins as $pluginName => $p){
+		foreach($this->enabledPlugins as $p){
 			$p->getScheduler()->mainThreadHeartbeat($currentTick);
 		}
 	}

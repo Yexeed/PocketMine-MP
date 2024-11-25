@@ -695,6 +695,7 @@ class InventoryManager{
 
 	/**
 	 * @param EnchantingOption[] $options
+	 * @phpstan-param list<EnchantingOption> $options
 	 */
 	public function syncEnchantingTableOptions(array $options) : void{
 		$protocolOptions = [];
