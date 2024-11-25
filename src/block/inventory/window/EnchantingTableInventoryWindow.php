@@ -43,8 +43,7 @@ final class EnchantingTableInventoryWindow extends BlockInventoryWindow{
 	/** @var EnchantingOption[] $options */
 	private array $options = [];
 
-	/** @phpstan-var \WeakReference<InventoryListener> */
-	private \WeakReference $listener;
+	private InventoryListener $listener;
 
 	public function __construct(
 		Player $viewer,
@@ -54,7 +53,7 @@ final class EnchantingTableInventoryWindow extends BlockInventoryWindow{
 
 		/** @phpstan-var \WeakReference<self> $weakThis */
 		$weakThis = \WeakReference::create($this);
-		$listener = new CallbackInventoryListener(
+		$this->listener = new CallbackInventoryListener(
 			onSlotChange: static function(Inventory $_, int $slot) use ($weakThis) : void{ //remaining params unneeded
 				if($slot === self::SLOT_INPUT && ($strongThis = $weakThis->get()) !== null){
 					$strongThis->regenerateOptions();
@@ -66,16 +65,11 @@ final class EnchantingTableInventoryWindow extends BlockInventoryWindow{
 				}
 			}
 		);
-		$this->inventory->getListeners()->add($listener);
-
-		$this->listener = \WeakReference::create($listener);
+		$this->inventory->getListeners()->add($this->listener);
 	}
 
 	public function __destruct(){
-		$listener = $this->listener->get();
-		if($listener !== null){
-			$this->inventory->getListeners()->remove($listener);
-		}
+		$this->inventory->getListeners()->remove($this->listener);
 	}
 
 	private function regenerateOptions() : void{
