@@ -23,17 +23,26 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\window\ShulkerBoxInventoryWindow;
+use pocketmine\block\inventory\window\BlockInventoryWindow;
 use pocketmine\block\tile\ShulkerBox as TileShulkerBox;
+use pocketmine\block\utils\AnimatedContainer;
+use pocketmine\block\utils\AnimatedContainerTrait;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\BlockEventPacket;
+use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
+use pocketmine\world\Position;
+use pocketmine\world\sound\ShulkerBoxCloseSound;
+use pocketmine\world\sound\ShulkerBoxOpenSound;
+use pocketmine\world\sound\Sound;
 
-class ShulkerBox extends Opaque{
+class ShulkerBox extends Opaque implements AnimatedContainer{
+	use AnimatedContainerTrait;
 	use AnyFacingTrait;
 
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
@@ -106,7 +115,7 @@ class ShulkerBox extends Opaque{
 					return true;
 				}
 
-				$player->setCurrentWindow(new ShulkerBoxInventoryWindow($player, $shulker->getInventory(), $this->position));
+				$player->setCurrentWindow(new BlockInventoryWindow($player, $shulker->getInventory(), $this->position));
 			}
 		}
 
@@ -115,5 +124,19 @@ class ShulkerBox extends Opaque{
 
 	public function getSupportType(int $facing) : SupportType{
 		return SupportType::NONE;
+	}
+
+	protected function getContainerOpenSound() : Sound{
+		return new ShulkerBoxOpenSound();
+	}
+
+	protected function getContainerCloseSound() : Sound{
+		return new ShulkerBoxCloseSound();
+	}
+
+	protected function doContainerAnimation(Position $position, bool $isOpen) : void{
+		//event ID is always 1 for a chest
+		//TODO: we probably shouldn't be sending a packet directly here, but it doesn't fit anywhere into existing systems
+		$position->getWorld()->broadcastPacketToViewers($position, BlockEventPacket::create(BlockPosition::fromVector3($position), 1, $isOpen ? 1 : 0));
 	}
 }

@@ -23,8 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\window\BarrelInventoryWindow;
+use pocketmine\block\inventory\window\BlockInventoryWindow;
 use pocketmine\block\tile\Barrel as TileBarrel;
+use pocketmine\block\utils\AnimatedContainer;
+use pocketmine\block\utils\AnimatedContainerTrait;
 use pocketmine\block\utils\AnyFacingTrait;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\item\Item;
@@ -32,9 +34,14 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
+use pocketmine\world\Position;
+use pocketmine\world\sound\BarrelCloseSound;
+use pocketmine\world\sound\BarrelOpenSound;
+use pocketmine\world\sound\Sound;
 use function abs;
 
-class Barrel extends Opaque{
+class Barrel extends Opaque implements AnimatedContainer{
+	use AnimatedContainerTrait;
 	use AnyFacingTrait;
 
 	protected bool $open = false;
@@ -82,7 +89,7 @@ class Barrel extends Opaque{
 					return true;
 				}
 
-				$player->setCurrentWindow(new BarrelInventoryWindow($player, $barrel->getInventory(), $this->position));
+				$player->setCurrentWindow(new BlockInventoryWindow($player, $barrel->getInventory(), $this->position));
 			}
 		}
 
@@ -91,5 +98,21 @@ class Barrel extends Opaque{
 
 	public function getFuelTime() : int{
 		return 300;
+	}
+
+	protected function getContainerOpenSound() : Sound{
+		return new BarrelOpenSound();
+	}
+
+	protected function getContainerCloseSound() : Sound{
+		return new BarrelCloseSound();
+	}
+
+	protected function doContainerAnimation(Position $position, bool $isOpen) : void{
+		$world = $position->getWorld();
+		$block = $world->getBlock($position);
+		if($block instanceof Barrel){
+			$world->setBlock($position, $block->setOpen($isOpen));
+		}
 	}
 }

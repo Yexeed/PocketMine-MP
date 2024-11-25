@@ -27,7 +27,7 @@ use pocketmine\inventory\Inventory;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 
-final class DoubleChestInventoryWindow extends ChestInventoryWindow{
+final class DoubleChestInventoryWindow extends BlockInventoryWindow{
 
 	public function __construct(
 		Player $viewer,
@@ -41,12 +41,4 @@ final class DoubleChestInventoryWindow extends ChestInventoryWindow{
 	public function getLeft() : Position{ return $this->left; }
 
 	public function getRight() : Position{ return $this->right; }
-
-	protected function doBlockEffects(bool $isOpen) : void{
-		$this->animateBlock($this->left, $isOpen);
-		$this->animateBlock($this->right, $isOpen);
-
-		$this->playSound($this->left, $isOpen);
-		$this->playSound($this->right, $isOpen);
-	}
 }

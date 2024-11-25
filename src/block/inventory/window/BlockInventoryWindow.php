@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory\window;
 
+use pocketmine\block\utils\AnimatedContainer;
 use pocketmine\inventory\Inventory;
 use pocketmine\player\InventoryWindow;
 use pocketmine\player\Player;
@@ -39,4 +40,20 @@ class BlockInventoryWindow extends InventoryWindow{
 	}
 
 	public function getHolder() : Position{ return $this->holder; }
+
+	public function onOpen() : void{
+		parent::onOpen();
+		$block = $this->holder->getWorld()->getBlock($this->holder);
+		if($block instanceof AnimatedContainer){
+			$block->onContainerOpen();
+		}
+	}
+
+	public function onClose() : void{
+		$block = $this->holder->getWorld()->getBlock($this->holder);
+		if($block instanceof AnimatedContainer){
+			$block->onContainerClose();
+		}
+		parent::onClose();
+	}
 }

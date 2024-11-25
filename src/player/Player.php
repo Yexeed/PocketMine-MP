@@ -2693,6 +2693,9 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		if($window === $this->currentWindow){
 			return true;
 		}
+		if($window->getViewer() !== $this){
+			throw new \InvalidArgumentException("Cannot reuse InventoryWindow instances, please create a new one for each player");
+		}
 		$ev = new InventoryOpenEvent($window, $this);
 		$ev->call();
 		if($ev->isCancelled()){
