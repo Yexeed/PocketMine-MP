@@ -112,6 +112,9 @@ class InventoryTransaction{
 		if(!isset($this->actions[$hash = spl_object_id($action)])){
 			$this->actions[$hash] = $action;
 			$action->onAddToTransaction($this);
+			if($action instanceof SlotChangeAction && !isset($this->inventoryWindows[$inventoryId = spl_object_id($action->getInventoryWindow())])){
+				$this->inventoryWindows[$inventoryId] = $action->getInventoryWindow();
+			}
 		}else{
 			throw new \InvalidArgumentException("Tried to add the same action to a transaction twice");
 		}
@@ -128,16 +131,6 @@ class InventoryTransaction{
 			$actions[$key] = $this->actions[$key];
 		}
 		$this->actions = $actions;
-	}
-
-	/**
-	 * @internal This method should not be used by plugins, it's used to add tracked inventories for InventoryActions
-	 * involving inventories.
-	 */
-	public function addInventoryWindow(InventoryWindow $inventoryWindow) : void{
-		if(!isset($this->inventoryWindows[$hash = spl_object_id($inventoryWindow)])){
-			$this->inventoryWindows[$hash] = $inventoryWindow;
-		}
 	}
 
 	/**
