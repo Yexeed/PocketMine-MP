@@ -88,19 +88,17 @@ class Language{
 		throw new LanguageNotFoundException("Language directory $path does not exist or is not a directory");
 	}
 
-	/** @var string */
-	protected $langName;
-
+	protected string $langName;
 	/**
 	 * @var string[]
 	 * @phpstan-var array<string, string>
 	 */
-	protected $lang = [];
+	protected array $lang = [];
 	/**
 	 * @var string[]
 	 * @phpstan-var array<string, string>
 	 */
-	protected $fallbackLang = [];
+	protected array $fallbackLang = [];
 
 	/**
 	 * @throws LanguageNotFoundException
@@ -149,7 +147,7 @@ class Language{
 			$baseText = $this->parseTranslation($str, $onlyPrefix);
 		}
 
-		foreach($params as $i => $p){
+		foreach(Utils::promoteKeys($params) as $i => $p){
 			$replacement = $p instanceof Translatable ? $this->translate($p) : (string) $p;
 			$baseText = str_replace("{%$i}", $replacement, $baseText);
 		}
@@ -163,7 +161,7 @@ class Language{
 			$baseText = $this->parseTranslation($c->getText());
 		}
 
-		foreach($c->getParameters() as $i => $p){
+		foreach(Utils::promoteKeys($c->getParameters()) as $i => $p){
 			$replacement = $p instanceof Translatable ? $this->translate($p) : $p;
 			$baseText = str_replace("{%$i}", $replacement, $baseText);
 		}
