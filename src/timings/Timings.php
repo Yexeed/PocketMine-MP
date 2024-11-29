@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\player\Player;
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\scheduler\Task;
 use pocketmine\scheduler\TaskHandler;
 use function get_class;
 use function str_starts_with;
@@ -195,6 +196,10 @@ abstract class Timings{
 
 	}
 
+	/**
+	 * @template TTask of Task
+	 * @phpstan-param TaskHandler<TTask> $task
+	 */
 	public static function getScheduledTaskTimings(TaskHandler $task, int $period) : TimingsHandler{
 		self::init();
 		$name = "Task: " . $task->getTaskName();

@@ -33,15 +33,26 @@ use pocketmine\Server;
 
 final class EventTest extends TestCase{
 
-	public function testHandlerInheritance() : void{
+	private Plugin $mockPlugin;
+	private PluginManager $pluginManager;
+
+	protected function setUp() : void{
+		HandlerListManager::global()->unregisterAll();
+
 		//TODO: this is a really bad hack and could break any time if PluginManager decides to access its Server field
 		//we really need to make it possible to register events without a Plugin or Server context
 		$mockServer = $this->createMock(Server::class);
-		$mockPlugin = self::createStub(Plugin::class);
-		$mockPlugin->method('isEnabled')->willReturn(true);
+		$this->mockPlugin = self::createStub(Plugin::class);
+		$this->mockPlugin->method('isEnabled')->willReturn(true);
 
-		$pluginManager = new PluginManager($mockServer, null);
+		$this->pluginManager = new PluginManager($mockServer, null);
+	}
 
+	public static function tearDownAfterClass() : void{
+		HandlerListManager::global()->unregisterAll();
+	}
+
+	public function testHandlerInheritance() : void{
 		$expectedOrder = [
 			TestGrandchildEvent::class,
 			TestChildEvent::class,
@@ -50,13 +61,13 @@ final class EventTest extends TestCase{
 		$actualOrder = [];
 
 		foreach($expectedOrder as $class){
-			$pluginManager->registerEvent(
+			$this->pluginManager->registerEvent(
 				$class,
 				function(TestParentEvent $event) use (&$actualOrder, $class) : void{
 					$actualOrder[] = $class;
 				},
 				EventPriority::NORMAL,
-				$mockPlugin
+				$this->mockPlugin
 			);
 		}
 
