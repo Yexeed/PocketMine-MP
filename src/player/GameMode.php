@@ -92,8 +92,8 @@ enum GameMode{
 	}
 
 	public function getPermissionGroupName() : string{
-    return $this->getMetadata()[2];
-  }
+		return $this->getMetadata()[2];
+	}
 
 	/**
 	 * @return string[]
