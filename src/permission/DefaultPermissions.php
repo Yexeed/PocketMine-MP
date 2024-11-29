@@ -114,8 +114,8 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(Names::COMMAND_WHITELIST_REMOVE, l10n::pocketmine_permission_command_whitelist_remove()), [$operatorRoot]);
 		self::registerPermission(new Permission(Names::COMMAND_XP_OTHER, l10n::pocketmine_permission_command_xp_other()), [$operatorRoot]);
 		self::registerPermission(new Permission(Names::COMMAND_XP_SELF, l10n::pocketmine_permission_command_xp_self()), [$operatorRoot]);
-    
-    self::registerPermission(new Permission(Names::GAME_CHAT, "Allows the user to chat"), [$everyoneRoot]);
+
+		self::registerPermission(new Permission(Names::GAME_CHAT, "Allows the user to chat"), [$everyoneRoot]);
 
 		$survivalRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_SURVIVAL));
 		$creativeRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_CREATIVE));
