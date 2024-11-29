@@ -76,6 +76,7 @@ abstract class AsyncEvent{
 
 	/**
 	 * @param AsyncRegisteredListener[] $handlers
+  	 * @phpstan-param list<AsyncRegisteredListener> $handlers
 	 * @phpstan-param \Closure() : void $resolve
 	 * @phpstan-param \Closure() : void $reject
 	 */
