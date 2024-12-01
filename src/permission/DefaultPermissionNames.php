@@ -97,6 +97,7 @@ final class DefaultPermissionNames{
 	public const GAME_FLIGHT = "pocketmine.game.flight";
 	public const GAME_ITEM_BYPASS_CANDESTROY = "pocketmine.game.item.bypass.candestroy";
 	public const GAME_ITEM_BYPASS_CANPLACEON = "pocketmine.game.item.bypass.canplaceon";
+	public const GAME_INVULNERABLE = "pocketmine.game.invulnerable";
 	public const GAME_ITEM_CREATE = "pocketmine.game.item.create";
 	public const GAME_ITEM_DROP = "pocketmine.game.item.drop";
 	public const GAME_ITEM_PICKUP = "pocketmine.game.item.pickup";

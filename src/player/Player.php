@@ -1454,7 +1454,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			$this->entityBaseTick($tickDiff);
 			Timings::$entityBaseTick->stopTiming();
 
-			if($this->isCreative() && $this->fireTicks > 1){
+			if($this->hasPermission(DefaultPermissionNames::GAME_INVULNERABLE) && $this->fireTicks > 1){
 				$this->fireTicks = 1;
 			}
 
@@ -1475,7 +1475,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	}
 
 	public function canBreathe() : bool{
-		return $this->isCreative() || parent::canBreathe();
+		return $this->hasPermission(DefaultPermissionNames::GAME_INVULNERABLE) || parent::canBreathe();
 	}
 
 	/**
@@ -2518,7 +2518,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			return;
 		}
 
-		if($this->isCreative()
+		if($this->hasPermission(DefaultPermissionNames::GAME_INVULNERABLE)
 			&& $source->getCause() !== EntityDamageEvent::CAUSE_SUICIDE
 		){
 			$source->cancel();

@@ -144,5 +144,6 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(Names::GAME_FLIGHT, "Allows the user to toggle flight mode"), [$creativeRoot]);
 
 		self::registerPermission(new Permission(Names::GAME_NOCOLLISION, "Allows the user to pass through blocks"), [$spectatorRoot]);
+		self::registerPermission(new Permission(Names::GAME_INVULNERABLE, "Allows the user to ignore all incoming damage (except suicide)"), [$creativeRoot, $spectatorRoot]);
 	}
 }
