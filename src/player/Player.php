@@ -275,7 +275,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 	//TODO: Abilities
 	protected bool $autoJump = true;
-	protected bool $blockCollision = true;
 	protected bool $flying = false;
 
 	/** @phpstan-var positive-int|null  */
@@ -481,12 +480,13 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 * Note: Enabling flight mode in conjunction with this is recommended. A non-flying player will simply fall through
 	 * the ground into the void.
 	 * @see Player::setFlying()
+	 *
+	 * @deprecated This is now controlled by setting a permission, which allows more fine-tuned control.
+	 * @see DefaultPermissionNames::GAME_NOCOLLISION
 	 */
 	public function setHasBlockCollision(bool $value) : void{
-		if($this->blockCollision !== $value){
-			$this->blockCollision = $value;
-			$this->getNetworkSession()->syncAbilities($this);
-		}
+		$this->setBasePermission(DefaultPermissionNames::GAME_NOCOLLISION, !$value);
+		$this->getNetworkSession()->syncAbilities($this);
 	}
 
 	/**
@@ -494,7 +494,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 * If false, the player can move through any block unobstructed.
 	 */
 	public function hasBlockCollision() : bool{
-		return $this->blockCollision;
+		return !$this->hasPermission(DefaultPermissionNames::GAME_NOCOLLISION);
 	}
 
 	public function setFlying(bool $value) : void{
@@ -1127,14 +1127,16 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$this->gamemode = $gameMode;
 
 		$this->setBasePermission($this->gamemode->getPermissionGroupName(), true);
-		//TODO: this preserves old behaviour of gamemode changes overriding setAllowFlight
-		//we should get rid of this when setAllowFlight is removed
+
+		//TODO: this preserves old behaviour of gamemode changes overriding setAllowFlight and setHasBlockCollision
+		//we should get rid of these when the deprecated setters are removed
 		$this->unsetBasePermission(DefaultPermissionNames::GAME_FLIGHT);
+		$this->unsetBasePermission(DefaultPermissionNames::GAME_NOCOLLISION);
+
 		$this->hungerManager->setEnabled($this->isSurvival());
 
 		if($this->isSpectator()){
 			$this->setFlying(true);
-			$this->setHasBlockCollision(false);
 			$this->setSilent();
 			$this->onGround = false;
 
@@ -1145,7 +1147,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			if(!$this->hasPermission(DefaultPermissionNames::GAME_FLIGHT)){
 				$this->setFlying(false);
 			}
-			$this->setHasBlockCollision(true);
 			$this->setSilent(false);
 			$this->checkGroundState(0, 0, 0, 0, 0, 0);
 		}

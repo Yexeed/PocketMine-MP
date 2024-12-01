@@ -100,6 +100,7 @@ final class DefaultPermissionNames{
 	public const GAME_ITEM_DROP = "pocketmine.game.item.drop";
 	public const GAME_ITEM_PICKUP = "pocketmine.game.item.pickup";
 	public const GAME_ITEM_USE = "pocketmine.game.item.use";
+	public const GAME_NOCOLLISION = "pocketmine.game.nocollision";
 	public const GAME_PLAYER_ATTACK = "pocketmine.game.player.attack";
 	public const GAME_PLAYER_INTERACT = "pocketmine.game.player.interact";
 	public const GROUP_CONSOLE = "pocketmine.group.console";

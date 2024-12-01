@@ -120,7 +120,7 @@ abstract class DefaultPermissions{
 		$survivalRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_SURVIVAL));
 		$creativeRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_CREATIVE));
 		$adventureRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_ADVENTURE));
-		self::registerPermission(new Permission(Names::GROUP_GAMEMODE_SPECTATOR)); //not currently used, but will be in the future
+		$spectatorRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_SPECTATOR));
 
 		self::registerPermission(new Permission(Names::GAME_BLOCK_INTERACT, "Allows the user to interact with blocks"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_BLOCK_MINE, "Allows the user to mine blocks"), [$survivalRoot, $creativeRoot, $adventureRoot]);
@@ -141,5 +141,7 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(Names::GAME_BLOCK_DELETE, "Allows the user to delete any block without delay, including indestructible blocks"), [$creativeRoot]);
 		self::registerPermission(new Permission(Names::GAME_ITEM_CREATE, "Allows the user to use the creative inventory"), [$creativeRoot]);
 		self::registerPermission(new Permission(Names::GAME_FLIGHT, "Allows the user to toggle flight mode"), [$creativeRoot]);
+
+		self::registerPermission(new Permission(Names::GAME_NOCOLLISION, "Allows the user to pass through blocks"), [$spectatorRoot]);
 	}
 }
