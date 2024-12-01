@@ -91,6 +91,7 @@ final class DefaultPermissionNames{
 	public const GAME_BLOCK_MINE = "pocketmine.game.block.mine";
 	public const GAME_BLOCK_PLACE = "pocketmine.game.block.place";
 	public const GAME_CHAT = "pocketmine.game.chat";
+	public const GAME_EMOTE = "pocketmine.game.emote";
 	public const GAME_ENTITY_ATTACK = "pocketmine.game.entity.attack";
 	public const GAME_ENTITY_INTERACT = "pocketmine.game.entity.interact";
 	public const GAME_FLIGHT = "pocketmine.game.flight";

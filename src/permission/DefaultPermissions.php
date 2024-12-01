@@ -116,6 +116,7 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(Names::COMMAND_XP_SELF, l10n::pocketmine_permission_command_xp_self()), [$operatorRoot]);
 
 		self::registerPermission(new Permission(Names::GAME_CHAT, "Allows the user to chat"), [$everyoneRoot]);
+		self::registerPermission(new Permission(Names::GAME_EMOTE, "Allows the user to emote"), [$everyoneRoot]);
 
 		$survivalRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_SURVIVAL));
 		$creativeRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_CREATIVE));

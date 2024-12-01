@@ -2067,6 +2067,9 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		if($currentTick - $this->lastEmoteTick > 5){
 			$this->lastEmoteTick = $currentTick;
 			$event = new PlayerEmoteEvent($this, $emoteId);
+			if(!$this->hasPermission(DefaultPermissionNames::GAME_EMOTE)){
+				$event->cancel();
+			}
 			$event->call();
 			if(!$event->isCancelled()){
 				$emoteId = $event->getEmoteId();
