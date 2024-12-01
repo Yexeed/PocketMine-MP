@@ -1458,7 +1458,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 				$this->fireTicks = 1;
 			}
 
-			if(!$this->isSpectator() && $this->isAlive()){
+			if($this->isAlive()){
 				Timings::$playerCheckNearEntities->startTiming();
 				$this->checkNearEntities();
 				Timings::$playerCheckNearEntities->stopTiming();
@@ -1595,7 +1595,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		foreach($this->inventory->addItem(...$extraReturnedItems) as $drop){
 			//TODO: we can't generate a transaction for this since the items aren't coming from an inventory :(
 			$ev = new PlayerDropItemEvent($this, $drop);
-			if($this->isSpectator()){
+			if(!$this->hasPermission(DefaultPermissionNames::GAME_ITEM_DROP)){
 				$ev->cancel();
 			}
 			$ev->call();

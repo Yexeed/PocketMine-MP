@@ -182,7 +182,7 @@ class Arrow extends Projectile{
 		if(($player->hasFiniteResources() && $playerInventory === null) || !$player->hasPermission(DefaultPermissionNames::GAME_ITEM_PICKUP)){
 			$ev->cancel();
 		}
-		if($this->pickupMode === self::PICKUP_NONE || ($this->pickupMode === self::PICKUP_CREATIVE && !$player->isCreative())){
+		if($this->pickupMode === self::PICKUP_NONE || ($this->pickupMode === self::PICKUP_CREATIVE && $player->hasFiniteResources())){
 			$ev->cancel();
 		}
 
