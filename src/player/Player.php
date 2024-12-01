@@ -273,7 +273,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 	private bool $respawnLocked = false;
 
-	//TODO: Abilities
 	protected bool $autoJump = true;
 	protected bool $flying = false;
 
