@@ -1800,7 +1800,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			return true;
 		}
 
-		if(!$this->isCreative() && !$target->getBreakInfo()->breaksInstantly()){
+		if(!$this->hasPermission(DefaultPermissionNames::GAME_BLOCK_DELETE) && !$target->getBreakInfo()->breaksInstantly()){
 			$this->blockBreakHandler = new SurvivalBlockBreakHandler($this, $pos, $target, $face, 16);
 		}
 

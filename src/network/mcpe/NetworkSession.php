@@ -1045,7 +1045,7 @@ class NetworkSession{
 			AbilitiesLayer::ABILITY_INFINITE_RESOURCES => !$for->hasFiniteResources(),
 			AbilitiesLayer::ABILITY_LIGHTNING => false,
 			AbilitiesLayer::ABILITY_BUILD => $for->hasPermission(DefaultPermissionNames::GAME_BLOCK_PLACE),
-			AbilitiesLayer::ABILITY_MINE => $for->hasPermission(DefaultPermissionNames::GAME_BLOCK_BREAK),
+			AbilitiesLayer::ABILITY_MINE => $for->hasPermission(DefaultPermissionNames::GAME_BLOCK_MINE),
 			AbilitiesLayer::ABILITY_DOORS_AND_SWITCHES => $for->hasPermission(DefaultPermissionNames::GAME_BLOCK_INTERACT),
 			AbilitiesLayer::ABILITY_OPEN_CONTAINERS => $for->hasPermission(DefaultPermissionNames::GAME_BLOCK_INTERACT) || $for->hasPermission(DefaultPermissionNames::GAME_ENTITY_INTERACT), //not perfect, but this is a pain to implement right now
 			AbilitiesLayer::ABILITY_ATTACK_PLAYERS => $for->hasPermission(DefaultPermissionNames::GAME_PLAYER_ATTACK),

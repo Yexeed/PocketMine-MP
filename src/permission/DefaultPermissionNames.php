@@ -86,8 +86,9 @@ final class DefaultPermissionNames{
 	public const COMMAND_WHITELIST_REMOVE = "pocketmine.command.whitelist.remove";
 	public const COMMAND_XP_OTHER = "pocketmine.command.xp.other";
 	public const COMMAND_XP_SELF = "pocketmine.command.xp.self";
-	public const GAME_BLOCK_BREAK = "pocketmine.game.block.break";
+	public const GAME_BLOCK_DELETE = "pocketmine.game.block.delete";
 	public const GAME_BLOCK_INTERACT = "pocketmine.game.block.interact";
+	public const GAME_BLOCK_MINE = "pocketmine.game.block.mine";
 	public const GAME_BLOCK_PLACE = "pocketmine.game.block.place";
 	public const GAME_CHAT = "pocketmine.game.chat";
 	public const GAME_ENTITY_ATTACK = "pocketmine.game.entity.attack";

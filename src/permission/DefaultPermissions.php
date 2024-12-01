@@ -122,8 +122,8 @@ abstract class DefaultPermissions{
 		$adventureRoot = self::registerPermission(new Permission(Names::GROUP_GAMEMODE_ADVENTURE));
 		self::registerPermission(new Permission(Names::GROUP_GAMEMODE_SPECTATOR)); //not currently used, but will be in the future
 
-		self::registerPermission(new Permission(Names::GAME_BLOCK_BREAK, "Allows the user to break blocks"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_BLOCK_INTERACT, "Allows the user to interact with blocks"), [$survivalRoot, $creativeRoot, $adventureRoot]);
+		self::registerPermission(new Permission(Names::GAME_BLOCK_MINE, "Allows the user to mine blocks"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_BLOCK_PLACE, "Allows the user to place blocks"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_ENTITY_ATTACK, "Allows the user to attack entities"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_ENTITY_INTERACT, "Allows the user to interact with entities"), [$survivalRoot, $creativeRoot, $adventureRoot]);
@@ -133,6 +133,7 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(Names::GAME_PLAYER_ATTACK, "Allows the user to attack other players"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_PLAYER_INTERACT, "Allows the user to interact with other players"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 
+		self::registerPermission(new Permission(Names::GAME_BLOCK_DELETE, "Allows the user to delete any block without delay, including indestructible blocks"), [$creativeRoot]);
 		self::registerPermission(new Permission(Names::GAME_ITEM_CREATE, "Allows the user to use the creative inventory"), [$creativeRoot]);
 		self::registerPermission(new Permission(Names::GAME_FLIGHT, "Allows the user to toggle flight mode"), [$creativeRoot]);
 	}

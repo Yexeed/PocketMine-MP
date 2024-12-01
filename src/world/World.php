@@ -2065,9 +2065,9 @@ class World implements ChunkManager{
 		}
 
 		if($player !== null){
-			$ev = new BlockBreakEvent($player, $target, $item, $player->isCreative(), $drops, $xpDrop);
+			$ev = new BlockBreakEvent($player, $target, $item, $player->hasPermission(DefaultPermissionNames::GAME_BLOCK_DELETE), $drops, $xpDrop);
 
-			if($target instanceof Air || ($player->isSurvival() && !$target->getBreakInfo()->isBreakable()) || !$player->hasPermission(DefaultPermissionNames::GAME_BLOCK_BREAK)){
+			if($target instanceof Air || (!$player->hasPermission(DefaultPermissionNames::GAME_BLOCK_DELETE) && !$target->getBreakInfo()->isBreakable()) || !$player->hasPermission(DefaultPermissionNames::GAME_BLOCK_MINE)){
 				$ev->cancel();
 			}
 
