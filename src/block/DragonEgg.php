@@ -30,7 +30,6 @@ use pocketmine\event\block\BlockTeleportEvent;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\permission\DefaultPermissionNames;
-use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\world\particle\DragonEggTeleportParticle;
 use pocketmine\world\World;
