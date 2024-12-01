@@ -2071,7 +2071,7 @@ class World implements ChunkManager{
 				$ev->cancel();
 			}
 
-			if($player->isAdventure(true) && !$ev->isCancelled()){
+			if(!$player->hasPermission(DefaultPermissionNames::GAME_ITEM_BYPASS_CANDESTROY) && !$ev->isCancelled()){
 				$canBreak = false;
 				$itemParser = LegacyStringToItemParser::getInstance();
 				foreach($item->getCanDestroy() as $v){
@@ -2238,7 +2238,7 @@ class World implements ChunkManager{
 				$ev->cancel();
 			}
 
-			if($player->isAdventure(true) && !$ev->isCancelled()){
+			if(!$player->hasPermission(DefaultPermissionNames::GAME_ITEM_BYPASS_CANPLACEON) && !$ev->isCancelled()){
 				$canPlace = false;
 				$itemParser = LegacyStringToItemParser::getInstance();
 				foreach($item->getCanPlaceOn() as $v){

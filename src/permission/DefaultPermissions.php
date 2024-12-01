@@ -133,6 +133,11 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(Names::GAME_PLAYER_ATTACK, "Allows the user to attack other players"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 		self::registerPermission(new Permission(Names::GAME_PLAYER_INTERACT, "Allows the user to interact with other players"), [$survivalRoot, $creativeRoot, $adventureRoot]);
 
+		//TODO: maybe we should add deny inherits for the adventure group for these, instead of just granting them to the survival and creative groups
+		//we'll end up needing to add these to new game modes if they are added
+		self::registerPermission(new Permission(Names::GAME_ITEM_BYPASS_CANDESTROY, "Allows the user to bypass CanDestroy item restrictions when mining blocks"), [$survivalRoot, $creativeRoot]);
+		self::registerPermission(new Permission(Names::GAME_ITEM_BYPASS_CANPLACEON, "Allows the user to bypass CanPlaceOn item restrictions when placing blocks"), [$survivalRoot, $creativeRoot]);
+
 		self::registerPermission(new Permission(Names::GAME_BLOCK_DELETE, "Allows the user to delete any block without delay, including indestructible blocks"), [$creativeRoot]);
 		self::registerPermission(new Permission(Names::GAME_ITEM_CREATE, "Allows the user to use the creative inventory"), [$creativeRoot]);
 		self::registerPermission(new Permission(Names::GAME_FLIGHT, "Allows the user to toggle flight mode"), [$creativeRoot]);
