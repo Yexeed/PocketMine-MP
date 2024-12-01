@@ -456,9 +456,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 * Note: Setting this to false DOES NOT change whether the player is currently flying. Use
 	 * {@link Player::setFlying()} for that purpose.
 	 *
-	 * Note: As of 4.13, this will override any game mode flight restrictions for the duration of the game session.
-	 * This differs from previous behaviour, where the flag would get overwritten by game mode changes.
-	 *
 	 * @deprecated This is now controlled by setting a permission, which allows more fine-tuned control.
 	 * @see DefaultPermissionNames::GAME_FLIGHT
 	 */
@@ -1130,6 +1127,9 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$this->gamemode = $gameMode;
 
 		$this->setBasePermission($this->gamemode->getPermissionGroupName(), true);
+		//TODO: this preserves old behaviour of gamemode changes overriding setAllowFlight
+		//we should get rid of this when setAllowFlight is removed
+		$this->unsetBasePermission(DefaultPermissionNames::GAME_FLIGHT);
 		$this->hungerManager->setEnabled($this->isSurvival());
 
 		if($this->isSpectator()){
