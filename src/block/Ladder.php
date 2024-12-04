@@ -51,7 +51,7 @@ class Ladder extends Transparent{
 	}
 
 	public function onEntityInside(Entity $entity) : bool{
-		if($entity instanceof Living && $entity->getPosition()->floor()->distanceSquared($this->position) < 1){ //entity coordinates must be inside block
+		if($entity instanceof Living && $entity->getPosition()->floor()->distanceSquared($this->position->asVector3()) < 1){ //entity coordinates must be inside block
 			$entity->resetFallDistance();
 			$entity->onGround = true;
 		}

@@ -32,7 +32,6 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
-use pocketmine\world\World;
 use function count;
 use function shuffle;
 
@@ -84,7 +83,8 @@ class GlowLichen extends Transparent{
 		return $result->setFace($spreadFace, true);
 	}
 
-	private function spread(World $world, Vector3 $replacePos, int $spreadFace) : bool{
+	private function spread(BlockPosition $replacePos, int $spreadFace) : bool{
+		$world = $replacePos->getWorld();
 		$supportBlock = $world->getBlock($replacePos->getSide($spreadFace));
 		$supportFace = Facing::opposite($spreadFace);
 
@@ -117,12 +117,10 @@ class GlowLichen extends Transparent{
 	}
 
 	private function spreadAroundSupport(int $sourceFace) : bool{
-		$world = $this->position->getWorld();
-
 		$supportPos = $this->position->getSide($sourceFace);
 		foreach(self::getShuffledSpreadFaces($sourceFace) as $spreadFace){
 			$replacePos = $supportPos->getSide($spreadFace);
-			if($this->spread($world, $replacePos, Facing::opposite($spreadFace))){
+			if($this->spread($replacePos, Facing::opposite($spreadFace))){
 				return true;
 			}
 		}
@@ -131,11 +129,9 @@ class GlowLichen extends Transparent{
 	}
 
 	private function spreadAdjacentToSupport(int $sourceFace) : bool{
-		$world = $this->position->getWorld();
-
 		foreach(self::getShuffledSpreadFaces($sourceFace) as $spreadFace){
 			$replacePos = $this->position->getSide($spreadFace);
-			if($this->spread($world, $replacePos, $sourceFace)){
+			if($this->spread($replacePos, $sourceFace)){
 				return true;
 			}
 		}
@@ -144,7 +140,7 @@ class GlowLichen extends Transparent{
 
 	private function spreadWithinSelf(int $sourceFace) : bool{
 		foreach(self::getShuffledSpreadFaces($sourceFace) as $spreadFace){
-			if(!$this->hasFace($spreadFace) && $this->spread($this->position->getWorld(), $this->position, $spreadFace)){
+			if(!$this->hasFace($spreadFace) && $this->spread($this->position, $spreadFace)){
 				return true;
 			}
 		}

@@ -185,7 +185,7 @@ class Campfire extends Transparent{
 			if($item->getTypeId() === ItemTypeIds::FIRE_CHARGE){
 				$item->pop();
 				$this->ignite();
-				$this->position->getWorld()->addSound($this->position, new BlazeShootSound());
+				$this->position->getWorld()->addSound($this->position->asVector3(), new BlazeShootSound());
 				return true;
 			}elseif($item->getTypeId() === ItemTypeIds::FLINT_AND_STEEL || $item->hasEnchantment(VanillaEnchantments::FIRE_ASPECT())){
 				if($item instanceof Durable){
@@ -205,7 +205,7 @@ class Campfire extends Transparent{
 			$ingredient->setCount(1);
 			if(count($this->inventory->addItem($ingredient)) === 0){
 				$item->pop();
-				$this->position->getWorld()->addSound($this->position, new ItemFrameAddItemSound());
+				$this->position->getWorld()->addSound($this->position->asVector3(), new ItemFrameAddItemSound());
 				return true;
 			}
 		}
@@ -259,26 +259,26 @@ class Campfire extends Transparent{
 
 					$this->inventory->setItem($slot, VanillaItems::AIR());
 					$this->setCookingTime($slot, 0);
-					$this->position->getWorld()->dropItem($this->position->add(0.5, 1, 0.5), $ev->getResult());
+					$this->position->getWorld()->dropItem($this->position->asVector3()->add(0.5, 1, 0.5), $ev->getResult());
 				}
 			}
 			if(count($items) > 0){
 				$this->position->getWorld()->setBlock($this->position, $this);
 			}
 			if(mt_rand(1, 6) === 1){
-				$this->position->getWorld()->addSound($this->position, $furnaceType->getCookSound());
+				$this->position->getWorld()->addSound($this->position->asVector3(), $furnaceType->getCookSound());
 			}
 			$this->position->getWorld()->scheduleDelayedBlockUpdate($this->position, self::UPDATE_INTERVAL_TICKS);
 		}
 	}
 
 	private function extinguish() : void{
-		$this->position->getWorld()->addSound($this->position, new FireExtinguishSound());
+		$this->position->getWorld()->addSound($this->position->asVector3(), new FireExtinguishSound());
 		$this->position->getWorld()->setBlock($this->position, $this->setLit(false));
 	}
 
 	private function ignite() : void{
-		$this->position->getWorld()->addSound($this->position, new FlintSteelSound());
+		$this->position->getWorld()->addSound($this->position->asVector3(), new FlintSteelSound());
 		$this->position->getWorld()->setBlock($this->position, $this->setLit(true));
 		$this->position->getWorld()->scheduleDelayedBlockUpdate($this->position, self::UPDATE_INTERVAL_TICKS);
 	}

@@ -27,15 +27,12 @@ use pocketmine\block\utils\AgeableTrait;
 use pocketmine\block\utils\StaticSupportTrait;
 use pocketmine\entity\projectile\Projectile;
 use pocketmine\event\block\StructureGrowEvent;
-use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Facing;
 use pocketmine\math\RayTraceResult;
-use pocketmine\math\Vector3;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\sound\ChorusFlowerDieSound;
 use pocketmine\world\sound\ChorusFlowerGrowSound;
-use pocketmine\world\World;
 use function array_rand;
 use function min;
 use function mt_rand;
@@ -54,24 +51,22 @@ final class ChorusFlower extends Flowable{
 	}
 
 	private function canBeSupportedAt(Block $block) : bool{
-		$position = $block->position;
-		$world = $position->getWorld();
-		$down = $world->getBlock($position->down());
+		$down = $block->getSide(Facing::DOWN);
 
 		if($down->getTypeId() === BlockTypeIds::END_STONE || $down->getTypeId() === BlockTypeIds::CHORUS_PLANT){
 			return true;
 		}
 
 		$plantAdjacent = false;
-		foreach($position->sidesAroundAxis(Axis::Y) as $sidePosition){
-			$block = $world->getBlock($sidePosition);
+		foreach(Facing::HORIZONTAL as $side){
+			$sideBlock = $block->getSide($side);
 
-			if($block->getTypeId() === BlockTypeIds::CHORUS_PLANT){
+			if($sideBlock->getTypeId() === BlockTypeIds::CHORUS_PLANT){
 				if($plantAdjacent){ //at most one plant may be horizontally adjacent
 					return false;
 				}
 				$plantAdjacent = true;
-			}elseif($block->getTypeId() !== BlockTypeIds::AIR){
+			}elseif($sideBlock->getTypeId() !== BlockTypeIds::AIR){
 				return false;
 			}
 		}
@@ -92,7 +87,7 @@ final class ChorusFlower extends Flowable{
 		$stemHeight = 0;
 		$endStoneBelow = false;
 		for($yOffset = 0; $yOffset < self::MAX_STEM_HEIGHT; $yOffset++, $stemHeight++){
-			$down = $world->getBlock($this->position->down($yOffset + 1));
+			$down = $this->getSide(Facing::DOWN, $yOffset + 1);
 
 			if($down->getTypeId() !== BlockTypeIds::CHORUS_PLANT){
 				if($down->getTypeId() === BlockTypeIds::END_STONE){
@@ -105,12 +100,13 @@ final class ChorusFlower extends Flowable{
 		return [$stemHeight, $endStoneBelow];
 	}
 
-	private function allHorizontalBlocksEmpty(World $world, Vector3 $position, ?int $except) : bool{
-		foreach($position->sidesAroundAxis(Axis::Y) as $facing => $sidePosition){
+	private function allHorizontalBlocksEmpty(BlockPosition $position, ?int $except) : bool{
+		$world = $position->getWorld();
+		foreach(Facing::HORIZONTAL as $facing){
 			if($facing === $except){
 				continue;
 			}
-			if($world->getBlock($sidePosition)->getTypeId() !== BlockTypeIds::AIR){
+			if($world->getBlock($position->getSide($facing))->getTypeId() !== BlockTypeIds::AIR){
 				return false;
 			}
 		}
@@ -121,7 +117,7 @@ final class ChorusFlower extends Flowable{
 	private function canGrowUpwards(int $stemHeight, bool $endStoneBelow) : bool{
 		$world = $this->position->getWorld();
 
-		$up = $this->position->up();
+		$up = $this->position->getSide(Facing::UP);
 		if(
 			//the space above must be empty and writable
 			!$world->isInWorld($up->x, $up->y, $up->z) ||
@@ -129,7 +125,7 @@ final class ChorusFlower extends Flowable{
 			(
 				//the space above that must be empty, but doesn't need to be writable
 				$world->isInWorld($up->x, $up->y + 1, $up->z) &&
-				$world->getBlock($up->up())->getTypeId() !== BlockTypeIds::AIR
+				$world->getBlock($up->getSide(Facing::UP))->getTypeId() !== BlockTypeIds::AIR
 			)
 		){
 			return false;
@@ -145,7 +141,7 @@ final class ChorusFlower extends Flowable{
 			}
 		}
 
-		return $this->allHorizontalBlocksEmpty($world, $up, null);
+		return $this->allHorizontalBlocksEmpty($up, null);
 	}
 
 	private function grow(int $facing, int $ageChange, ?BlockTransaction $tx) : BlockTransaction{
@@ -183,8 +179,8 @@ final class ChorusFlower extends Flowable{
 				$sidePosition = $this->position->getSide($facing);
 				if(
 					$world->getBlock($sidePosition)->getTypeId() === BlockTypeIds::AIR &&
-					$world->getBlock($sidePosition->down())->getTypeId() === BlockTypeIds::AIR &&
-					$this->allHorizontalBlocksEmpty($world, $sidePosition, Facing::opposite($facing))
+					$world->getBlock($sidePosition->getSide(Facing::DOWN))->getTypeId() === BlockTypeIds::AIR &&
+					$this->allHorizontalBlocksEmpty($sidePosition, Facing::opposite($facing))
 				){
 					$tx = $this->grow($facing, 1, $tx);
 				}
@@ -196,10 +192,10 @@ final class ChorusFlower extends Flowable{
 			$ev = new StructureGrowEvent($this, $tx, null);
 			$ev->call();
 			if(!$ev->isCancelled() && $tx->apply()){
-				$world->addSound($this->position->add(0.5, 0.5, 0.5), new ChorusFlowerGrowSound());
+				$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new ChorusFlowerGrowSound());
 			}
 		}else{
-			$world->addSound($this->position->add(0.5, 0.5, 0.5), new ChorusFlowerDieSound());
+			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new ChorusFlowerDieSound());
 			$this->position->getWorld()->setBlock($this->position, $this->setAge(self::MAX_AGE));
 		}
 	}

@@ -66,7 +66,7 @@ class LiquidBucket extends Item{
 		$ev->call();
 		if(!$ev->isCancelled()){
 			$player->getWorld()->setBlock($blockReplace->getPosition(), $resultBlock->getFlowingForm());
-			$player->getWorld()->addSound($blockReplace->getPosition()->add(0.5, 0.5, 0.5), $resultBlock->getBucketEmptySound());
+			$player->getWorld()->addSound($blockReplace->getPosition()->asVector3()->add(0.5, 0.5, 0.5), $resultBlock->getBucketEmptySound());
 
 			$this->pop();
 			$returnedItems[] = $ev->getItem();

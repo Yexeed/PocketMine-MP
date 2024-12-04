@@ -123,7 +123,7 @@ class Lectern extends Transparent{
 		if($this->book === null && $item instanceof WritableBookBase){
 			$world = $this->position->getWorld();
 			$world->setBlock($this->position, $this->setBook($item));
-			$world->addSound($this->position, new LecternPlaceBookSound());
+			$world->addSound($this->position->asVector3(), new LecternPlaceBookSound());
 			$item->pop();
 		}
 		return true;
@@ -132,7 +132,7 @@ class Lectern extends Transparent{
 	public function onAttack(Item $item, int $face, ?Player $player = null) : bool{
 		if($this->book !== null){
 			$world = $this->position->getWorld();
-			$world->dropItem($this->position->up(), $this->book);
+			$world->dropItem($this->position->getSide(Facing::UP)->asVector3(), $this->book);
 			$world->setBlock($this->position, $this->setBook(null));
 		}
 		return false;

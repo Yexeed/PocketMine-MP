@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\inventory\TemporaryInventory;
-use pocketmine\world\Position;
 
 final class LoomInventory extends SimpleInventory implements BlockInventory, TemporaryInventory{
 	use BlockInventoryTrait;
@@ -34,7 +34,7 @@ final class LoomInventory extends SimpleInventory implements BlockInventory, Tem
 	public const SLOT_DYE = 1;
 	public const SLOT_PATTERN = 2;
 
-	public function __construct(Position $holder, int $size = 3){
+	public function __construct(BlockPosition $holder, int $size = 3){
 		$this->holder = $holder;
 		parent::__construct($size);
 	}

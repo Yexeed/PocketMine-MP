@@ -26,6 +26,7 @@ namespace pocketmine\player;
 use DateTimeImmutable;
 use pocketmine\block\BaseSign;
 use pocketmine\block\Bed;
+use pocketmine\block\BlockPosition;
 use pocketmine\block\BlockTypeTags;
 use pocketmine\block\UnknownBlock;
 use pocketmine\block\VanillaBlocks;
@@ -106,11 +107,12 @@ use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\SetActorMotionPacket;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
@@ -274,7 +276,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 	protected float $stepHeight = 0.6;
 
-	protected ?Vector3 $sleeping = null;
+	protected ?BlockPosition $sleeping = null;
 	private ?Position $spawnPosition = null;
 
 	private bool $respawnLocked = false;
@@ -1112,8 +1114,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		return $this->sleeping !== null;
 	}
 
-	public function sleepOn(Vector3 $pos) : bool{
-		$pos = $pos->floor();
+	public function sleepOn(BlockPosition $pos) : bool{
 		$b = $this->getWorld()->getBlock($pos);
 
 		$ev = new PlayerBedEnterEvent($this, $b);
@@ -1130,7 +1131,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$this->sleeping = $pos;
 		$this->networkPropertiesDirty = true;
 
-		$this->setSpawn($pos);
+		$this->setSpawn($pos->asVector3());
 
 		$this->getWorld()->setSleepTicks(60);
 
@@ -1138,7 +1139,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	}
 
 	public function stopSleep() : void{
-		if($this->sleeping instanceof Vector3){
+		if($this->sleeping !== null){
 			$b = $this->getWorld()->getBlock($this->sleeping);
 			if($b instanceof Bed){
 				$b->setOccupied(false);
@@ -1737,7 +1738,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		}
 	}
 
-	public function pickBlock(Vector3 $pos, bool $addTileNBT) : bool{
+	public function pickBlock(BlockPosition $pos, bool $addTileNBT) : bool{
 		$block = $this->getWorld()->getBlock($pos);
 		if($block instanceof UnknownBlock){
 			return true;
@@ -1810,8 +1811,8 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 *
 	 * @return bool if an action took place successfully
 	 */
-	public function attackBlock(Vector3 $pos, int $face) : bool{
-		if($pos->distanceSquared($this->location) > 10000){
+	public function attackBlock(BlockPosition $pos, int $face) : bool{
+		if($pos->asVector3()->distanceSquared($this->location) > 10000){
 			return false; //TODO: maybe this should throw an exception instead?
 		}
 
@@ -1833,7 +1834,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$block = $target->getSide($face);
 		if($block->hasTypeTag(BlockTypeTags::FIRE)){
 			$this->getWorld()->setBlock($block->getPosition(), VanillaBlocks::AIR());
-			$this->getWorld()->addSound($block->getPosition()->add(0.5, 0.5, 0.5), new FireExtinguishSound());
+			$this->getWorld()->addSound($block->getPosition()->asVector3()->add(0.5, 0.5, 0.5), new FireExtinguishSound());
 			return true;
 		}
 
@@ -1844,14 +1845,14 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		return true;
 	}
 
-	public function continueBreakBlock(Vector3 $pos, int $face) : void{
-		if($this->blockBreakHandler !== null && $this->blockBreakHandler->getBlockPos()->distanceSquared($pos) < 0.0001){
+	public function continueBreakBlock(BlockPosition $pos, int $face) : void{
+		if($this->blockBreakHandler !== null && $this->blockBreakHandler->getBlockPos()->asVector3()->distanceSquared($pos->asVector3()) < 0.0001){
 			$this->blockBreakHandler->setTargetedFace($face);
 		}
 	}
 
-	public function stopBreakBlock(Vector3 $pos) : void{
-		if($this->blockBreakHandler !== null && $this->blockBreakHandler->getBlockPos()->distanceSquared($pos) < 0.0001){
+	public function stopBreakBlock(BlockPosition $pos) : void{
+		if($this->blockBreakHandler !== null && $this->blockBreakHandler->getBlockPos()->asVector3()->distanceSquared($pos->asVector3()) < 0.0001){
 			$this->blockBreakHandler = null;
 		}
 	}
@@ -1861,10 +1862,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 *
 	 * @return bool if the block was successfully broken, false if a rollback needs to take place.
 	 */
-	public function breakBlock(Vector3 $pos) : bool{
+	public function breakBlock(BlockPosition $pos) : bool{
 		$this->removeCurrentWindow();
 
-		if($this->canInteract($pos->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
+		if($this->canInteract($pos->asVector3()->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
 			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
 			$this->stopBreakBlock($pos);
 			$item = $this->inventory->getItemInHand();
@@ -1887,10 +1888,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 *
 	 * @return bool if it did something
 	 */
-	public function interactBlock(Vector3 $pos, int $face, Vector3 $clickOffset) : bool{
+	public function interactBlock(BlockPosition $pos, int $face, Vector3 $clickOffset) : bool{
 		$this->setUsingItem(false);
 
-		if($this->canInteract($pos->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
+		if($this->canInteract($pos->asVector3()->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
 			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
 			$item = $this->inventory->getItemInHand(); //this is a copy of the real item
 			$oldItem = clone $item;
@@ -2572,15 +2573,15 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$properties->setGenericFlag(EntityMetadataFlags::HAS_COLLISION, $this->hasBlockCollision());
 
 		$properties->setPlayerFlag(PlayerMetadataFlags::SLEEP, $this->sleeping !== null);
-		$properties->setBlockPos(EntityMetadataProperties::PLAYER_BED_POSITION, $this->sleeping !== null ? BlockPosition::fromVector3($this->sleeping) : new BlockPosition(0, 0, 0));
+		$properties->setBlockPos(EntityMetadataProperties::PLAYER_BED_POSITION, TypeConverter::getInstance()->coreBlockPositionToNet($this->sleeping));
 
 		if($this->deathPosition !== null && $this->deathPosition->world === $this->location->world){
-			$properties->setBlockPos(EntityMetadataProperties::PLAYER_DEATH_POSITION, BlockPosition::fromVector3($this->deathPosition));
+			$properties->setBlockPos(EntityMetadataProperties::PLAYER_DEATH_POSITION, ProtocolBlockPosition::fromVector3($this->deathPosition));
 			//TODO: this should be updated when dimensions are implemented
 			$properties->setInt(EntityMetadataProperties::PLAYER_DEATH_DIMENSION, DimensionIds::OVERWORLD);
 			$properties->setByte(EntityMetadataProperties::PLAYER_HAS_DIED, 1);
 		}else{
-			$properties->setBlockPos(EntityMetadataProperties::PLAYER_DEATH_POSITION, new BlockPosition(0, 0, 0));
+			$properties->setBlockPos(EntityMetadataProperties::PLAYER_DEATH_POSITION, new ProtocolBlockPosition(0, 0, 0));
 			$properties->setInt(EntityMetadataProperties::PLAYER_DEATH_DIMENSION, DimensionIds::OVERWORLD);
 			$properties->setByte(EntityMetadataProperties::PLAYER_HAS_DIED, 0);
 		}
@@ -2787,7 +2788,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	 * Opens the player's sign editor GUI for the sign at the given position.
 	 * TODO: add support for editing the rear side of the sign (not currently supported due to technical limitations)
 	 */
-	public function openSignEditor(Vector3 $position) : void{
+	public function openSignEditor(BlockPosition $position) : void{
 		$block = $this->getWorld()->getBlock($position);
 		if($block instanceof BaseSign){
 			$this->getWorld()->setBlock($position, $block->setEditorEntityRuntimeId($this->getId()));

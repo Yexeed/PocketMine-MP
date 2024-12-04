@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\inventory\BrewingStandInventory;
 use pocketmine\crafting\BrewingRecipe;
 use pocketmine\event\block\BrewingFuelUseEvent;
@@ -31,12 +32,10 @@ use pocketmine\inventory\CallbackInventoryListener;
 use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\ContainerSetDataPacket;
 use pocketmine\player\Player;
 use pocketmine\world\sound\PotionFinishBrewingSound;
-use pocketmine\world\World;
 use function array_map;
 use function count;
 
@@ -60,11 +59,11 @@ class BrewingStand extends Spawnable implements Container, Nameable{
 	private int $maxFuelTime = 0;
 	private int $remainingFuelTime = 0;
 
-	public function __construct(World $world, Vector3 $pos){
-		parent::__construct($world, $pos);
+	public function __construct(BlockPosition $position){
+		parent::__construct($position);
 		$this->inventory = new BrewingStandInventory($this->position);
-		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(static function(Inventory $unused) use ($world, $pos) : void{
-			$world->scheduleDelayedBlockUpdate($pos, 1);
+		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(static function(Inventory $unused) use ($position) : void{
+			$position->getWorld()->scheduleDelayedBlockUpdate($position, 1);
 		}));
 	}
 
@@ -215,7 +214,7 @@ class BrewingStand extends Spawnable implements Container, Nameable{
 					}
 
 					if($anythingBrewed){
-						$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), new PotionFinishBrewingSound());
+						$this->position->getWorld()->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new PotionFinishBrewingSound());
 					}
 
 					$ingredient->pop();

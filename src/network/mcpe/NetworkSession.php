@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\event\player\PlayerDuplicateLoginEvent;
 use pocketmine\event\player\PlayerResourcePackOfferEvent;
@@ -83,7 +84,7 @@ use pocketmine\network\mcpe\protocol\ToastRequestPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
 use pocketmine\network\mcpe\protocol\types\AbilitiesData;
 use pocketmine\network\mcpe\protocol\types\AbilitiesLayer;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
@@ -1005,17 +1006,17 @@ class NetworkSession{
 	}
 
 	public function syncViewAreaCenterPoint(Vector3 $newPos, int $viewDistance) : void{
-		$this->sendDataPacket(NetworkChunkPublisherUpdatePacket::create(BlockPosition::fromVector3($newPos), $viewDistance * 16, [])); //blocks, not chunks >.>
+		$this->sendDataPacket(NetworkChunkPublisherUpdatePacket::create(ProtocolBlockPosition::fromVector3($newPos), $viewDistance * 16, [])); //blocks, not chunks >.>
 	}
 
 	public function syncPlayerSpawnPoint(Position $newSpawn) : void{
-		$newSpawnBlockPosition = BlockPosition::fromVector3($newSpawn);
+		$newSpawnBlockPosition = ProtocolBlockPosition::fromVector3($newSpawn);
 		//TODO: respawn causing block position (bed, respawn anchor)
 		$this->sendDataPacket(SetSpawnPositionPacket::playerSpawn($newSpawnBlockPosition, DimensionIds::OVERWORLD, $newSpawnBlockPosition));
 	}
 
 	public function syncWorldSpawnPoint(Position $newSpawn) : void{
-		$this->sendDataPacket(SetSpawnPositionPacket::worldSpawn(BlockPosition::fromVector3($newSpawn), DimensionIds::OVERWORLD));
+		$this->sendDataPacket(SetSpawnPositionPacket::worldSpawn(ProtocolBlockPosition::fromVector3($newSpawn), DimensionIds::OVERWORLD));
 	}
 
 	public function syncGameMode(GameMode $mode, bool $isRollback = false) : void{
@@ -1288,8 +1289,8 @@ class NetworkSession{
 		$this->sendDataPacket(ToastRequestPacket::create($title, $body));
 	}
 
-	public function onOpenSignEditor(Vector3 $signPosition, bool $frontSide) : void{
-		$this->sendDataPacket(OpenSignPacket::create(BlockPosition::fromVector3($signPosition), $frontSide));
+	public function onOpenSignEditor(BlockPosition $signPosition, bool $frontSide) : void{
+		$this->sendDataPacket(OpenSignPacket::create(new ProtocolBlockPosition($signPosition->x, $signPosition->y, $signPosition->z), $frontSide));
 	}
 
 	public function onItemCooldownChanged(Item $item, int $ticks) : void{

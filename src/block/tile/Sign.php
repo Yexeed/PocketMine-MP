@@ -23,15 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\utils\SignText;
 use pocketmine\color\Color;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\utils\Binary;
-use pocketmine\world\World;
 use function array_pad;
 use function array_slice;
 use function explode;
@@ -72,9 +71,9 @@ class Sign extends Spawnable{
 
 	protected ?int $editorEntityRuntimeId = null;
 
-	public function __construct(World $world, Vector3 $pos){
+	public function __construct(BlockPosition $position){
 		$this->text = new SignText();
-		parent::__construct($world, $pos);
+		parent::__construct($position);
 	}
 
 	private function readTextTag(CompoundTag $nbt, bool $lightingBugResolved) : void{

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\handler;
 
 use pocketmine\block\BaseSign;
+use pocketmine\block\BlockPosition;
 use pocketmine\block\Lectern;
 use pocketmine\block\tile\Sign;
 use pocketmine\block\utils\SignText;
@@ -85,7 +86,7 @@ use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\SubClientLoginPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\types\ActorEvent;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\network\mcpe\protocol\types\inventory\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\inventory\MismatchTransactionData;
 use pocketmine\network\mcpe\protocol\types\inventory\NetworkInventoryAction;
@@ -257,7 +258,7 @@ class InGamePacketHandler extends PacketHandler{
 			foreach(Utils::promoteKeys($blockActions) as $k => $blockAction){
 				$actionHandled = false;
 				if($blockAction instanceof PlayerBlockActionStopBreak){
-					$actionHandled = $this->handlePlayerActionFromData($blockAction->getActionType(), new BlockPosition(0, 0, 0), Facing::DOWN);
+					$actionHandled = $this->handlePlayerActionFromData($blockAction->getActionType(), new ProtocolBlockPosition(0, 0, 0), Facing::DOWN);
 				}elseif($blockAction instanceof PlayerBlockActionWithBlockInfo){
 					$actionHandled = $this->handlePlayerActionFromData($blockAction->getActionType(), $blockAction->getBlockPosition(), $blockAction->getFace());
 				}
@@ -494,20 +495,20 @@ class InGamePacketHandler extends PacketHandler{
 
 				self::validateFacing($data->getFace());
 
-				$blockPos = $data->getBlockPosition();
-				$vBlockPos = new Vector3($blockPos->getX(), $blockPos->getY(), $blockPos->getZ());
-				$this->player->interactBlock($vBlockPos, $data->getFace(), $clickPos);
+				$networkBlockPos = $data->getBlockPosition();
+				$blockPos = new BlockPosition($networkBlockPos->getX(), $networkBlockPos->getY(), $networkBlockPos->getZ(), $this->player->getWorld());
+				$this->player->interactBlock($blockPos, $data->getFace(), $clickPos);
 				//always sync this in case plugins caused a different result than the client expected
 				//we *could* try to enhance detection of plugin-altered behaviour, but this would require propagating
 				//more information up the stack. For now I think this is good enough.
 				//if only the client would tell us what blocks it thinks changed...
-				$this->syncBlocksNearby($vBlockPos, $data->getFace());
+				$this->syncBlocksNearby($blockPos, $data->getFace());
 				return true;
 			case UseItemTransactionData::ACTION_BREAK_BLOCK:
-				$blockPos = $data->getBlockPosition();
-				$vBlockPos = new Vector3($blockPos->getX(), $blockPos->getY(), $blockPos->getZ());
-				if(!$this->player->breakBlock($vBlockPos)){
-					$this->syncBlocksNearby($vBlockPos, null);
+				$networkBlockPos = $data->getBlockPosition();
+				$blockPos = new BlockPosition($networkBlockPos->getX(), $networkBlockPos->getY(), $networkBlockPos->getZ(), $this->player->getWorld());
+				if(!$this->player->breakBlock($blockPos)){
+					$this->syncBlocksNearby($blockPos, null);
 				}
 				return true;
 			case UseItemTransactionData::ACTION_CLICK_AIR:
@@ -537,14 +538,14 @@ class InGamePacketHandler extends PacketHandler{
 	/**
 	 * Syncs blocks nearby to ensure that the client and server agree on the world's blocks after a block interaction.
 	 */
-	private function syncBlocksNearby(Vector3 $blockPos, ?int $face) : void{
-		if($blockPos->distanceSquared($this->player->getLocation()) < 10000){
-			$blocks = $blockPos->sidesArray();
+	private function syncBlocksNearby(BlockPosition $blockPos, ?int $face) : void{
+		//TODO: migrate this to BlockPosition
+		if($blockPos->asVector3()->distanceSquared($this->player->getLocation()) < 10000){
+			$blocks = $blockPos->getAllSidesArray();
 			if($face !== null){
 				$sidePos = $blockPos->getSide($face);
 
-				/** @var Vector3[] $blocks */
-				array_push($blocks, ...$sidePos->sidesArray()); //getAllSides() on each of these will include $blockPos and $sidePos because they are next to each other
+				array_push($blocks, ...$sidePos->getAllSidesArray()); //getAllSides() on each of these will include $blockPos and $sidePos because they are next to each other
 			}else{
 				$blocks[] = $blockPos;
 			}
@@ -670,7 +671,7 @@ class InGamePacketHandler extends PacketHandler{
 	}
 
 	public function handleBlockPickRequest(BlockPickRequestPacket $packet) : bool{
-		return $this->player->pickBlock(new Vector3($packet->blockPosition->getX(), $packet->blockPosition->getY(), $packet->blockPosition->getZ()), $packet->addUserData);
+		return $this->player->pickBlock(new BlockPosition($packet->blockPosition->getX(), $packet->blockPosition->getY(), $packet->blockPosition->getZ(), $this->player->getWorld()), $packet->addUserData);
 	}
 
 	public function handleActorPickRequest(ActorPickRequestPacket $packet) : bool{
@@ -681,8 +682,8 @@ class InGamePacketHandler extends PacketHandler{
 		return $this->handlePlayerActionFromData($packet->action, $packet->blockPosition, $packet->face);
 	}
 
-	private function handlePlayerActionFromData(int $action, BlockPosition $blockPosition, int $face) : bool{
-		$pos = new Vector3($blockPosition->getX(), $blockPosition->getY(), $blockPosition->getZ());
+	private function handlePlayerActionFromData(int $action, ProtocolBlockPosition $blockPosition, int $face) : bool{
+		$pos = new BlockPosition($blockPosition->getX(), $blockPosition->getY(), $blockPosition->getZ(), $this->player->getWorld());
 
 		switch($action){
 			case PlayerAction::START_BREAK:
@@ -744,8 +745,8 @@ class InGamePacketHandler extends PacketHandler{
 	}
 
 	public function handleBlockActorData(BlockActorDataPacket $packet) : bool{
-		$pos = new Vector3($packet->blockPosition->getX(), $packet->blockPosition->getY(), $packet->blockPosition->getZ());
-		if($pos->distanceSquared($this->player->getLocation()) > 10000){
+		$pos = new BlockPosition($packet->blockPosition->getX(), $packet->blockPosition->getY(), $packet->blockPosition->getZ(), $this->player->getWorld());
+		if($pos->asVector3()->distanceSquared($this->player->getLocation()) > 10000){
 			return false;
 		}
 
@@ -1002,9 +1003,10 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		$lectern = $world->getBlockAt($pos->getX(), $pos->getY(), $pos->getZ());
-		if($lectern instanceof Lectern && $this->player->canInteract($lectern->getPosition(), 15)){
+		$lecternPos = $lectern->getPosition();
+		if($lectern instanceof Lectern && $this->player->canInteract($lecternPos->asVector3(), 15)){
 			if(!$lectern->onPageTurn($packet->page)){
-				$this->syncBlocksNearby($lectern->getPosition(), null);
+				$this->syncBlocksNearby($lecternPos, null);
 			}
 			return true;
 		}

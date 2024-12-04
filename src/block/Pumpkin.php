@@ -38,7 +38,7 @@ class Pumpkin extends Opaque{
 			$item->applyDamage(1);
 			$world = $this->position->getWorld();
 			$world->setBlock($this->position, VanillaBlocks::CARVED_PUMPKIN()->setFacing($face));
-			$world->dropItem($this->position->add(0.5, 0.5, 0.5), VanillaItems::PUMPKIN_SEEDS()->setCount(1));
+			$world->dropItem($this->position->asVector3()->add(0.5, 0.5, 0.5), VanillaItems::PUMPKIN_SEEDS()->setCount(1));
 			return true;
 		}
 		return false;

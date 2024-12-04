@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\block\inventory;
 
 use pocketmine\block\Barrel;
+use pocketmine\block\BlockPosition;
 use pocketmine\inventory\SimpleInventory;
-use pocketmine\world\Position;
 use pocketmine\world\sound\BarrelCloseSound;
 use pocketmine\world\sound\BarrelOpenSound;
 use pocketmine\world\sound\Sound;
@@ -33,7 +33,7 @@ use pocketmine\world\sound\Sound;
 class BarrelInventory extends SimpleInventory implements BlockInventory{
 	use AnimatedBlockInventoryTrait;
 
-	public function __construct(Position $holder){
+	public function __construct(BlockPosition $holder){
 		$this->holder = $holder;
 		parent::__construct(27);
 	}

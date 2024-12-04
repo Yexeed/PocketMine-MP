@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\world;
 
 use pocketmine\block\Block;
+use pocketmine\block\BlockPosition;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Utils;
 
@@ -51,8 +52,8 @@ class BlockTransaction{
 	 *
 	 * @return $this
 	 */
-	public function addBlock(Vector3 $pos, Block $state) : self{
-		return $this->addBlockAt($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ(), $state);
+	public function addBlock(BlockPosition $pos, Block $state) : self{
+		return $this->addBlockAt($pos->x, $pos->y, $pos->z, $state);
 	}
 
 	/**

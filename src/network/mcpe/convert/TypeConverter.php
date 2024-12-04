@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\convert;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\crafting\ExactRecipeIngredient;
 use pocketmine\crafting\MetaWildcardRecipeIngredient;
@@ -37,6 +38,7 @@ use pocketmine\nbt\NbtException;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\serializer\ItemTypeDictionary;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\network\mcpe\protocol\types\GameMode as ProtocolGameMode;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStackExtraData;
@@ -51,6 +53,7 @@ use pocketmine\utils\Filesystem;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
+use pocketmine\world\World;
 use function get_class;
 
 class TypeConverter{
@@ -275,5 +278,25 @@ class TypeConverter{
 		return $id === $this->shieldRuntimeId ?
 			ItemStackExtraDataShield::read($extraDataDeserializer) :
 			ItemStackExtraData::read($extraDataDeserializer);
+	}
+
+	public function coreBlockPositionToNet(?BlockPosition $position) : ProtocolBlockPosition{
+		if($position === null){
+			return new ProtocolBlockPosition(0, 0, 0);
+		}
+		return new ProtocolBlockPosition(
+			$position->x,
+			$position->y,
+			$position->z
+		);
+	}
+
+	public function netBlockPositionToCore(ProtocolBlockPosition $position, World $world) : BlockPosition{
+		return new BlockPosition(
+			$position->getX(),
+			$position->getY(),
+			$position->getZ(),
+			$world
+		);
 	}
 }

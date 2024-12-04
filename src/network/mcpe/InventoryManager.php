@@ -357,7 +357,8 @@ class InventoryManager{
 		//TODO: we should be using some kind of tagging system to identify the types. Instanceof is flaky especially
 		//if the class isn't final, not to mention being inflexible.
 		if($inv instanceof BlockInventory){
-			$blockPosition = BlockPosition::fromVector3($inv->getHolder());
+			$blockPosition = $inv->getHolder();
+			$protocolBlockPosition = new BlockPosition($blockPosition->x, $blockPosition->y, $blockPosition->z);
 			$windowType = match(true){
 				$inv instanceof LoomInventory => WindowTypes::LOOM,
 				$inv instanceof FurnaceInventory => match($inv->getFurnaceType()){
@@ -376,7 +377,7 @@ class InventoryManager{
 				$inv instanceof SmithingTableInventory => WindowTypes::SMITHING_TABLE,
 				default => WindowTypes::CONTAINER
 			};
-			return [ContainerOpenPacket::blockInv($id, $windowType, $blockPosition)];
+			return [ContainerOpenPacket::blockInv($id, $windowType, $protocolBlockPosition)];
 		}
 		return null;
 	}

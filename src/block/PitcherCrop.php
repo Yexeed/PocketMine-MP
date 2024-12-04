@@ -73,7 +73,7 @@ final class PitcherCrop extends Flowable{
 
 			$tx = new BlockTransaction($this->position->getWorld());
 			$tx->addBlock($this->position, VanillaBlocks::DOUBLE_PITCHER_CROP()->setTop(false));
-			$tx->addBlock($this->position->up(), VanillaBlocks::DOUBLE_PITCHER_CROP()->setTop(true));
+			$tx->addBlock($this->position->getSide(Facing::UP), VanillaBlocks::DOUBLE_PITCHER_CROP()->setTop(true));
 
 			$ev = new StructureGrowEvent($this, $tx, $player);
 			$ev->call();

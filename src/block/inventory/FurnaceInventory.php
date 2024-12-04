@@ -23,10 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Item;
-use pocketmine\world\Position;
 
 class FurnaceInventory extends SimpleInventory implements BlockInventory{
 	use BlockInventoryTrait;
@@ -36,7 +36,7 @@ class FurnaceInventory extends SimpleInventory implements BlockInventory{
 	public const SLOT_RESULT = 2;
 
 	public function __construct(
-		Position $holder,
+		BlockPosition $holder,
 		private FurnaceType $furnaceType
 	){
 		$this->holder = $holder;

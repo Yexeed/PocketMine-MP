@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\Furnace as BlockFurnace;
 use pocketmine\block\inventory\FurnaceInventory;
 use pocketmine\crafting\FurnaceRecipe;
@@ -32,11 +33,9 @@ use pocketmine\event\inventory\FurnaceSmeltEvent;
 use pocketmine\inventory\CallbackInventoryListener;
 use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\ContainerSetDataPacket;
 use pocketmine\player\Player;
-use pocketmine\world\World;
 use function array_map;
 use function max;
 
@@ -53,12 +52,12 @@ abstract class Furnace extends Spawnable implements Container, Nameable{
 	private int $cookTime = 0;
 	private int $maxFuelTime = 0;
 
-	public function __construct(World $world, Vector3 $pos){
-		parent::__construct($world, $pos);
+	public function __construct(BlockPosition $position){
+		parent::__construct($position);
 		$this->inventory = new FurnaceInventory($this->position, $this->getFurnaceType());
 		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(
-			static function(Inventory $unused) use ($world, $pos) : void{
-				$world->scheduleDelayedBlockUpdate($pos, 1);
+			static function(Inventory $unused) use ($position) : void{
+				$position->getWorld()->scheduleDelayedBlockUpdate($position, 1);
 			})
 		);
 	}

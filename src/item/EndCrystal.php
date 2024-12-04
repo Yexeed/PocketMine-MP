@@ -40,14 +40,14 @@ class EndCrystal extends Item{
 			$pos = $blockClicked->getPosition();
 			$world = $pos->getWorld();
 			$bb = AxisAlignedBB::one()
-				->offset($pos->getX(), $pos->getY(), $pos->getZ())
+				->offset($pos->x, $pos->y, $pos->z)
 				->extend(Facing::UP, 1);
 			if(
 				count($world->getNearbyEntities($bb)) === 0 &&
 				$blockClicked->getSide(Facing::UP)->getTypeId() === BlockTypeIds::AIR &&
 				$blockClicked->getSide(Facing::UP, 2)->getTypeId() === BlockTypeIds::AIR
 			){
-				$crystal = new EntityEndCrystal(Location::fromObject($pos->add(0.5, 1, 0.5), $world));
+				$crystal = new EntityEndCrystal(Location::fromObject($pos->asVector3()->add(0.5, 1, 0.5), $world));
 				$crystal->spawnToAll();
 
 				$this->pop();

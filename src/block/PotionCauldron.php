@@ -27,6 +27,7 @@ use pocketmine\block\tile\Cauldron as TileCauldron;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\VanillaItems;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\sound\CauldronEmptyPotionSound;
@@ -107,10 +108,10 @@ final class PotionCauldron extends FillableCauldron{
 
 	public function onNearbyBlockChange() : void{
 		$world = $this->position->getWorld();
-		if($world->getBlock($this->position->up())->getTypeId() === BlockTypeIds::WATER){
+		if($this->getSide(Facing::UP)->getTypeId() === BlockTypeIds::WATER){
 			$cauldron = VanillaBlocks::WATER_CAULDRON()->setFillLevel(FillableCauldron::MAX_FILL_LEVEL);
 			$world->setBlock($this->position, $cauldron);
-			$world->addSound($this->position->add(0.5, 0.5, 0.5), $cauldron->getFillSound());
+			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), $cauldron->getFillSound());
 		}
 	}
 }

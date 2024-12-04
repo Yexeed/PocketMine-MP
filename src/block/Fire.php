@@ -161,7 +161,7 @@ class Fire extends BaseFire{
 		$ageDivisor = $this->age + 30;
 
 		for($y = -1; $y <= 4; ++$y){
-			$targetY = $y + (int) $this->position->y;
+			$targetY = $y + $this->position->y;
 			if($targetY < World::Y_MIN || $targetY >= World::Y_MAX){
 				continue;
 			}
@@ -169,12 +169,12 @@ class Fire extends BaseFire{
 			$randomBound = 100 + ($y > 1 ? ($y - 1) * 100 : 0);
 
 			for($z = -1; $z <= 1; ++$z){
-				$targetZ = $z + (int) $this->position->z;
+				$targetZ = $z + $this->position->z;
 				for($x = -1; $x <= 1; ++$x){
 					if($x === 0 && $y === 0 && $z === 0){
 						continue;
 					}
-					$targetX = $x + (int) $this->position->x;
+					$targetX = $x + $this->position->x;
 					if(!$world->isInWorld($targetX, $targetY, $targetZ)){
 						continue;
 					}
@@ -190,9 +190,10 @@ class Fire extends BaseFire{
 					//TODO: fire can't spread if it's raining in any horizontally adjacent block, or the current one
 
 					$encouragement = 0;
-					foreach($block->position->sides() as $vector3){
-						if($world->isInWorld($vector3->x, $vector3->y, $vector3->z)){
-							$encouragement = max($encouragement, $world->getBlockAt($vector3->x, $vector3->y, $vector3->z)->getFlameEncouragement());
+					foreach(Facing::ALL as $facing){
+						$sidePos = $block->position->getSide($facing);
+						if($world->isInWorld($sidePos->x, $sidePos->y, $sidePos->z)){
+							$encouragement = max($encouragement, $world->getBlockAt($sidePos->x, $sidePos->y, $sidePos->z)->getFlameEncouragement());
 						}
 					}
 

@@ -23,13 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\event\player\PlayerEnchantingOptionsRequestEvent;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\inventory\TemporaryInventory;
 use pocketmine\item\enchantment\EnchantingHelper as Helper;
 use pocketmine\item\enchantment\EnchantingOption;
 use pocketmine\item\Item;
-use pocketmine\world\Position;
 use function array_values;
 use function count;
 
@@ -45,7 +45,7 @@ class EnchantInventory extends SimpleInventory implements BlockInventory, Tempor
 	 */
 	private array $options = [];
 
-	public function __construct(Position $holder){
+	public function __construct(BlockPosition $holder){
 		$this->holder = $holder;
 		parent::__construct(2);
 	}

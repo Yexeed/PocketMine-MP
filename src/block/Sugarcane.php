@@ -32,7 +32,6 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
-use pocketmine\world\Position;
 
 class Sugarcane extends Flowable{
 	use AgeableTrait;
@@ -42,16 +41,16 @@ class Sugarcane extends Flowable{
 
 	public const MAX_AGE = 15;
 
-	private function seekToBottom() : Position{
+	private function seekToBottom() : BlockPosition{
 		$world = $this->position->getWorld();
 		$bottom = $this->position;
-		while(($next = $world->getBlock($bottom->down()))->hasSameTypeId($this)){
+		while(($next = $world->getBlock($bottom->getSide(Facing::DOWN)))->hasSameTypeId($this)){
 			$bottom = $next->position;
 		}
 		return $bottom;
 	}
 
-	private function grow(Position $pos, ?Player $player = null) : bool{
+	private function grow(BlockPosition $pos, ?Player $player = null) : bool{
 		$grew = false;
 		$world = $pos->getWorld();
 		for($y = 1; $y < 3; ++$y){

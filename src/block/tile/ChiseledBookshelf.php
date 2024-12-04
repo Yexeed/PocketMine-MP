@@ -23,18 +23,17 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\utils\ChiseledBookshelfSlot;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\data\SavedDataLoadingException;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Item;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\world\World;
 use function count;
 
 class ChiseledBookshelf extends Tile implements Container{
@@ -46,8 +45,8 @@ class ChiseledBookshelf extends Tile implements Container{
 
 	private ?ChiseledBookshelfSlot $lastInteractedSlot = null;
 
-	public function __construct(World $world, Vector3 $pos){
-		parent::__construct($world, $pos);
+	public function __construct(BlockPosition $position){
+		parent::__construct($position);
 		$this->inventory = new SimpleInventory(count(ChiseledBookshelfSlot::cases()));
 	}
 

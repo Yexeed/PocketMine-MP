@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
-use pocketmine\world\Position;
+use pocketmine\block\BlockPosition;
 
 interface BlockInventory{
-	public function getHolder() : Position;
+	public function getHolder() : BlockPosition;
 }

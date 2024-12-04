@@ -76,6 +76,6 @@ class CakeWithCandle extends BaseCake{
 
 	public function onConsume(Living $consumer) : void{
 		parent::onConsume($consumer);
-		$this->position->getWorld()->dropItem($this->position->add(0.5, 0.5, 0.5), $this->getCandle()->asItem());
+		$this->position->getWorld()->dropItem($this->position->asVector3()->add(0.5, 0.5, 0.5), $this->getCandle()->asItem());
 	}
 }

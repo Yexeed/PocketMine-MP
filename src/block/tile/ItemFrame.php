@@ -23,13 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\network\mcpe\convert\TypeConverter;
-use pocketmine\world\World;
 
 /**
  * @deprecated
@@ -44,9 +43,9 @@ class ItemFrame extends Spawnable{
 	private int $itemRotation = 0;
 	private float $itemDropChance = 1.0;
 
-	public function __construct(World $world, Vector3 $pos){
+	public function __construct(BlockPosition $position){
 		$this->item = VanillaItems::AIR();
-		parent::__construct($world, $pos);
+		parent::__construct($position);
 	}
 
 	public function readSaveData(CompoundTag $nbt) : void{

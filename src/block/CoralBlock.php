@@ -26,6 +26,7 @@ namespace pocketmine\block;
 use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\CoralTypeTrait;
 use pocketmine\item\Item;
+use pocketmine\math\Facing;
 use function mt_rand;
 
 final class CoralBlock extends Opaque{
@@ -39,11 +40,9 @@ final class CoralBlock extends Opaque{
 
 	public function onScheduledUpdate() : void{
 		if(!$this->dead){
-			$world = $this->position->getWorld();
-
 			$hasWater = false;
-			foreach($this->position->sides() as $vector3){
-				if($world->getBlock($vector3) instanceof Water){
+			foreach(Facing::ALL as $facing){
+				if($this->getSide($facing) instanceof Water){
 					$hasWater = true;
 					break;
 				}

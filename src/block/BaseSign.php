@@ -145,7 +145,7 @@ abstract class BaseSign extends Transparent{
 
 	private function changeSignGlowingState(bool $glowing, Player $player, Item $item) : bool{
 		if($this->text->isGlowing() !== $glowing && $this->doSignChange(new SignText($this->text->getLines(), $this->text->getBaseColor(), $glowing), $player, $item)){
-			$this->position->getWorld()->addSound($this->position, new InkSacUseSound());
+			$this->position->getWorld()->addSound($this->position->asVector3(), new InkSacUseSound());
 			return true;
 		}
 		return false;
@@ -183,7 +183,7 @@ abstract class BaseSign extends Transparent{
 				$color->toARGB() !== $this->text->getBaseColor()->toARGB() &&
 				$this->doSignChange(new SignText($this->text->getLines(), $color, $this->text->isGlowing()), $player, $item)
 			){
-				$this->position->getWorld()->addSound($this->position, new DyeUseSound());
+				$this->position->getWorld()->addSound($this->position->asVector3(), new DyeUseSound());
 				return true;
 			}
 		}elseif(match($item->getTypeId()){

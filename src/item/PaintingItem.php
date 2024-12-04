@@ -74,13 +74,14 @@ class PaintingItem extends Item{
 		$motive = $motives[array_rand($motives)];
 
 		$replacePos = $blockReplace->getPosition();
+		$replaceVec3 = $replacePos->asVector3();
 		$clickedPos = $blockClicked->getPosition();
 
-		$entity = new Painting(Location::fromObject($replacePos, $replacePos->getWorld()), $clickedPos, $face, $motive);
+		$entity = new Painting(Location::fromObject($replaceVec3, $replacePos->getWorld()), $clickedPos, $face, $motive);
 		$this->pop();
 		$entity->spawnToAll();
 
-		$player->getWorld()->addSound($replacePos->add(0.5, 0.5, 0.5), new PaintingPlaceSound());
+		$player->getWorld()->addSound($replaceVec3->add(0.5, 0.5, 0.5), new PaintingPlaceSound());
 		return ItemUseResult::SUCCESS;
 	}
 }

@@ -24,12 +24,12 @@ declare(strict_types=1);
 namespace pocketmine\block\utils;
 
 use pocketmine\block\Block;
+use pocketmine\block\BlockPosition;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Location;
 use pocketmine\entity\object\FallingBlock;
 use pocketmine\math\Facing;
 use pocketmine\utils\AssumptionFailedError;
-use pocketmine\world\Position;
 use pocketmine\world\sound\Sound;
 
 /**
@@ -39,7 +39,7 @@ use pocketmine\world\sound\Sound;
  */
 trait FallableTrait{
 
-	abstract protected function getPosition() : Position;
+	abstract protected function getPosition() : BlockPosition;
 
 	public function onNearbyBlockChange() : void{
 		$pos = $this->getPosition();
@@ -51,7 +51,7 @@ trait FallableTrait{
 			$block = $this;
 			if(!($block instanceof Block)) throw new AssumptionFailedError(__TRAIT__ . " should only be used by Blocks");
 
-			$fall = new FallingBlock(Location::fromObject($pos->add(0.5, 0, 0.5), $world), $block);
+			$fall = new FallingBlock(Location::fromObject($pos->asVector3()->add(0.5, 0, 0.5), $world), $block);
 			$fall->spawnToAll();
 		}
 	}

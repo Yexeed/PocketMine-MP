@@ -73,14 +73,14 @@ final class BambooSapling extends Flowable{
 
 	private function grow(?Player $player) : bool{
 		$world = $this->position->getWorld();
-		if(!$world->getBlock($this->position->up())->canBeReplaced()){
+		if(!$world->getBlock($this->position->getSide(Facing::UP))->canBeReplaced()){
 			return false;
 		}
 
 		$tx = new BlockTransaction($world);
 		$bamboo = VanillaBlocks::BAMBOO();
 		$tx->addBlock($this->position, $bamboo)
-			->addBlock($this->position->up(), (clone $bamboo)->setLeafSize(Bamboo::SMALL_LEAVES));
+			->addBlock($this->position->getSide(Facing::UP), (clone $bamboo)->setLeafSize(Bamboo::SMALL_LEAVES));
 
 		$ev = new StructureGrowEvent($this, $tx, $player);
 		$ev->call();
@@ -102,7 +102,7 @@ final class BambooSapling extends Flowable{
 			if($world->getFullLight($this->position) < 9 || !$this->grow(null)){
 				$world->setBlock($this->position, $this);
 			}
-		}elseif($world->getBlock($this->position->up())->canBeReplaced()){
+		}elseif($world->getBlock($this->position->getSide(Facing::UP))->canBeReplaced()){
 			$this->ready = true;
 			$world->setBlock($this->position, $this);
 		}

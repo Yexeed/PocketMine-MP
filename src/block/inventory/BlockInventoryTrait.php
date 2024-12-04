@@ -23,12 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
-use pocketmine\world\Position;
+use pocketmine\block\BlockPosition;
 
 trait BlockInventoryTrait{
-	protected Position $holder;
+	protected BlockPosition $holder;
 
-	public function getHolder() : Position{
+	public function getHolder() : BlockPosition{
 		return $this->holder;
 	}
 }

@@ -27,6 +27,7 @@ use pocketmine\block\utils\BlockEventHelper;
 use pocketmine\block\utils\CoralTypeTrait;
 use pocketmine\block\utils\SupportType;
 use pocketmine\item\Item;
+use pocketmine\math\Facing;
 use function mt_rand;
 
 abstract class BaseCoral extends Transparent{
@@ -55,11 +56,9 @@ abstract class BaseCoral extends Transparent{
 	public function isSolid() : bool{ return false; }
 
 	protected function isCoveredWithWater() : bool{
-		$world = $this->position->getWorld();
-
 		$hasWater = false;
-		foreach($this->position->sides() as $vector3){
-			if($world->getBlock($vector3) instanceof Water){
+		foreach(Facing::ALL as $side){
+			if($this->getSide($side) instanceof Water){
 				$hasWater = true;
 				break;
 			}

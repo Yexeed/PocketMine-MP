@@ -24,9 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\player;
 
 use pocketmine\block\Block;
+use pocketmine\block\BlockPosition;
 use pocketmine\entity\animation\ArmSwingAnimation;
 use pocketmine\math\Facing;
-use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelEvent;
 use pocketmine\world\particle\BlockPunchParticle;
@@ -43,7 +43,7 @@ final class SurvivalBlockBreakHandler{
 
 	public function __construct(
 		private Player $player,
-		private Vector3 $blockPos,
+		private BlockPosition $blockPos,
 		private Block $block,
 		private int $targetedFace,
 		private int $maxPlayerDistance,
@@ -51,9 +51,10 @@ final class SurvivalBlockBreakHandler{
 	){
 		$this->breakSpeed = $this->calculateBreakProgressPerTick();
 		if($this->breakSpeed > 0){
+			$vector3 = $this->blockPos->asVector3();
 			$this->player->getWorld()->broadcastPacketToViewers(
-				$this->blockPos,
-				LevelEventPacket::create(LevelEvent::BLOCK_START_BREAK, (int) (65535 * $this->breakSpeed), $this->blockPos)
+				$vector3,
+				LevelEventPacket::create(LevelEvent::BLOCK_START_BREAK, (int) (65535 * $this->breakSpeed), $vector3)
 			);
 		}
 	}
@@ -75,7 +76,8 @@ final class SurvivalBlockBreakHandler{
 	}
 
 	public function update() : bool{
-		if($this->player->getPosition()->distanceSquared($this->blockPos->add(0.5, 0.5, 0.5)) > $this->maxPlayerDistance ** 2){
+		$vector3 = $this->blockPos->asVector3();
+		if($this->player->getPosition()->distanceSquared($vector3->add(0.5, 0.5, 0.5)) > $this->maxPlayerDistance ** 2){
 			return false;
 		}
 
@@ -88,15 +90,15 @@ final class SurvivalBlockBreakHandler{
 		$this->breakProgress += $this->breakSpeed;
 
 		if(($this->fxTicker++ % $this->fxTickInterval) === 0 && $this->breakProgress < 1){
-			$this->player->getWorld()->addParticle($this->blockPos, new BlockPunchParticle($this->block, $this->targetedFace));
-			$this->player->getWorld()->addSound($this->blockPos, new BlockPunchSound($this->block));
+			$this->player->getWorld()->addParticle($vector3, new BlockPunchParticle($this->block, $this->targetedFace));
+			$this->player->getWorld()->addSound($vector3, new BlockPunchSound($this->block));
 			$this->player->broadcastAnimation(new ArmSwingAnimation($this->player), $this->player->getViewers());
 		}
 
 		return $this->breakProgress < 1;
 	}
 
-	public function getBlockPos() : Vector3{
+	public function getBlockPos() : BlockPosition{
 		return $this->blockPos;
 	}
 
@@ -118,10 +120,11 @@ final class SurvivalBlockBreakHandler{
 	}
 
 	public function __destruct(){
-		if($this->player->getWorld()->isInLoadedTerrain($this->blockPos)){
+		$vector3 = $this->blockPos->asVector3();
+		if($this->player->getWorld()->isInLoadedTerrain($vector3)){
 			$this->player->getWorld()->broadcastPacketToViewers(
-				$this->blockPos,
-				LevelEventPacket::create(LevelEvent::BLOCK_STOP_BREAK, 0, $this->blockPos)
+				$vector3,
+				LevelEventPacket::create(LevelEvent::BLOCK_STOP_BREAK, 0, $vector3)
 			);
 		}
 	}

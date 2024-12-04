@@ -26,6 +26,7 @@ namespace pocketmine\entity;
 use DaveRandom\CallbackValidator\CallbackType;
 use DaveRandom\CallbackValidator\ParameterType;
 use DaveRandom\CallbackValidator\ReturnType;
+use pocketmine\block\BlockPosition;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\data\bedrock\LegacyEntityIdToStringIdMap;
 use pocketmine\data\bedrock\PotionTypeIdMap;
@@ -48,7 +49,6 @@ use pocketmine\entity\projectile\Snowball;
 use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\item\Item;
 use pocketmine\math\Facing;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\NbtException;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -143,7 +143,7 @@ final class EntityFactory{
 			if($motive === null){
 				throw new SavedDataLoadingException("Unknown painting motive");
 			}
-			$blockIn = new Vector3($nbt->getInt(Painting::TAG_TILE_X), $nbt->getInt(Painting::TAG_TILE_Y), $nbt->getInt(Painting::TAG_TILE_Z));
+			$blockIn = new BlockPosition($nbt->getInt(Painting::TAG_TILE_X), $nbt->getInt(Painting::TAG_TILE_Y), $nbt->getInt(Painting::TAG_TILE_Z), $world);
 			if(($directionTag = $nbt->getTag(Painting::TAG_DIRECTION_BE)) instanceof ByteTag){
 				$facing = Painting::DATA_TO_FACING[$directionTag->getValue()] ?? Facing::NORTH;
 			}elseif(($facingTag = $nbt->getTag(Painting::TAG_FACING_JE)) instanceof ByteTag){

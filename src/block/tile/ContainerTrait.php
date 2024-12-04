@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\data\SavedDataLoadingException;
 use pocketmine\inventory\Inventory;
@@ -31,7 +32,6 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\world\Position;
 
 /**
  * This trait implements most methods in the {@link Container} interface. It should only be used by Tiles.
@@ -90,9 +90,9 @@ trait ContainerTrait{
 	}
 
 	/**
-	 * @see Position::asPosition()
+	 * @see Tile::getPosition()
 	 */
-	abstract protected function getPosition() : Position;
+	abstract protected function getPosition() : BlockPosition;
 
 	/**
 	 * @see Tile::onBlockDestroyedHook()
@@ -102,7 +102,7 @@ trait ContainerTrait{
 		$pos = $this->getPosition();
 
 		$world = $pos->getWorld();
-		$dropPos = $pos->add(0.5, 0.5, 0.5);
+		$dropPos = $pos->asVector3()->add(0.5, 0.5, 0.5);
 		foreach($inv->getContents() as $k => $item){
 			$world->dropItem($dropPos, $item);
 		}

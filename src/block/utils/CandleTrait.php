@@ -54,9 +54,9 @@ trait CandleTrait{
 			}elseif($item->getTypeId() === ItemTypeIds::FIRE_CHARGE){
 				$item->pop();
 				//TODO: not sure if this is intentional, but it's what Bedrock currently does as of 1.20.10
-				$this->position->getWorld()->addSound($this->position, new BlazeShootSound());
+				$this->position->getWorld()->addSound($this->position->asVector3(), new BlazeShootSound());
 			}
-			$this->position->getWorld()->addSound($this->position, new FlintSteelSound());
+			$this->position->getWorld()->addSound($this->position->asVector3(), new FlintSteelSound());
 			$this->position->getWorld()->setBlock($this->position, $this->setLit(true));
 
 			return true;
@@ -65,7 +65,7 @@ trait CandleTrait{
 			if(!$this->lit){
 				return true;
 			}
-			$this->position->getWorld()->addSound($this->position, new FireExtinguishSound());
+			$this->position->getWorld()->addSound($this->position->asVector3(), new FireExtinguishSound());
 			$this->position->getWorld()->setBlock($this->position, $this->setLit(false));
 
 			return true;

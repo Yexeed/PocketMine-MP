@@ -161,9 +161,9 @@ class Farmland extends Transparent{
 	protected function canHydrate() : bool{
 		$world = $this->position->getWorld();
 
-		$startX = $this->position->getFloorX() - (int) (self::WATER_SEARCH_HORIZONTAL_LENGTH / 2);
-		$startY = $this->position->getFloorY();
-		$startZ = $this->position->getFloorZ() - (int) (self::WATER_SEARCH_HORIZONTAL_LENGTH / 2);
+		$startX = $this->position->x - (int) (self::WATER_SEARCH_HORIZONTAL_LENGTH / 2);
+		$startY = $this->position->y;
+		$startZ = $this->position->z - (int) (self::WATER_SEARCH_HORIZONTAL_LENGTH / 2);
 
 		if($this->waterPositionIndex !== self::WATER_POSITION_INDEX_UNKNOWN){
 			$raw = $this->waterPositionIndex;

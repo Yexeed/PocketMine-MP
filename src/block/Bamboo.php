@@ -116,7 +116,7 @@ class Bamboo extends Transparent{
 	}
 
 	public function getModelPositionOffset() : ?Vector3{
-		$seed = self::getOffsetSeed($this->position->getFloorX(), 0, $this->position->getFloorZ());
+		$seed = self::getOffsetSeed($this->position->x, 0, $this->position->z);
 		$retX = (($seed % 12) + 1) / 16;
 		$retZ = ((($seed >> 8) % 12) + 1) / 16;
 		return new Vector3($retX, 0, $retZ);
@@ -135,7 +135,7 @@ class Bamboo extends Transparent{
 	private function seekToTop() : Bamboo{
 		$world = $this->position->getWorld();
 		$top = $this;
-		while(($next = $world->getBlock($top->position->up())) instanceof Bamboo && $next->hasSameTypeId($this)){
+		while(($next = $world->getBlock($top->position->getSide(Facing::UP))) instanceof Bamboo && $next->hasSameTypeId($this)){
 			$top = $next;
 		}
 		return $top;
@@ -144,7 +144,7 @@ class Bamboo extends Transparent{
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($item instanceof Fertilizer){
 			$top = $this->seekToTop();
-			if($top->grow(self::getMaxHeight($top->position->getFloorX(), $top->position->getFloorZ()), mt_rand(1, 2), $player)){
+			if($top->grow(self::getMaxHeight($top->position->x, $top->position->z), mt_rand(1, 2), $player)){
 				$item->pop();
 				return true;
 			}
@@ -159,12 +159,12 @@ class Bamboo extends Transparent{
 
 	private function grow(int $maxHeight, int $growAmount, ?Player $player) : bool{
 		$world = $this->position->getWorld();
-		if(!$world->getBlock($this->position->up())->canBeReplaced()){
+		if(!$world->getBlock($this->position->getSide(Facing::UP))->canBeReplaced()){
 			return false;
 		}
 
 		$height = 1;
-		while($world->getBlock($this->position->subtract(0, $height, 0))->hasSameTypeId($this)){
+		while($world->getBlock($this->position->getSide(Facing::DOWN, $height))->hasSameTypeId($this)){
 			if(++$height >= $maxHeight){
 				return false;
 			}
@@ -201,7 +201,7 @@ class Bamboo extends Transparent{
 
 		$tx = new BlockTransaction($world);
 		foreach($newBlocks as $idx => $newBlock){
-			$tx->addBlock($this->position->subtract(0, $idx - $growAmount, 0), $newBlock);
+			$tx->addBlock($this->position->getSide(Facing::DOWN, $idx - $growAmount), $newBlock);
 		}
 
 		$ev = new StructureGrowEvent($this, $tx, $player);
@@ -221,10 +221,10 @@ class Bamboo extends Transparent{
 		$world = $this->position->getWorld();
 		if($this->ready){
 			$this->ready = false;
-			if($world->getFullLight($this->position) < 9 || !$this->grow(self::getMaxHeight($this->position->getFloorX(), $this->position->getFloorZ()), 1, null)){
+			if($world->getFullLight($this->position) < 9 || !$this->grow(self::getMaxHeight($this->position->x, $this->position->z), 1, null)){
 				$world->setBlock($this->position, $this);
 			}
-		}elseif($world->getBlock($this->position->up())->canBeReplaced()){
+		}elseif($world->getBlock($this->position->getSide(Facing::UP))->canBeReplaced()){
 			$this->ready = true;
 			$world->setBlock($this->position, $this);
 		}

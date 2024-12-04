@@ -36,7 +36,7 @@ class FireCharge extends Item{
 		if($blockReplace->getTypeId() === BlockTypeIds::AIR){
 			$world = $player->getWorld();
 			$world->setBlock($blockReplace->getPosition(), VanillaBlocks::FIRE());
-			$world->addSound($blockReplace->getPosition()->add(0.5, 0.5, 0.5), new BlazeShootSound());
+			$world->addSound($blockReplace->getPosition()->asVector3()->add(0.5, 0.5, 0.5), new BlazeShootSound());
 
 			$this->pop();
 

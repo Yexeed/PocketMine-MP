@@ -100,7 +100,7 @@ class TNT extends Opaque{
 
 		$mot = (new Random())->nextSignedFloat() * M_PI * 2;
 
-		$tnt = new PrimedTNT(Location::fromObject($this->position->add(0.5, 0, 0.5), $world));
+		$tnt = new PrimedTNT(Location::fromObject($this->position->asVector3()->add(0.5, 0, 0.5), $world));
 		$tnt->setFuse($fuse);
 		$tnt->setWorksUnderwater($this->worksUnderwater);
 		$tnt->setMotion(new Vector3(-sin($mot) * 0.02, 0.2, -cos($mot) * 0.02));

@@ -94,7 +94,7 @@ final class AcaciaTree extends Tree{
 				$nextBlockPos = $nextBlockPos->getSide($branchFacing);
 				$diagonalPlaced++;
 			}
-			$transaction->addBlock($nextBlockPos, $this->trunkBlock);
+			$transaction->addBlockAt($nextBlockPos->getFloorX(), $nextBlockPos->getFloorY(), $nextBlockPos->getFloorZ(), $this->trunkBlock);
 		}
 
 		return $nextBlockPos;

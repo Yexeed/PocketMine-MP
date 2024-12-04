@@ -139,7 +139,7 @@ abstract class PressurePlate extends Transparent{
 			if($newState !== null){
 				$world->setBlock($this->position, $newState);
 				if($pressedChange !== null){
-					$world->addSound($this->position, $pressedChange ?
+					$world->addSound($this->position->asVector3(), $pressedChange ?
 						new PressurePlateActivateSound($this) :
 						new PressurePlateDeactivateSound($this)
 					);

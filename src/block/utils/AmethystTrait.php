@@ -34,7 +34,7 @@ trait AmethystTrait{
 	 * @see Block::onProjectileHit()
 	 */
 	public function onProjectileHit(Projectile $projectile, RayTraceResult $hitResult) : void{
-		$this->position->getWorld()->addSound($this->position, new AmethystBlockChimeSound());
-		$this->position->getWorld()->addSound($this->position, new BlockPunchSound($this));
+		$this->position->getWorld()->addSound($this->position->asVector3(), new AmethystBlockChimeSound());
+		$this->position->getWorld()->addSound($this->position->asVector3(), new BlockPunchSound($this));
 	}
 }

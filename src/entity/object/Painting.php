@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\object;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntitySizeInfo;
@@ -64,13 +65,13 @@ class Painting extends Entity{
 		Facing::EAST => 3
 	];
 
-	protected Vector3 $blockIn;
+	protected BlockPosition $blockIn;
 	protected int $facing;
 	protected PaintingMotive $motive;
 
-	public function __construct(Location $location, Vector3 $blockIn, int $facing, PaintingMotive $motive, ?CompoundTag $nbt = null){
+	public function __construct(Location $location, BlockPosition $blockIn, int $facing, PaintingMotive $motive, ?CompoundTag $nbt = null){
 		$this->motive = $motive;
-		$this->blockIn = $blockIn->asVector3();
+		$this->blockIn = $blockIn;
 		$this->facing = $facing;
 		parent::__construct($location, $nbt);
 	}
@@ -92,9 +93,9 @@ class Painting extends Entity{
 
 	public function saveNBT() : CompoundTag{
 		$nbt = parent::saveNBT();
-		$nbt->setInt(self::TAG_TILE_X, (int) $this->blockIn->x);
-		$nbt->setInt(self::TAG_TILE_Y, (int) $this->blockIn->y);
-		$nbt->setInt(self::TAG_TILE_Z, (int) $this->blockIn->z);
+		$nbt->setInt(self::TAG_TILE_X, $this->blockIn->x);
+		$nbt->setInt(self::TAG_TILE_Y, $this->blockIn->y);
+		$nbt->setInt(self::TAG_TILE_Z, $this->blockIn->z);
 
 		$nbt->setByte(self::TAG_FACING_JE, self::FACING_TO_DATA[$this->facing]);
 		$nbt->setByte(self::TAG_DIRECTION_BE, self::FACING_TO_DATA[$this->facing]); //Save both for full compatibility
@@ -202,7 +203,7 @@ class Painting extends Entity{
 	/**
 	 * Returns whether a painting with the specified motive can be placed at the given position.
 	 */
-	public static function canFit(World $world, Vector3 $blockIn, int $facing, bool $checkOverlap, PaintingMotive $motive) : bool{
+	public static function canFit(World $world, BlockPosition $blockIn, int $facing, bool $checkOverlap, PaintingMotive $motive) : bool{
 		$width = $motive->getWidth();
 		$height = $motive->getHeight();
 
@@ -213,7 +214,7 @@ class Painting extends Entity{
 
 		$oppositeSide = Facing::opposite($facing);
 
-		$startPos = $blockIn->asVector3()->getSide(Facing::opposite($rotatedFace), $horizontalStart)->getSide(Facing::DOWN, $verticalStart);
+		$startPos = $blockIn->getSide(Facing::opposite($rotatedFace), $horizontalStart)->getSide(Facing::DOWN, $verticalStart);
 
 		for($w = 0; $w < $width; ++$w){
 			for($h = 0; $h < $height; ++$h){

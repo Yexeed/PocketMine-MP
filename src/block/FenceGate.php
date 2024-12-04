@@ -111,7 +111,7 @@ class FenceGate extends Transparent{
 
 		$world = $this->position->getWorld();
 		$world->setBlock($this->position, $this);
-		$world->addSound($this->position, new DoorSound());
+		$world->addSound($this->position->asVector3(), new DoorSound());
 		return true;
 	}
 

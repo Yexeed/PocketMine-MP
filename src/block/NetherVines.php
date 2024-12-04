@@ -117,7 +117,7 @@ class NetherVines extends Flowable{
 
 		for($i = 1; $i <= $growthAmount; $i++){
 			$growthPos = $pos->getSide($this->growthFace, $i);
-			if(!$world->isInWorld($growthPos->getFloorX(), $growthPos->getFloorY(), $growthPos->getFloorZ()) || !$world->getBlock($growthPos)->canBeReplaced()){
+			if(!$world->isInWorld($growthPos->x, $growthPos->y, $growthPos->z) || !$world->getBlock($growthPos)->canBeReplaced()){
 				break;
 			}
 			$tx->addBlock($growthPos, (clone $top)->setAge(min(++$age, self::MAX_AGE)));

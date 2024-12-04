@@ -99,10 +99,10 @@ abstract class BaseBigDripleaf extends Transparent{
 			return false;
 		}
 		$pos = $head->position;
-		$up = $pos->up();
+		$up = $pos->getSide(Facing::UP);
 		$world = $pos->getWorld();
 		if(
-			!$world->isInWorld($up->getFloorX(), $up->getFloorY(), $up->getFloorZ()) ||
+			!$world->isInWorld($up->x, $up->y, $up->z) ||
 			$world->getBlock($up)->getTypeId() !== BlockTypeIds::AIR
 		){
 			return false;

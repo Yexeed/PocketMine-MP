@@ -56,7 +56,7 @@ class Bucket extends Item{
 			$ev->call();
 			if(!$ev->isCancelled()){
 				$player->getWorld()->setBlock($blockClicked->getPosition(), VanillaBlocks::AIR());
-				$player->getWorld()->addSound($blockClicked->getPosition()->add(0.5, 0.5, 0.5), $blockClicked->getBucketFillSound());
+				$player->getWorld()->addSound($blockClicked->getPosition()->asVector3()->add(0.5, 0.5, 0.5), $blockClicked->getBucketFillSound());
 
 				$this->pop();
 				$returnedItems[] = $ev->getItem();

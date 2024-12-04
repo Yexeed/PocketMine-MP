@@ -56,9 +56,9 @@ final class CropGrowthHelper{
 		$position = $block->getPosition();
 
 		$world = $position->getWorld();
-		$baseX = $position->getFloorX();
-		$baseY = $position->getFloorY();
-		$baseZ = $position->getFloorZ();
+		$baseX = $position->x;
+		$baseY = $position->y;
+		$baseZ = $position->z;
 
 		$farmland = $world->getBlockAt($baseX, $baseY - 1, $baseZ);
 

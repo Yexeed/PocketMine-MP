@@ -33,7 +33,6 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
-use pocketmine\world\Position;
 use function mt_rand;
 
 class SmallDripleaf extends Transparent{
@@ -98,9 +97,9 @@ class SmallDripleaf extends Transparent{
 		return false;
 	}
 
-	private function canGrowTo(Position $pos) : bool{
+	private function canGrowTo(BlockPosition $pos) : bool{
 		$world = $pos->getWorld();
-		if(!$world->isInWorld($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ())){
+		if(!$world->isInWorld($pos->x, $pos->y, $pos->z)){
 			return false;
 		}
 		$block = $world->getBlock($pos);

@@ -143,10 +143,10 @@ final class Bell extends Transparent{
 
 	public function ring(int $faceHit) : void{
 		$world = $this->position->getWorld();
-		$world->addSound($this->position, new BellRingSound());
+		$world->addSound($this->position->asVector3(), new BellRingSound());
 		$tile = $world->getTile($this->position);
 		if($tile instanceof TileBell){
-			$world->broadcastPacketToViewers($this->position, $tile->createFakeUpdatePacket($faceHit));
+			$world->broadcastPacketToViewers($this->position->asVector3(), $tile->createFakeUpdatePacket($faceHit));
 		}
 	}
 

@@ -132,7 +132,7 @@ class FallingBlock extends Entity{
 			$world = $this->getWorld();
 			$pos = $this->location->add(-$this->size->getWidth() / 2, $this->size->getHeight(), -$this->size->getWidth() / 2)->floor();
 
-			$this->block->position($world, $pos->x, $pos->y, $pos->z);
+			$this->block->position($world, $pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ());
 
 			$blockTarget = null;
 			if($this->block instanceof Fallable){
@@ -143,7 +143,7 @@ class FallingBlock extends Entity{
 				$this->flagForDespawn();
 
 				$blockResult = $blockTarget ?? $this->block;
-				$block = $world->getBlock($pos);
+				$block = $world->getBlock($this->block->getPosition());
 				if(!$block->canBeReplaced() || !$world->isInWorld($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ()) || ($this->onGround && abs($this->location->y - $this->location->getFloorY()) > 0.001)){
 					$world->dropItem($this->location, $this->block->asItem());
 					$world->addSound($pos->add(0.5, 0.5, 0.5), new BlockBreakSound($blockResult));
@@ -152,7 +152,7 @@ class FallingBlock extends Entity{
 					$ev->call();
 					if(!$ev->isCancelled()){
 						$b = $ev->getTo();
-						$world->setBlock($pos, $b);
+						$world->setBlock($this->block->getPosition(), $b);
 						if($this->onGround && $b instanceof Fallable && ($sound = $b->getLandSound()) !== null){
 							$world->addSound($pos->add(0.5, 0.5, 0.5), $sound);
 						}

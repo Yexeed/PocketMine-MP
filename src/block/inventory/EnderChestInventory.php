@@ -23,14 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\tile\EnderChest;
 use pocketmine\inventory\DelegateInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\PlayerEnderInventory;
 use pocketmine\network\mcpe\protocol\BlockEventPacket;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\player\Player;
-use pocketmine\world\Position;
 use pocketmine\world\sound\EnderChestCloseSound;
 use pocketmine\world\sound\EnderChestOpenSound;
 use pocketmine\world\sound\Sound;
@@ -44,7 +44,7 @@ class EnderChestInventory extends DelegateInventory implements BlockInventory{
 	}
 
 	public function __construct(
-		Position $holder,
+		BlockPosition $holder,
 		private PlayerEnderInventory $inventory
 	){
 		parent::__construct($inventory);
@@ -75,7 +75,8 @@ class EnderChestInventory extends DelegateInventory implements BlockInventory{
 		$holder = $this->getHolder();
 
 		//event ID is always 1 for a chest
-		$holder->getWorld()->broadcastPacketToViewers($holder, BlockEventPacket::create(BlockPosition::fromVector3($holder), 1, $isOpen ? 1 : 0));
+		//TODO: maybe broadcast should use BlockPosition
+		$holder->getWorld()->broadcastPacketToViewers($holder->asVector3(), BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
 	}
 
 	public function onClose(Player $who) : void{

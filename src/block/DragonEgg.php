@@ -66,16 +66,17 @@ class DragonEgg extends Transparent implements Fallable{
 				$this->position->z + mt_rand(-16, 16)
 			);
 			if($block instanceof Air){
-				$ev = new BlockTeleportEvent($this, $block->position);
+				//TODO: this needs migrating to BlockPosition, but having World in there presents some issues
+				$ev = new BlockTeleportEvent($this, $block->position->asVector3());
 				$ev->call();
 				if($ev->isCancelled()){
 					break;
 				}
 
 				$blockPos = $ev->getTo();
-				$world->addParticle($this->position, new DragonEggTeleportParticle($this->position->x - $blockPos->x, $this->position->y - $blockPos->y, $this->position->z - $blockPos->z));
+				$world->addParticle($this->position->asVector3(), new DragonEggTeleportParticle($this->position->x - $blockPos->getFloorX(), $this->position->y - $blockPos->getFloorY(), $this->position->z - $blockPos->getFloorZ()));
 				$world->setBlock($this->position, VanillaBlocks::AIR());
-				$world->setBlock($blockPos, $this);
+				$world->setBlockAt($blockPos->getFloorX(), $blockPos->getFloorY(), $blockPos->getFloorZ(), $this);
 				break;
 			}
 		}

@@ -23,12 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\inventory\ShulkerBoxInventory;
 use pocketmine\item\Item;
 use pocketmine\math\Facing;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\world\World;
 
 class ShulkerBox extends Spawnable implements Container, Nameable{
 	use NameableTrait {
@@ -42,8 +41,8 @@ class ShulkerBox extends Spawnable implements Container, Nameable{
 
 	protected ShulkerBoxInventory $inventory;
 
-	public function __construct(World $world, Vector3 $pos){
-		parent::__construct($world, $pos);
+	public function __construct(BlockPosition $position){
+		parent::__construct($position);
 		$this->inventory = new ShulkerBoxInventory($this->position);
 	}
 

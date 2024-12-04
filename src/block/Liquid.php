@@ -165,9 +165,9 @@ abstract class Liquid extends Transparent{
 
 		$vX = $vY = $vZ = 0;
 
-		$x = $this->position->getFloorX();
-		$y = $this->position->getFloorY();
-		$z = $this->position->getFloorZ();
+		$x = $this->position->x;
+		$y = $this->position->y;
+		$z = $this->position->z;
 
 		$decay = $this->getEffectiveFlowDecay($this);
 
@@ -259,9 +259,9 @@ abstract class Liquid extends Transparent{
 
 		$world = $this->position->getWorld();
 
-		$x = $this->position->getFloorX();
-		$y = $this->position->getFloorY();
-		$z = $this->position->getFloorZ();
+		$x = $this->position->x;
+		$y = $this->position->y;
+		$z = $this->position->z;
 
 		if(!$this->isSource()){
 			$smallestFlowDecay = -100;
@@ -368,7 +368,7 @@ abstract class Liquid extends Transparent{
 
 	protected function liquidCollide(Block $cause, Block $result) : bool{
 		if(BlockEventHelper::form($this, $result, $cause)){
-			$this->position->getWorld()->addSound($this->position->add(0.5, 0.5, 0.5), new FizzSound(2.6 + (Utils::getRandomFloat() - Utils::getRandomFloat()) * 0.8));
+			$this->position->getWorld()->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new FizzSound(2.6 + (Utils::getRandomFloat() - Utils::getRandomFloat()) * 0.8));
 		}
 		return true;
 	}

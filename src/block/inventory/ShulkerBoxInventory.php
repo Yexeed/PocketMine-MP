@@ -23,12 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\network\mcpe\protocol\BlockEventPacket;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\world\Position;
 use pocketmine\world\sound\ShulkerBoxCloseSound;
 use pocketmine\world\sound\ShulkerBoxOpenSound;
@@ -37,7 +38,7 @@ use pocketmine\world\sound\Sound;
 class ShulkerBoxInventory extends SimpleInventory implements BlockInventory{
 	use AnimatedBlockInventoryTrait;
 
-	public function __construct(Position $holder){
+	public function __construct(BlockPosition $holder){
 		$this->holder = $holder;
 		parent::__construct(27);
 	}
@@ -62,6 +63,7 @@ class ShulkerBoxInventory extends SimpleInventory implements BlockInventory{
 		$holder = $this->getHolder();
 
 		//event ID is always 1 for a chest
-		$holder->getWorld()->broadcastPacketToViewers($holder, BlockEventPacket::create(BlockPosition::fromVector3($holder), 1, $isOpen ? 1 : 0));
+		//TODO: maybe broadcast should use block position
+		$holder->getWorld()->broadcastPacketToViewers($holder->asVector3(), BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
 	}
 }

@@ -68,9 +68,9 @@ class IceBomb extends Throwable{
 
 		$pos = $blockHit->getPosition();
 		$world = $pos->getWorld();
-		$posX = $pos->getFloorX();
-		$posY = $pos->getFloorY();
-		$posZ = $pos->getFloorZ();
+		$posX = $pos->x;
+		$posY = $pos->y;
+		$posZ = $pos->z;
 
 		$ice = VanillaBlocks::ICE();
 		for($x = $posX - 1; $x <= $posX + 1; $x++){

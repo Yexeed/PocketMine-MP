@@ -28,6 +28,7 @@ namespace pocketmine\world;
 
 use pocketmine\block\Air;
 use pocketmine\block\Block;
+use pocketmine\block\BlockPosition;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\block\tile\Spawnable;
@@ -72,7 +73,7 @@ use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\NetworkBroadcastUtils;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\player\Player;
 use pocketmine\promise\Promise;
@@ -283,12 +284,12 @@ class World implements ChunkManager{
 	private array $chunks = [];
 
 	/**
-	 * @var Vector3[][] chunkHash => [relativeBlockHash => Vector3]
-	 * @phpstan-var array<ChunkPosHash, array<ChunkBlockPosHash, Vector3>>
+	 * @var BlockPosition[][] chunkHash => [relativeBlockHash => BlockPosition]
+	 * @phpstan-var array<ChunkPosHash, array<ChunkBlockPosHash, BlockPosition>>
 	 */
 	private array $changedBlocks = [];
 
-	/** @phpstan-var ReversePriorityQueue<int, Vector3> */
+	/** @phpstan-var ReversePriorityQueue<int, BlockPosition> */
 	private ReversePriorityQueue $scheduledBlockUpdateQueue;
 	/**
 	 * @var int[] blockHash => tick delay
@@ -953,10 +954,10 @@ class World implements ChunkManager{
 		$this->timings->scheduledBlockUpdates->startTiming();
 		//Delayed updates
 		while($this->scheduledBlockUpdateQueue->count() > 0 && $this->scheduledBlockUpdateQueue->current()["priority"] <= $currentTick){
-			/** @var Vector3 $vec */
+			/** @var BlockPosition $vec */
 			$vec = $this->scheduledBlockUpdateQueue->extract()["data"];
 			unset($this->scheduledBlockUpdateQueueIndex[World::blockHash($vec->x, $vec->y, $vec->z)]);
-			if(!$this->isInLoadedTerrain($vec)){
+			if(!$this->isChunkLoaded($vec->x >> Chunk::COORD_BIT_SIZE, $vec->z >> Chunk::COORD_BIT_SIZE)){
 				continue;
 			}
 			$block = $this->getBlock($vec);
@@ -1083,8 +1084,8 @@ class World implements ChunkManager{
 	}
 
 	/**
-	 * @param Vector3[] $blocks
-	 * @phpstan-param list<Vector3> $blocks
+	 * @param BlockPosition[] $blocks
+	 * @phpstan-param list<BlockPosition> $blocks
 	 *
 	 * @return ClientboundPacket[]
 	 * @phpstan-return list<ClientboundPacket>
@@ -1095,12 +1096,12 @@ class World implements ChunkManager{
 		$blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
 
 		foreach($blocks as $b){
-			if(!($b instanceof Vector3)){
+			if(!($b instanceof BlockPosition)){
 				throw new \TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
 			}
 
 			$fullBlock = $this->getBlockAt($b->x, $b->y, $b->z);
-			$blockPosition = BlockPosition::fromVector3($b);
+			$blockPosition = new ProtocolBlockPosition($b->x, $b->y, $b->z);
 
 			$tile = $this->getTileAt($b->x, $b->y, $b->z);
 			if($tile instanceof Spawnable){
@@ -1449,7 +1450,7 @@ class World implements ChunkManager{
 	 * Schedules a block update to be executed after the specified number of ticks.
 	 * Blocks will be updated with the scheduled update type.
 	 */
-	public function scheduleDelayedBlockUpdate(Vector3 $pos, int $delay) : void{
+	public function scheduleDelayedBlockUpdate(BlockPosition $pos, int $delay) : void{
 		if(
 			!$this->isInWorld($pos->x, $pos->y, $pos->z) ||
 			(isset($this->scheduledBlockUpdateQueueIndex[$index = World::blockHash($pos->x, $pos->y, $pos->z)]) && $this->scheduledBlockUpdateQueueIndex[$index] <= $delay)
@@ -1457,7 +1458,7 @@ class World implements ChunkManager{
 			return;
 		}
 		$this->scheduledBlockUpdateQueueIndex[$index] = $delay;
-		$this->scheduledBlockUpdateQueue->insert(new Vector3((int) $pos->x, (int) $pos->y, (int) $pos->z), $delay + $this->server->getTick());
+		$this->scheduledBlockUpdateQueue->insert(new BlockPosition($pos->x, $pos->y, $pos->z, $this), $delay + $this->server->getTick());
 	}
 
 	private function tryAddToNeighbourUpdateQueue(int $x, int $y, int $z) : void{
@@ -1673,11 +1674,8 @@ class World implements ChunkManager{
 	 * Returns the highest level of any type of light at the given coordinates, adjusted for the current weather and
 	 * time of day.
 	 */
-	public function getFullLight(Vector3 $pos) : int{
-		$floorX = $pos->getFloorX();
-		$floorY = $pos->getFloorY();
-		$floorZ = $pos->getFloorZ();
-		return $this->getFullLightAt($floorX, $floorY, $floorZ);
+	public function getFullLight(BlockPosition $pos) : int{
+		return $this->getFullLightAt($pos->x, $pos->y, $pos->z);
 	}
 
 	/**
@@ -1867,8 +1865,8 @@ class World implements ChunkManager{
 	 * @param bool $cached     Whether to use the block cache for getting the block (faster, but may be inaccurate)
 	 * @param bool $addToCache Whether to cache the block object created by this method call.
 	 */
-	public function getBlock(Vector3 $pos, bool $cached = true, bool $addToCache = true) : Block{
-		return $this->getBlockAt((int) floor($pos->x), (int) floor($pos->y), (int) floor($pos->z), $cached, $addToCache);
+	public function getBlock(BlockPosition $pos, bool $cached = true, bool $addToCache = true) : Block{
+		return $this->getBlockAt($pos->x, $pos->y, $pos->z, $cached, $addToCache);
 	}
 
 	/**
@@ -1931,8 +1929,8 @@ class World implements ChunkManager{
 	 *
 	 * @throws \InvalidArgumentException if the position is out of the world bounds
 	 */
-	public function setBlock(Vector3 $pos, Block $block, bool $update = true) : void{
-		$this->setBlockAt((int) floor($pos->x), (int) floor($pos->y), (int) floor($pos->z), $block, $update);
+	public function setBlock(BlockPosition $pos, Block $block, bool $update = true) : void{
+		$this->setBlockAt($pos->x, $pos->y, $pos->z, $block, $update);
 	}
 
 	/**
@@ -1961,7 +1959,6 @@ class World implements ChunkManager{
 
 		$block->position($this, $x, $y, $z);
 		$block->writeStateToWorld();
-		$pos = new Vector3($x, $y, $z);
 
 		$chunkHash = World::chunkHash($chunkX, $chunkZ);
 		$relativeBlockHash = World::chunkBlockHash($x, $y, $z);
@@ -1979,8 +1976,9 @@ class World implements ChunkManager{
 		if(!isset($this->changedBlocks[$chunkHash])){
 			$this->changedBlocks[$chunkHash] = [];
 		}
-		$this->changedBlocks[$chunkHash][$relativeBlockHash] = $pos;
+		$this->changedBlocks[$chunkHash][$relativeBlockHash] = new BlockPosition($x, $y, $z, $this);
 
+		$pos = new Vector3($x, $y, $z);
 		foreach($this->getChunkListeners($chunkX, $chunkZ) as $listener){
 			$listener->onBlockChanged($pos);
 		}
@@ -2037,11 +2035,9 @@ class World implements ChunkManager{
 	 * @param Item[] &$returnedItems Items to be added to the target's inventory (or dropped, if the inventory is full)
 	 * @phpstan-param-out Item $item
 	 */
-	public function useBreakOn(Vector3 $vector, ?Item &$item = null, ?Player $player = null, bool $createParticles = false, array &$returnedItems = []) : bool{
-		$vector = $vector->floor();
-
-		$chunkX = $vector->getFloorX() >> Chunk::COORD_BIT_SIZE;
-		$chunkZ = $vector->getFloorZ() >> Chunk::COORD_BIT_SIZE;
+	public function useBreakOn(BlockPosition $vector, ?Item &$item = null, ?Player $player = null, bool $createParticles = false, array &$returnedItems = []) : bool{
+		$chunkX = $vector->x >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $vector->z >> Chunk::COORD_BIT_SIZE;
 		if(!$this->isChunkLoaded($chunkX, $chunkZ) || $this->isChunkLocked($chunkX, $chunkZ)){
 			return false;
 		}
@@ -2105,7 +2101,7 @@ class World implements ChunkManager{
 		$item->onDestroyBlock($target, $returnedItems);
 
 		if(count($drops) > 0){
-			$dropPos = $vector->add(0.5, 0.5, 0.5);
+			$dropPos = $vector->asVector3()->add(0.5, 0.5, 0.5);
 			foreach($drops as $drop){
 				if(!$drop->isNull()){
 					$this->dropItem($dropPos, $drop);
@@ -2114,7 +2110,7 @@ class World implements ChunkManager{
 		}
 
 		if($xpDrop > 0){
-			$this->dropExperience($vector->add(0.5, 0.5, 0.5), $xpDrop);
+			$this->dropExperience($vector->asVector3()->add(0.5, 0.5, 0.5), $xpDrop);
 		}
 
 		return true;
@@ -2125,7 +2121,7 @@ class World implements ChunkManager{
 	 */
 	private function destroyBlockInternal(Block $target, Item $item, ?Player $player, bool $createParticles, array &$returnedItems) : void{
 		if($createParticles){
-			$this->addParticle($target->getPosition()->add(0.5, 0.5, 0.5), new BlockBreakParticle($target));
+			$this->addParticle($target->getPosition()->asVector3()->add(0.5, 0.5, 0.5), new BlockBreakParticle($target));
 		}
 
 		$target->onBreak($item, $player, $returnedItems);
@@ -2143,7 +2139,7 @@ class World implements ChunkManager{
 	 * @param bool        $playSound      Whether to play a block-place sound if the block was placed successfully.
 	 * @param Item[]      &$returnedItems Items to be added to the target's inventory (or dropped if the inventory is full)
 	 */
-	public function useItemOn(Vector3 $vector, Item &$item, int $face, ?Vector3 $clickVector = null, ?Player $player = null, bool $playSound = false, array &$returnedItems = []) : bool{
+	public function useItemOn(BlockPosition $vector, Item &$item, int $face, ?Vector3 $clickVector = null, ?Player $player = null, bool $playSound = false, array &$returnedItems = []) : bool{
 		$blockClicked = $this->getBlock($vector);
 		$blockReplace = $blockClicked->getSide($face);
 
@@ -2161,8 +2157,8 @@ class World implements ChunkManager{
 			//TODO: build height limit messages for custom world heights and mcregion cap
 			return false;
 		}
-		$chunkX = $blockReplace->getPosition()->getFloorX() >> Chunk::COORD_BIT_SIZE;
-		$chunkZ = $blockReplace->getPosition()->getFloorZ() >> Chunk::COORD_BIT_SIZE;
+		$chunkX = $blockReplace->getPosition()->x >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $blockReplace->getPosition()->z >> Chunk::COORD_BIT_SIZE;
 		if(!$this->isChunkLoaded($chunkX, $chunkZ) || $this->isChunkLocked($chunkX, $chunkZ)){
 			return false;
 		}
@@ -2273,7 +2269,7 @@ class World implements ChunkManager{
 		}
 
 		if($playSound){
-			$this->addSound($hand->getPosition(), new BlockPlaceSound($hand));
+			$this->addSound($hand->getPosition()->asVector3(), new BlockPlaceSound($hand));
 		}
 
 		$item->pop();
@@ -2405,8 +2401,8 @@ class World implements ChunkManager{
 	 * Note: This method wraps getTileAt(). If you're guaranteed to be passing integers, and you're using this method
 	 * in performance-sensitive code, consider using getTileAt() instead of this method for better performance.
 	 */
-	public function getTile(Vector3 $pos) : ?Tile{
-		return $this->getTileAt((int) floor($pos->x), (int) floor($pos->y), (int) floor($pos->z));
+	public function getTile(BlockPosition $pos) : ?Tile{
+		return $this->getTileAt($pos->x, $pos->y, $pos->z);
 	}
 
 	/**
@@ -2544,9 +2540,9 @@ class World implements ChunkManager{
 			$transferredTiles = 0;
 			foreach($oldChunk->getTiles() as $oldTile){
 				$tilePosition = $oldTile->getPosition();
-				$localX = $tilePosition->getFloorX() & Chunk::COORD_MASK;
-				$localY = $tilePosition->getFloorY();
-				$localZ = $tilePosition->getFloorZ() & Chunk::COORD_MASK;
+				$localX = $tilePosition->x & Chunk::COORD_MASK;
+				$localY = $tilePosition->y;
+				$localZ = $tilePosition->z & Chunk::COORD_MASK;
 
 				$newBlock = RuntimeBlockStateRegistry::getInstance()->fromStateId($chunk->getBlockStateId($localX, $localY, $localZ));
 				$expectedTileClass = $newBlock->getIdInfo()->getTileClass();
@@ -2772,12 +2768,12 @@ class World implements ChunkManager{
 		if(!$pos->isValid() || $pos->getWorld() !== $this){
 			throw new \InvalidArgumentException("Invalid Tile world");
 		}
-		if(!$this->isInWorld($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ())){
+		if(!$this->isInWorld($pos->x, $pos->y, $pos->z)){
 			throw new \InvalidArgumentException("Tile position is outside the world bounds");
 		}
 
-		$chunkX = $pos->getFloorX() >> Chunk::COORD_BIT_SIZE;
-		$chunkZ = $pos->getFloorZ() >> Chunk::COORD_BIT_SIZE;
+		$chunkX = $pos->x >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $pos->z >> Chunk::COORD_BIT_SIZE;
 
 		if(isset($this->chunks[$hash = World::chunkHash($chunkX, $chunkZ)])){
 			$this->chunks[$hash]->addTile($tile);
@@ -2786,7 +2782,7 @@ class World implements ChunkManager{
 		}
 
 		//delegate tile ticking to the corresponding block
-		$this->scheduleDelayedBlockUpdate($pos->asVector3(), 1);
+		$this->scheduleDelayedBlockUpdate($pos, 1);
 	}
 
 	/**
@@ -2799,8 +2795,8 @@ class World implements ChunkManager{
 			throw new \InvalidArgumentException("Invalid Tile world");
 		}
 
-		$chunkX = $pos->getFloorX() >> Chunk::COORD_BIT_SIZE;
-		$chunkZ = $pos->getFloorZ() >> Chunk::COORD_BIT_SIZE;
+		$chunkX = $pos->x >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $pos->z >> Chunk::COORD_BIT_SIZE;
 
 		if(isset($this->chunks[$hash = World::chunkHash($chunkX, $chunkZ)])){
 			$this->chunks[$hash]->removeTile($tile);
@@ -2925,9 +2921,9 @@ class World implements ChunkManager{
 				}
 
 				$tilePosition = $tile->getPosition();
-				if(!$this->isChunkLoaded($tilePosition->getFloorX() >> Chunk::COORD_BIT_SIZE, $tilePosition->getFloorZ() >> Chunk::COORD_BIT_SIZE)){
+				if(!$this->isChunkLoaded($tilePosition->x >> Chunk::COORD_BIT_SIZE, $tilePosition->z >> Chunk::COORD_BIT_SIZE)){
 					$logger->error("Found tile saved on wrong chunk - unable to fix due to correct chunk not loaded");
-				}elseif(!$this->isInWorld($tilePosition->getFloorX(), $tilePosition->getFloorY(), $tilePosition->getFloorZ())){
+				}elseif(!$this->isInWorld($tilePosition->x, $tilePosition->y, $tilePosition->z)){
 					$logger->error("Cannot add tile with position outside the world bounds: x=$tilePosition->x,y=$tilePosition->y,z=$tilePosition->z");
 				}elseif($this->getTile($tilePosition) !== null){
 					$logger->error("Cannot add tile at x=$tilePosition->x,y=$tilePosition->y,z=$tilePosition->z: Another tile is already at that position");

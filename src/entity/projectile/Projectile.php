@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\entity\projectile;
 
 use pocketmine\block\Block;
+use pocketmine\block\BlockPosition;
 use pocketmine\data\SavedDataLoadingException;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
@@ -60,7 +61,7 @@ abstract class Projectile extends Entity{
 	private const TAG_TILE_Z = "tileZ"; //TAG_Int
 
 	protected float $damage = 0.0;
-	protected ?Vector3 $blockHit = null;
+	protected ?BlockPosition $blockHit = null;
 
 	public function __construct(Location $location, ?Entity $shootingEntity, ?CompoundTag $nbt = null){
 		parent::__construct($location, $nbt);
@@ -90,9 +91,9 @@ abstract class Projectile extends Entity{
 			/** @var IntTag[] $values */
 			$values = $stuckOnBlockPosTag->getValue();
 
-			$this->blockHit = new Vector3($values[0]->getValue(), $values[1]->getValue(), $values[2]->getValue());
+			$this->blockHit = new BlockPosition($values[0]->getValue(), $values[1]->getValue(), $values[2]->getValue(), $this->getWorld());
 		}elseif(($tileXTag = $nbt->getTag(self::TAG_TILE_X)) instanceof IntTag && ($tileYTag = $nbt->getTag(self::TAG_TILE_Y)) instanceof IntTag && ($tileZTag = $nbt->getTag(self::TAG_TILE_Z)) instanceof IntTag){
-			$this->blockHit = new Vector3($tileXTag->getValue(), $tileYTag->getValue(), $tileZTag->getValue());
+			$this->blockHit = new BlockPosition($tileXTag->getValue(), $tileYTag->getValue(), $tileZTag->getValue(), $this->getWorld());
 		}
 	}
 
@@ -133,9 +134,9 @@ abstract class Projectile extends Entity{
 
 		if($this->blockHit !== null){
 			$nbt->setTag(self::TAG_STUCK_ON_BLOCK_POS, new ListTag([
-				new IntTag($this->blockHit->getFloorX()),
-				new IntTag($this->blockHit->getFloorY()),
-				new IntTag($this->blockHit->getFloorZ())
+				new IntTag($this->blockHit->x),
+				new IntTag($this->blockHit->y),
+				new IntTag($this->blockHit->z)
 			]));
 		}
 
@@ -147,7 +148,7 @@ abstract class Projectile extends Entity{
 	}
 
 	public function onNearbyBlockChange() : void{
-		if($this->blockHit !== null && $this->getWorld()->isInLoadedTerrain($this->blockHit)){
+		if($this->blockHit !== null && $this->getWorld()->isInLoadedTerrain($this->blockHit->asVector3())){
 			$blockHit = $this->getWorld()->getBlock($this->blockHit);
 			if(!$blockHit->collidesWithBB($this->getBoundingBox()->expandedCopy(0.001, 0.001, 0.001))){
 				$this->blockHit = null;
@@ -176,7 +177,7 @@ abstract class Projectile extends Entity{
 
 		$world = $this->getWorld();
 		foreach(VoxelRayTrace::betweenPoints($start, $end) as $vector3){
-			$block = $world->getBlockAt($vector3->x, $vector3->y, $vector3->z);
+			$block = $world->getBlockAt($vector3->getFloorX(), $vector3->getFloorY(), $vector3->getFloorZ());
 
 			$blockHitResult = $this->calculateInterceptWithBlock($block, $start, $end);
 			if($blockHitResult !== null){
@@ -314,7 +315,7 @@ abstract class Projectile extends Entity{
 	 * Called when the projectile collides with a Block.
 	 */
 	protected function onHitBlock(Block $blockHit, RayTraceResult $hitResult) : void{
-		$this->blockHit = $blockHit->getPosition()->asVector3();
+		$this->blockHit = $blockHit->getPosition();
 		$blockHit->onProjectileHit($this, $hitResult);
 	}
 }

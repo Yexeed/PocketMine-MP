@@ -377,11 +377,12 @@ abstract class Living extends Entity{
 	}
 
 	protected function onHitGround() : ?float{
-		$fallBlockPos = $this->location->floor();
-		$fallBlock = $this->getWorld()->getBlock($fallBlockPos);
+		$fallBlockX = $this->location->getFloorX();
+		$fallBlockY = $this->location->getFloorY();
+		$fallBlockZ = $this->location->getFloorZ();
+		$fallBlock = $this->getWorld()->getBlockAt($fallBlockX, $fallBlockY, $fallBlockZ);
 		if(count($fallBlock->getCollisionBoxes()) === 0){
-			$fallBlockPos = $fallBlockPos->down();
-			$fallBlock = $this->getWorld()->getBlock($fallBlockPos);
+			$fallBlock = $this->getWorld()->getBlockAt($fallBlockX, $fallBlockY - 1, $fallBlockZ);
 		}
 		$newVerticalVelocity = $fallBlock->onEntityLand($this);
 

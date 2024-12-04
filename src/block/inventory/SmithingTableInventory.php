@@ -23,14 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\block\inventory;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\inventory\TemporaryInventory;
-use pocketmine\world\Position;
 
 final class SmithingTableInventory extends SimpleInventory implements BlockInventory, TemporaryInventory{
 	use BlockInventoryTrait;
 
-	public function __construct(Position $holder){
+	public function __construct(BlockPosition $holder){
 		$this->holder = $holder;
 		parent::__construct(3);
 	}

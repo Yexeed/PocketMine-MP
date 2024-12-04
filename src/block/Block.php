@@ -73,7 +73,7 @@ class Block{
 	protected BlockIdentifier $idInfo;
 	protected string $fallbackName;
 	protected BlockTypeInfo $typeInfo;
-	protected Position $position;
+	protected BlockPosition $position;
 
 	/** @var AxisAlignedBB[]|null */
 	protected ?array $collisionBoxes = null;
@@ -107,7 +107,7 @@ class Block{
 		$this->idInfo = $idInfo;
 		$this->fallbackName = $name;
 		$this->typeInfo = $typeInfo;
-		$this->position = new Position(0, 0, 0, null);
+		$this->position = new BlockPosition(0, 0, 0, null);
 
 		$calculator = new RuntimeDataSizeCalculator();
 		$this->describeBlockItemState($calculator);
@@ -377,7 +377,7 @@ class Block{
 	 */
 	public function writeStateToWorld() : void{
 		$world = $this->position->getWorld();
-		$chunk = $world->getOrLoadChunkAtPosition($this->position);
+		$chunk = $world->loadChunk($this->position->x >> Chunk::COORD_BIT_SIZE, $this->position->z >> Chunk::COORD_BIT_SIZE);
 		if($chunk === null){
 			throw new AssumptionFailedError("World::setBlock() should have loaded the chunk before calling this method");
 		}
@@ -608,7 +608,7 @@ class Block{
 		return false;
 	}
 
-	final public function getPosition() : Position{
+	final public function getPosition() : BlockPosition{
 		return $this->position;
 	}
 
@@ -616,7 +616,7 @@ class Block{
 	 * @internal
 	 */
 	final public function position(World $world, int $x, int $y, int $z) : void{
-		$this->position = new Position($x, $y, $z, $world);
+		$this->position = new BlockPosition($x, $y, $z, $world);
 		$this->collisionBoxes = null;
 	}
 
@@ -912,9 +912,9 @@ class Block{
 		if($this->collisionBoxes === null){
 			$this->collisionBoxes = $this->recalculateCollisionBoxes();
 			$extraOffset = $this->getModelPositionOffset();
-			$offset = $extraOffset !== null ? $this->position->addVector($extraOffset) : $this->position;
+			[$dx, $dy, $dz] = $extraOffset !== null ? [$extraOffset->x, $extraOffset->y, $extraOffset->z] : [0, 0, 0];
 			foreach($this->collisionBoxes as $bb){
-				$bb->offset($offset->x, $offset->y, $offset->z);
+				$bb->offset($this->position->x + $dx, $this->position->y + $dy, $this->position->z + $dz);
 			}
 		}
 

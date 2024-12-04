@@ -90,8 +90,8 @@ class CaveVines extends Flowable{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($this->berries){
-			$this->position->getWorld()->dropItem($this->position, $this->asItem());
-			$this->position->getWorld()->addSound($this->position, new GlowBerriesPickSound());
+			$this->position->getWorld()->dropItem($this->position->asVector3(), $this->asItem());
+			$this->position->getWorld()->addSound($this->position->asVector3(), new GlowBerriesPickSound());
 
 			$this->position->getWorld()->setBlock($this->position, $this->setBerries(false));
 			return true;
@@ -117,7 +117,7 @@ class CaveVines extends Flowable{
 		if($this->age < self::MAX_AGE && mt_rand(1, 10) === 1){
 			$growthPos = $this->position->getSide(Facing::DOWN);
 			$world = $growthPos->getWorld();
-			if($world->isInWorld($growthPos->getFloorX(), $growthPos->getFloorY(), $growthPos->getFloorZ())){
+			if($world->isInWorld($growthPos->x, $growthPos->y, $growthPos->z)){
 				$block = $world->getBlock($growthPos);
 				if($block->getTypeId() === BlockTypeIds::AIR){
 					$newState = VanillaBlocks::CAVE_VINES()

@@ -73,7 +73,7 @@ class Furnace extends Opaque{
 		$furnace = $world->getTile($this->position);
 		if($furnace instanceof TileFurnace && $furnace->onUpdate()){
 			if(mt_rand(1, 60) === 1){ //in vanilla this is between 1 and 5 seconds; try to average about 3
-				$world->addSound($this->position, $furnace->getFurnaceType()->getCookSound());
+				$world->addSound($this->position->asVector3(), $furnace->getFurnaceType()->getCookSound());
 			}
 			$world->scheduleDelayedBlockUpdate($this->position, 1); //TODO: check this
 		}

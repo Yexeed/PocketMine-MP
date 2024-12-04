@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\data\SavedDataLoadingException;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\NbtException;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\utils\SingletonTrait;
@@ -130,7 +130,7 @@ final class TileFactory{
 			 * @var Tile $tile
 			 * @see Tile::__construct()
 			 */
-			$tile = new $class($world, new Vector3($nbt->getInt(Tile::TAG_X), $nbt->getInt(Tile::TAG_Y), $nbt->getInt(Tile::TAG_Z)));
+			$tile = new $class(new BlockPosition($nbt->getInt(Tile::TAG_X), $nbt->getInt(Tile::TAG_Y), $nbt->getInt(Tile::TAG_Z), $world));
 			$tile->readSaveData($nbt);
 		}catch(NbtException $e){
 			throw new SavedDataLoadingException($e->getMessage(), 0, $e);

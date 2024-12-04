@@ -206,7 +206,7 @@ class Explosion{
 			}else{
 				if(mt_rand(0, 100) < $yield){
 					foreach($block->getDrops($air) as $drop){
-						$this->world->dropItem($pos->add(0.5, 0.5, 0.5), $drop);
+						$this->world->dropItem($pos->asVector3()->add(0.5, 0.5, 0.5), $drop);
 					}
 				}
 				if(($t = $this->world->getTileAt($pos->x, $pos->y, $pos->z)) !== null){

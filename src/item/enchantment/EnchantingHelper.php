@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\item\enchantment;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\item\enchantment\AvailableEnchantmentRegistry as EnchantmentRegistry;
 use pocketmine\item\Item;
@@ -75,7 +76,7 @@ final class EnchantingHelper{
 	/**
 	 * @return EnchantingOption[]
 	 */
-	public static function generateOptions(Position $tablePos, Item $input, int $seed) : array{
+	public static function generateOptions(BlockPosition $tablePos, Item $input, int $seed) : array{
 		if($input->isNull() || $input->hasEnchantments()){
 			return [];
 		}
@@ -95,7 +96,7 @@ final class EnchantingHelper{
 		];
 	}
 
-	private static function countBookshelves(Position $tablePos) : int{
+	private static function countBookshelves(BlockPosition $tablePos) : int{
 		$bookshelfCount = 0;
 		$world = $tablePos->getWorld();
 

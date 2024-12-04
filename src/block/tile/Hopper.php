@@ -23,10 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
+use pocketmine\block\BlockPosition;
 use pocketmine\block\inventory\HopperInventory;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\world\World;
 
 class Hopper extends Spawnable implements Container, Nameable{
 
@@ -38,8 +37,8 @@ class Hopper extends Spawnable implements Container, Nameable{
 	private HopperInventory $inventory;
 	private int $transferCooldown = 0;
 
-	public function __construct(World $world, Vector3 $pos){
-		parent::__construct($world, $pos);
+	public function __construct(BlockPosition $position){
+		parent::__construct($position);
 		$this->inventory = new HopperInventory($this->position);
 	}
 
