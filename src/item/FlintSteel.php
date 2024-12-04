@@ -36,7 +36,7 @@ class FlintSteel extends Tool{
 		if($blockReplace->getTypeId() === BlockTypeIds::AIR){
 			$world = $player->getWorld();
 			$world->setBlock($blockReplace->getPosition(), VanillaBlocks::FIRE());
-			$world->addSound($blockReplace->getPosition()->asVector3()->add(0.5, 0.5, 0.5), new FlintSteelSound());
+			$world->addSound($blockReplace->getPosition()->center(), new FlintSteelSound());
 
 			$this->applyDamage(1);
 

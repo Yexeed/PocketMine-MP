@@ -51,10 +51,9 @@ final class SurvivalBlockBreakHandler{
 	){
 		$this->breakSpeed = $this->calculateBreakProgressPerTick();
 		if($this->breakSpeed > 0){
-			$vector3 = $this->blockPos->asVector3();
-			$this->player->getWorld()->broadcastPacketToViewers(
-				$vector3,
-				LevelEventPacket::create(LevelEvent::BLOCK_START_BREAK, (int) (65535 * $this->breakSpeed), $vector3)
+			$this->player->getWorld()->broadcastPacketOnBlock(
+				$this->blockPos,
+				LevelEventPacket::create(LevelEvent::BLOCK_START_BREAK, (int) (65535 * $this->breakSpeed), $this->blockPos->asVector3())
 			);
 		}
 	}
@@ -120,11 +119,10 @@ final class SurvivalBlockBreakHandler{
 	}
 
 	public function __destruct(){
-		$vector3 = $this->blockPos->asVector3();
 		if($this->player->getWorld()->isInLoadedTerrain($vector3)){
-			$this->player->getWorld()->broadcastPacketToViewers(
-				$vector3,
-				LevelEventPacket::create(LevelEvent::BLOCK_STOP_BREAK, 0, $vector3)
+			$this->player->getWorld()->broadcastPacketOnBlock(
+				$this->blockPos,
+				LevelEventPacket::create(LevelEvent::BLOCK_STOP_BREAK, 0, $this->blockPos->asVector3())
 			);
 		}
 	}

@@ -76,12 +76,12 @@ class Jukebox extends Opaque{
 
 	public function startSound() : void{
 		if($this->record !== null){
-			$this->position->getWorld()->addSound($this->position->asVector3(), new RecordSound($this->record->getRecordType()));
+			$this->position->getWorld()->addSound($this->position->center(), new RecordSound($this->record->getRecordType()));
 		}
 	}
 
 	public function stopSound() : void{
-		$this->position->getWorld()->addSound($this->position->asVector3(), new RecordStopSound());
+		$this->position->getWorld()->addSound($this->position->center(), new RecordStopSound());
 	}
 
 	public function onBreak(Item $item, ?Player $player = null, array &$returnedItems = []) : bool{

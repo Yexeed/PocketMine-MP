@@ -214,7 +214,7 @@ class BrewingStand extends Spawnable implements Container, Nameable{
 					}
 
 					if($anythingBrewed){
-						$this->position->getWorld()->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new PotionFinishBrewingSound());
+						$this->position->getWorld()->addSound($this->position->center(), new PotionFinishBrewingSound());
 					}
 
 					$ingredient->pop();

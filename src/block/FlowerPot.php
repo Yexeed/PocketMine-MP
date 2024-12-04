@@ -111,7 +111,7 @@ class FlowerPot extends Flowable{
 				$removedItems = $player->getInventory()->addItem(...$removedItems);
 			}
 			foreach($removedItems as $drops){
-				$world->dropItem($this->position->asVector3()->add(0.5, 0.5, 0.5), $drops);
+				$world->dropItem($this->position->center(), $drops);
 			}
 
 			$this->setPlant(null);

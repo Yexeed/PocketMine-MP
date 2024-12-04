@@ -192,10 +192,10 @@ final class ChorusFlower extends Flowable{
 			$ev = new StructureGrowEvent($this, $tx, null);
 			$ev->call();
 			if(!$ev->isCancelled() && $tx->apply()){
-				$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new ChorusFlowerGrowSound());
+				$world->addSound($this->position->center(), new ChorusFlowerGrowSound());
 			}
 		}else{
-			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new ChorusFlowerDieSound());
+			$world->addSound($this->position->center(), new ChorusFlowerDieSound());
 			$this->position->getWorld()->setBlock($this->position, $this->setAge(self::MAX_AGE));
 		}
 	}

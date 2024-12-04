@@ -90,8 +90,8 @@ class CaveVines extends Flowable{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($this->berries){
-			$this->position->getWorld()->dropItem($this->position->asVector3(), $this->asItem());
-			$this->position->getWorld()->addSound($this->position->asVector3(), new GlowBerriesPickSound());
+			$this->position->getWorld()->dropItem($this->position->center(), $this->asItem());
+			$this->position->getWorld()->addSound($this->position->center(), new GlowBerriesPickSound());
 
 			$this->position->getWorld()->setBlock($this->position, $this->setBerries(false));
 			return true;

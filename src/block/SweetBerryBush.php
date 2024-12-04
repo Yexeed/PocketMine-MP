@@ -81,7 +81,7 @@ class SweetBerryBush extends Flowable{
 			}
 		}elseif(($dropAmount = $this->getBerryDropAmount()) > 0){
 			$world->setBlock($this->position, $this->setAge(self::STAGE_BUSH_NO_BERRIES));
-			$posV3 = $this->position->asVector3();
+			$posV3 = $this->position->center();
 			$world->dropItem($posV3, $this->asItem()->setCount($dropAmount));
 			$world->addSound($posV3, new SweetBerriesPickSound());
 		}

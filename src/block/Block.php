@@ -398,7 +398,7 @@ class Block{
 			 * @var Tile $tile
 			 * @see Tile::__construct()
 			 */
-			$tile = new $tileType($world, $this->position->asVector3());
+			$tile = new $tileType($this->position);
 			$world->addTile($tile);
 		}
 	}

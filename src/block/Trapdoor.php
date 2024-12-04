@@ -88,7 +88,7 @@ class Trapdoor extends Transparent{
 		$this->open = !$this->open;
 		$world = $this->position->getWorld();
 		$world->setBlock($this->position, $this);
-		$world->addSound($this->position->asVector3(), new DoorSound());
+		$world->addSound($this->position->center(), new DoorSound());
 		return true;
 	}
 }

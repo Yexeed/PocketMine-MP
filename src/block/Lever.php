@@ -95,7 +95,7 @@ class Lever extends Flowable{
 		$world = $this->position->getWorld();
 		$world->setBlock($this->position, $this);
 		$world->addSound(
-			$this->position->asVector3()->add(0.5, 0.5, 0.5),
+			$this->position->center(),
 			$this->activated ? new RedstonePowerOnSound() : new RedstonePowerOffSound()
 		);
 		return true;

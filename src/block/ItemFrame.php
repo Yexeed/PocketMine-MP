@@ -135,11 +135,11 @@ class ItemFrame extends Flowable{
 		if($this->framedItem !== null){
 			$this->itemRotation = ($this->itemRotation + 1) % self::ROTATIONS;
 
-			$this->position->getWorld()->addSound($this->position->asVector3(), new ItemFrameRotateItemSound());
+			$this->position->getWorld()->addSound($this->position->center(), new ItemFrameRotateItemSound());
 		}elseif(!$item->isNull()){
 			$this->framedItem = $item->pop();
 
-			$this->position->getWorld()->addSound($this->position->asVector3(), new ItemFrameAddItemSound());
+			$this->position->getWorld()->addSound($this->position->center(), new ItemFrameAddItemSound());
 		}else{
 			return true;
 		}
@@ -155,8 +155,8 @@ class ItemFrame extends Flowable{
 		}
 		$world = $this->position->getWorld();
 		if(Utils::getRandomFloat() <= $this->itemDropChance){
-			$world->dropItem($this->position->asVector3()->add(0.5, 0.5, 0.5), clone $this->framedItem);
-			$world->addSound($this->position->asVector3(), new ItemFrameRemoveItemSound());
+			$world->dropItem($this->position->center(), clone $this->framedItem);
+			$world->addSound($this->position->center(), new ItemFrameRemoveItemSound());
 		}
 		$this->setFramedItem(null);
 		$world->setBlock($this->position, $this);

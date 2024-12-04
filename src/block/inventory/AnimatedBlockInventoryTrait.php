@@ -50,7 +50,7 @@ trait AnimatedBlockInventoryTrait{
 		if($this->holder->isValid() && $this->getViewerCount() === 1){
 			//TODO: this crap really shouldn't be managed by the inventory
 			$this->animateBlock(true);
-			$this->holder->getWorld()->addSound($this->holder->asVector3()->add(0.5, 0.5, 0.5), $this->getOpenSound());
+			$this->holder->getWorld()->addSound($this->holder->center(), $this->getOpenSound());
 		}
 	}
 
@@ -60,7 +60,7 @@ trait AnimatedBlockInventoryTrait{
 		if($this->holder->isValid() && $this->getViewerCount() === 1){
 			//TODO: this crap really shouldn't be managed by the inventory
 			$this->animateBlock(false);
-			$this->holder->getWorld()->addSound($this->holder->asVector3()->add(0.5, 0.5, 0.5), $this->getCloseSound());
+			$this->holder->getWorld()->addSound($this->holder->center(), $this->getCloseSound());
 		}
 		parent::onClose($who);
 	}

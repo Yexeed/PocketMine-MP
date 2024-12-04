@@ -712,7 +712,7 @@ class World implements ChunkManager{
 		if(count($pk) > 0){
 			if($players === $this->getViewersForPosition($pos)){
 				foreach($pk as $e){
-					$this->broadcastPacketToViewers($pos, $e);
+					$this->broadcastPacketOnPosition($pos, $e);
 				}
 			}else{
 				NetworkBroadcastUtils::broadcastPackets($this->filterViewersForPosition($pos, $players), $pk);
@@ -741,7 +741,7 @@ class World implements ChunkManager{
 		if(count($pk) > 0){
 			if($players === $this->getViewersForPosition($pos)){
 				foreach($pk as $e){
-					$this->broadcastPacketToViewers($pos, $e);
+					$this->broadcastPacketOnPosition($pos, $e);
 				}
 			}else{
 				NetworkBroadcastUtils::broadcastPackets($this->filterViewersForPosition($pos, $players), $pk);
@@ -793,8 +793,12 @@ class World implements ChunkManager{
 	/**
 	 * Broadcasts a packet to every player who has the target position within their view distance.
 	 */
-	public function broadcastPacketToViewers(Vector3 $pos, ClientboundPacket $packet) : void{
+	public function broadcastPacketOnPosition(Vector3 $pos, ClientboundPacket $packet) : void{
 		$this->broadcastPacketToPlayersUsingChunk($pos->getFloorX() >> Chunk::COORD_BIT_SIZE, $pos->getFloorZ() >> Chunk::COORD_BIT_SIZE, $packet);
+	}
+
+	public function broadcastPacketOnBlock(BlockPosition $pos, ClientboundPacket $packet) : void{
+		$this->broadcastPacketToPlayersUsingChunk($pos->x >> Chunk::COORD_BIT_SIZE, $pos->z >> Chunk::COORD_BIT_SIZE, $packet);
 	}
 
 	private function broadcastPacketToPlayersUsingChunk(int $chunkX, int $chunkZ, ClientboundPacket $packet) : void{
@@ -2101,7 +2105,7 @@ class World implements ChunkManager{
 		$item->onDestroyBlock($target, $returnedItems);
 
 		if(count($drops) > 0){
-			$dropPos = $vector->asVector3()->add(0.5, 0.5, 0.5);
+			$dropPos = $vector->center();
 			foreach($drops as $drop){
 				if(!$drop->isNull()){
 					$this->dropItem($dropPos, $drop);
@@ -2110,7 +2114,7 @@ class World implements ChunkManager{
 		}
 
 		if($xpDrop > 0){
-			$this->dropExperience($vector->asVector3()->add(0.5, 0.5, 0.5), $xpDrop);
+			$this->dropExperience($vector->center(), $xpDrop);
 		}
 
 		return true;
@@ -2121,7 +2125,7 @@ class World implements ChunkManager{
 	 */
 	private function destroyBlockInternal(Block $target, Item $item, ?Player $player, bool $createParticles, array &$returnedItems) : void{
 		if($createParticles){
-			$this->addParticle($target->getPosition()->asVector3()->add(0.5, 0.5, 0.5), new BlockBreakParticle($target));
+			$this->addParticle($target->getPosition()->center(), new BlockBreakParticle($target));
 		}
 
 		$target->onBreak($item, $player, $returnedItems);
@@ -2269,7 +2273,7 @@ class World implements ChunkManager{
 		}
 
 		if($playSound){
-			$this->addSound($hand->getPosition()->asVector3(), new BlockPlaceSound($hand));
+			$this->addSound($hand->getPosition()->center(), new BlockPlaceSound($hand));
 		}
 
 		$item->pop();

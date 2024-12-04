@@ -128,7 +128,7 @@ class Bed extends Transparent{
 				$player->sendMessage(TextFormat::GRAY . "This bed is incomplete");
 
 				return true;
-			}elseif($playerPos->distanceSquared($this->position->asVector3()) > 4 && $playerPos->distanceSquared($other->position->asVector3()) > 4){
+			}elseif($playerPos->distanceSquared($this->position->center()) > 4 && $playerPos->distanceSquared($other->position->center()) > 4){
 				$player->sendMessage(KnownTranslationFactory::tile_bed_tooFar()->prefix(TextFormat::GRAY));
 				return true;
 			}

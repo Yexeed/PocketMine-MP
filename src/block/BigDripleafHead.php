@@ -93,7 +93,7 @@ class BigDripleafHead extends BaseBigDripleaf{
 	public function onProjectileHit(Projectile $projectile, RayTraceResult $hitResult) : void{
 		if($this->leafState !== DripleafState::FULL_TILT){
 			$this->setTiltAndScheduleTick(DripleafState::FULL_TILT);
-			$this->position->getWorld()->addSound($this->position->asVector3(), new DripleafTiltDownSound());
+			$this->position->getWorld()->addSound($this->position->center(), new DripleafTiltDownSound());
 		}
 	}
 
@@ -101,13 +101,13 @@ class BigDripleafHead extends BaseBigDripleaf{
 		if($this->leafState !== DripleafState::STABLE){
 			if($this->leafState === DripleafState::FULL_TILT){
 				$this->position->getWorld()->setBlock($this->position, $this->setLeafState(DripleafState::STABLE));
-				$this->position->getWorld()->addSound($this->position->asVector3(), new DripleafTiltUpSound());
+				$this->position->getWorld()->addSound($this->position->center(), new DripleafTiltUpSound());
 			}else{
 				$this->setTiltAndScheduleTick(match($this->leafState){
 					DripleafState::UNSTABLE => DripleafState::PARTIAL_TILT,
 					DripleafState::PARTIAL_TILT => DripleafState::FULL_TILT,
 				});
-				$this->position->getWorld()->addSound($this->position->asVector3(), new DripleafTiltDownSound());
+				$this->position->getWorld()->addSound($this->position->center(), new DripleafTiltDownSound());
 			}
 		}
 	}

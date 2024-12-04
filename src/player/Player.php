@@ -1834,7 +1834,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		$block = $target->getSide($face);
 		if($block->hasTypeTag(BlockTypeTags::FIRE)){
 			$this->getWorld()->setBlock($block->getPosition(), VanillaBlocks::AIR());
-			$this->getWorld()->addSound($block->getPosition()->asVector3()->add(0.5, 0.5, 0.5), new FireExtinguishSound());
+			$this->getWorld()->addSound($block->getPosition()->center(), new FireExtinguishSound());
 			return true;
 		}
 
@@ -1865,7 +1865,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	public function breakBlock(BlockPosition $pos) : bool{
 		$this->removeCurrentWindow();
 
-		if($this->canInteract($pos->asVector3()->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
+		if($this->canInteract($pos->center(), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
 			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
 			$this->stopBreakBlock($pos);
 			$item = $this->inventory->getItemInHand();
@@ -1891,7 +1891,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 	public function interactBlock(BlockPosition $pos, int $face, Vector3 $clickOffset) : bool{
 		$this->setUsingItem(false);
 
-		if($this->canInteract($pos->asVector3()->add(0.5, 0.5, 0.5), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
+		if($this->canInteract($pos->center(), $this->isCreative() ? self::MAX_REACH_DISTANCE_CREATIVE : self::MAX_REACH_DISTANCE_SURVIVAL)){
 			$this->broadcastAnimation(new ArmSwingAnimation($this), $this->getViewers());
 			$item = $this->inventory->getItemInHand(); //this is a copy of the real item
 			$oldItem = clone $item;

@@ -67,7 +67,7 @@ abstract class Button extends Flowable{
 			$world = $this->position->getWorld();
 			$world->setBlock($this->position, $this);
 			$world->scheduleDelayedBlockUpdate($this->position, $this->getActivationTime());
-			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new RedstonePowerOnSound());
+			$world->addSound($this->position->center(), new RedstonePowerOnSound());
 		}
 
 		return true;
@@ -78,7 +78,7 @@ abstract class Button extends Flowable{
 			$this->pressed = false;
 			$world = $this->position->getWorld();
 			$world->setBlock($this->position, $this);
-			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new RedstonePowerOffSound());
+			$world->addSound($this->position->center(), new RedstonePowerOffSound());
 		}
 	}
 

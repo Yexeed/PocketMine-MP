@@ -65,6 +65,6 @@ class Jukebox extends Spawnable{
 	}
 
 	protected function onBlockDestroyedHook() : void{
-		$this->position->getWorld()->addSound($this->position->asVector3(), new RecordStopSound());
+		$this->position->getWorld()->addSound($this->position->center(), new RecordStopSound());
 	}
 }

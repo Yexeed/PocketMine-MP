@@ -1004,7 +1004,7 @@ class InGamePacketHandler extends PacketHandler{
 
 		$lectern = $world->getBlockAt($pos->getX(), $pos->getY(), $pos->getZ());
 		$lecternPos = $lectern->getPosition();
-		if($lectern instanceof Lectern && $this->player->canInteract($lecternPos->asVector3(), 15)){
+		if($lectern instanceof Lectern && $this->player->canInteract($lecternPos->center(), 15)){
 			if(!$lectern->onPageTurn($packet->page)){
 				$this->syncBlocksNearby($lecternPos, null);
 			}

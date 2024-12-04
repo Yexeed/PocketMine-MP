@@ -89,7 +89,7 @@ class PinkPetals extends Flowable{
 			if($this->count < self::MAX_COUNT){
 				$grew = BlockEventHelper::grow($this, (clone $this)->setCount($this->count + 1), $player);
 			}else{
-				$this->position->getWorld()->dropItem($this->position->asVector3()->add(0, 0.5, 0), $this->asItem());
+				$this->position->getWorld()->dropItem($this->position->center(), $this->asItem());
 				$grew = true;
 			}
 			if($grew){

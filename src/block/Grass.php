@@ -88,7 +88,7 @@ class Grass extends Opaque{
 		$world = $this->position->getWorld();
 		if($item instanceof Fertilizer){
 			$item->pop();
-			TallGrassObject::growGrass($world, $this->position->asVector3(), new Random(mt_rand()), 8, 2);
+			TallGrassObject::growGrass($world, $this->position->center(), new Random(mt_rand()), 8, 2);
 
 			return true;
 		}
@@ -96,14 +96,14 @@ class Grass extends Opaque{
 			if($item instanceof Hoe){
 				$item->applyDamage(1);
 				$newBlock = VanillaBlocks::FARMLAND();
-				$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new ItemUseOnBlockSound($newBlock));
+				$world->addSound($this->position->center(), new ItemUseOnBlockSound($newBlock));
 				$world->setBlock($this->position, $newBlock);
 
 				return true;
 			}elseif($item instanceof Shovel){
 				$item->applyDamage(1);
 				$newBlock = VanillaBlocks::GRASS_PATH();
-				$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), new ItemUseOnBlockSound($newBlock));
+				$world->addSound($this->position->center(), new ItemUseOnBlockSound($newBlock));
 				$world->setBlock($this->position, $newBlock);
 
 				return true;

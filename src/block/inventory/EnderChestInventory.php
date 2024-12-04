@@ -75,8 +75,7 @@ class EnderChestInventory extends DelegateInventory implements BlockInventory{
 		$holder = $this->getHolder();
 
 		//event ID is always 1 for a chest
-		//TODO: maybe broadcast should use BlockPosition
-		$holder->getWorld()->broadcastPacketToViewers($holder->asVector3(), BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
+		$holder->getWorld()->broadcastPacketOnBlock($holder, BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
 	}
 
 	public function onClose(Player $who) : void{

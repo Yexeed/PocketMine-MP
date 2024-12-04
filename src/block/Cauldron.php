@@ -69,7 +69,7 @@ final class Cauldron extends Transparent{
 	 */
 	private function fill(int $amount, FillableCauldron $result, Item $usedItem, Item $returnedItem, array &$returnedItems) : void{
 		$this->position->getWorld()->setBlock($this->position, $result->setFillLevel($amount));
-		$this->position->getWorld()->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), $result->getFillSound());
+		$this->position->getWorld()->addSound($this->position->center(), $result->getFillSound());
 
 		$usedItem->pop();
 		$returnedItems[] = $returnedItem;
@@ -98,7 +98,7 @@ final class Cauldron extends Transparent{
 		if($this->getSide(Facing::UP)->getTypeId() === BlockTypeIds::WATER){
 			$cauldron = VanillaBlocks::WATER_CAULDRON()->setFillLevel(FillableCauldron::MAX_FILL_LEVEL);
 			$world->setBlock($this->position, $cauldron);
-			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), $cauldron->getFillSound());
+			$world->addSound($this->position->center(), $cauldron->getFillSound());
 		}
 	}
 }

@@ -152,7 +152,7 @@ class Door extends Transparent{
 		}
 
 		$world->setBlock($this->position, $this);
-		$world->addSound($this->position->asVector3(), new DoorSound());
+		$world->addSound($this->position->center(), new DoorSound());
 
 		return true;
 	}

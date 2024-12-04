@@ -67,7 +67,7 @@ class Wood extends Opaque{
 			$item->applyDamage(1);
 			$this->stripped = true;
 			$this->position->getWorld()->setBlock($this->position, $this);
-			$this->position->getWorld()->addSound($this->position->asVector3(), new ItemUseOnBlockSound($this));
+			$this->position->getWorld()->addSound($this->position->center(), new ItemUseOnBlockSound($this));
 			return true;
 		}
 		return false;

@@ -111,7 +111,7 @@ final class PotionCauldron extends FillableCauldron{
 		if($this->getSide(Facing::UP)->getTypeId() === BlockTypeIds::WATER){
 			$cauldron = VanillaBlocks::WATER_CAULDRON()->setFillLevel(FillableCauldron::MAX_FILL_LEVEL);
 			$world->setBlock($this->position, $cauldron);
-			$world->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), $cauldron->getFillSound());
+			$world->addSound($this->position->center(), $cauldron->getFillSound());
 		}
 	}
 }

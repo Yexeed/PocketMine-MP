@@ -63,7 +63,6 @@ class ShulkerBoxInventory extends SimpleInventory implements BlockInventory{
 		$holder = $this->getHolder();
 
 		//event ID is always 1 for a chest
-		//TODO: maybe broadcast should use block position
-		$holder->getWorld()->broadcastPacketToViewers($holder->asVector3(), BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
+		$holder->getWorld()->broadcastPacketOnBlock($holder, BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
 	}
 }

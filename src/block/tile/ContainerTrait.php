@@ -102,7 +102,7 @@ trait ContainerTrait{
 		$pos = $this->getPosition();
 
 		$world = $pos->getWorld();
-		$dropPos = $pos->asVector3()->add(0.5, 0.5, 0.5);
+		$dropPos = $pos->center();
 		foreach($inv->getContents() as $k => $item){
 			$world->dropItem($dropPos, $item);
 		}

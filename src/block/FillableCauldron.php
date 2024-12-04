@@ -79,7 +79,7 @@ abstract class FillableCauldron extends Transparent{
 			return;
 		}
 		$this->position->getWorld()->setBlock($this->position, $this->withFillLevel($this->fillLevel + $amount));
-		$this->position->getWorld()->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), $this->getFillSound());
+		$this->position->getWorld()->addSound($this->position->center(), $this->getFillSound());
 
 		$usedItem->pop();
 		$returnedItems[] = $returnedItem;
@@ -94,7 +94,7 @@ abstract class FillableCauldron extends Transparent{
 		}
 
 		$this->position->getWorld()->setBlock($this->position, $this->withFillLevel($this->fillLevel - $amount));
-		$this->position->getWorld()->addSound($this->position->asVector3()->add(0.5, 0.5, 0.5), $this->getEmptySound());
+		$this->position->getWorld()->addSound($this->position->center(), $this->getEmptySound());
 
 		$usedItem->pop();
 		$returnedItems[] = $returnedItem;

@@ -51,6 +51,6 @@ class ChestInventory extends SimpleInventory implements BlockInventory{
 		$holder = $this->getHolder();
 
 		//event ID is always 1 for a chest
-		$holder->getWorld()->broadcastPacketToViewers($holder->asVector3(), BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
+		$holder->getWorld()->broadcastPacketOnBlock($holder, BlockEventPacket::create(new ProtocolBlockPosition($holder->x, $holder->y, $holder->z), 1, $isOpen ? 1 : 0));
 	}
 }

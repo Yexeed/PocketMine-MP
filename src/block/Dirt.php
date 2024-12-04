@@ -63,7 +63,7 @@ class Dirt extends Opaque{
 			$item->applyDamage(1);
 
 			$newBlock = $this->dirtType === DirtType::NORMAL ? VanillaBlocks::FARMLAND() : VanillaBlocks::DIRT();
-			$center = $this->position->asVector3()->add(0.5, 0.5, 0.5);
+			$center = $this->position->center();
 			$world->addSound($center, new ItemUseOnBlockSound($newBlock));
 			$world->setBlock($this->position, $newBlock);
 			if($this->dirtType === DirtType::ROOTED){
@@ -83,7 +83,7 @@ class Dirt extends Opaque{
 		}elseif(($item instanceof Potion || $item instanceof SplashPotion) && $item->getType() === PotionType::WATER){
 			$item->pop();
 			$world->setBlock($this->position, VanillaBlocks::MUD());
-			$world->addSound($this->position->asVector3(), new WaterSplashSound(0.5));
+			$world->addSound($this->position->center(), new WaterSplashSound(0.5));
 			return true;
 		}
 
