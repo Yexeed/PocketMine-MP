@@ -136,8 +136,6 @@ final class VanillaEnchantments{
 		self::register("FROST_WALKER", new Enchantment(
 			KnownTranslationFactory::enchantment_frostwalker(),
 			Rarity::RARE,
-			0,
-			0,
 			2,
 			fn(int $level) : int => 10 * $level,
 			15
