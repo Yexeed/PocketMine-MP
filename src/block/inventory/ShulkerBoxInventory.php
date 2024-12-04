@@ -30,7 +30,6 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\network\mcpe\protocol\BlockEventPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition as ProtocolBlockPosition;
-use pocketmine\world\Position;
 use pocketmine\world\sound\ShulkerBoxCloseSound;
 use pocketmine\world\sound\ShulkerBoxOpenSound;
 use pocketmine\world\sound\Sound;

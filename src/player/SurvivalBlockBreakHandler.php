@@ -119,10 +119,11 @@ final class SurvivalBlockBreakHandler{
 	}
 
 	public function __destruct(){
+		$vector3 = $this->blockPos->asVector3();
 		if($this->player->getWorld()->isInLoadedTerrain($vector3)){
 			$this->player->getWorld()->broadcastPacketOnBlock(
 				$this->blockPos,
-				LevelEventPacket::create(LevelEvent::BLOCK_STOP_BREAK, 0, $this->blockPos->asVector3())
+				LevelEventPacket::create(LevelEvent::BLOCK_STOP_BREAK, 0, $vector3)
 			);
 		}
 	}
