@@ -29,7 +29,6 @@ use pocketmine\crafting\FurnaceRecipe;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\event\inventory\FurnaceBurnEvent;
 use pocketmine\event\inventory\FurnaceSmeltEvent;
-use pocketmine\inventory\CallbackInventoryListener;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Item;
@@ -57,11 +56,6 @@ abstract class Furnace extends Spawnable implements ContainerTile, Nameable{
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
 		$this->inventory = new SimpleInventory(3);
-		$this->inventory->getListeners()->add(CallbackInventoryListener::onAnyChange(
-			static function(Inventory $unused) use ($world, $pos) : void{
-				$world->scheduleDelayedBlockUpdate($pos, 1);
-			})
-		);
 	}
 
 	public function readSaveData(CompoundTag $nbt) : void{
@@ -79,10 +73,6 @@ abstract class Furnace extends Spawnable implements ContainerTile, Nameable{
 
 		$this->loadName($nbt);
 		$this->loadItems($nbt);
-
-		if($this->remainingFuelTime > 0){
-			$this->position->getWorld()->scheduleDelayedBlockUpdate($this->position, 1);
-		}
 	}
 
 	protected function writeSaveData(CompoundTag $nbt) : void{
@@ -95,14 +85,6 @@ abstract class Furnace extends Spawnable implements ContainerTile, Nameable{
 
 	public function getDefaultName() : string{
 		return "Furnace";
-	}
-
-	public function close() : void{
-		if(!$this->closed){
-			$this->inventory->removeAllViewers();
-
-			parent::close();
-		}
 	}
 
 	public function getInventory() : Inventory{

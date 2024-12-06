@@ -58,14 +58,6 @@ class Hopper extends Spawnable implements ContainerTile, Nameable{
 		$nbt->setInt(self::TAG_TRANSFER_COOLDOWN, $this->transferCooldown);
 	}
 
-	public function close() : void{
-		if(!$this->closed){
-			$this->inventory->removeAllViewers();
-
-			parent::close();
-		}
-	}
-
 	public function getDefaultName() : string{
 		return "Hopper";
 	}

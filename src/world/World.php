@@ -30,6 +30,7 @@ use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\block\RuntimeBlockStateRegistry;
+use pocketmine\block\tile\ContainerTile;
 use pocketmine\block\tile\Spawnable;
 use pocketmine\block\tile\Tile;
 use pocketmine\block\tile\TileFactory;
@@ -57,6 +58,8 @@ use pocketmine\event\world\WorldDisplayNameChangeEvent;
 use pocketmine\event\world\WorldParticleEvent;
 use pocketmine\event\world\WorldSaveEvent;
 use pocketmine\event\world\WorldSoundEvent;
+use pocketmine\inventory\Inventory;
+use pocketmine\inventory\InventoryListener;
 use pocketmine\item\Item;
 use pocketmine\item\ItemUseResult;
 use pocketmine\item\LegacyStringToItemParser;
@@ -144,7 +147,7 @@ use const PHP_INT_MIN;
  * @phpstan-type BlockPosHash int
  * @phpstan-type ChunkBlockPosHash int
  */
-class World implements ChunkManager{
+class World implements ChunkManager, InventoryListener{
 
 	private static int $worldIdCounter = 1;
 
@@ -281,6 +284,12 @@ class World implements ChunkManager{
 	 * @phpstan-var array<ChunkPosHash, Chunk>
 	 */
 	private array $chunks = [];
+
+	/**
+	 * @var Vector3[]|\WeakMap
+	 * @phpstan-var \WeakMap<Inventory, Vector3>
+	 */
+	private \WeakMap $containerToBlockPositionMap;
 
 	/**
 	 * @var Vector3[][] chunkHash => [relativeBlockHash => Vector3]
@@ -505,6 +514,8 @@ class World implements ChunkManager{
 				throw new AssumptionFailedError("New generation requests scheduled during unload");
 			}
 		});
+
+		$this->containerToBlockPositionMap = new \WeakMap();
 
 		$this->scheduledBlockUpdateQueue = new ReversePriorityQueue();
 		$this->scheduledBlockUpdateQueue->setExtractFlags(\SplPriorityQueue::EXTR_BOTH);
@@ -2787,6 +2798,10 @@ class World implements ChunkManager{
 
 		//delegate tile ticking to the corresponding block
 		$this->scheduleDelayedBlockUpdate($pos->asVector3(), 1);
+		if($tile instanceof ContainerTile){
+			$tile->getInventory()->getListeners()->add($this);
+			$this->containerToBlockPositionMap[$tile->getInventory()] = $pos->asVector3();
+		}
 	}
 
 	/**
@@ -2805,9 +2820,38 @@ class World implements ChunkManager{
 		if(isset($this->chunks[$hash = World::chunkHash($chunkX, $chunkZ)])){
 			$this->chunks[$hash]->removeTile($tile);
 		}
+		if($tile instanceof ContainerTile){
+			$inventory = $tile->getInventory();
+			$inventory->removeAllViewers();
+			$inventory->getListeners()->remove($this);
+			unset($this->containerToBlockPositionMap[$inventory]);
+		}
 		foreach($this->getChunkListeners($chunkX, $chunkZ) as $listener){
 			$listener->onBlockChanged($pos->asVector3());
 		}
+	}
+
+	private function notifyInventoryUpdate(Inventory $inventory) : void{
+		$blockPosition = $this->containerToBlockPositionMap[$inventory] ?? null;
+		if($blockPosition !== null){
+			$this->scheduleDelayedBlockUpdate($blockPosition, 1);
+		}
+	}
+
+	/**
+	 * @internal
+	 * @see InventoryListener
+	 */
+	public function onSlotChange(Inventory $inventory, int $slot, Item $oldItem) : void{
+		$this->notifyInventoryUpdate($inventory);
+	}
+
+	/**
+	 * @internal
+	 * @see InventoryListener
+	 */
+	public function onContentChange(Inventory $inventory, array $oldContents) : void{
+		$this->notifyInventoryUpdate($inventory);
 	}
 
 	public function isChunkInUse(int $x, int $z) : bool{
