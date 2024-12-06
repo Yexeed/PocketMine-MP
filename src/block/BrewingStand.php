@@ -28,6 +28,7 @@ use pocketmine\block\tile\BrewingStand as TileBrewingStand;
 use pocketmine\block\utils\BrewingStandSlot;
 use pocketmine\block\utils\SupportType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
+use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
 use pocketmine\math\Axis;
 use pocketmine\math\AxisAlignedBB;
@@ -114,19 +115,22 @@ class BrewingStand extends Transparent{
 			if($brewing->onUpdate()){
 				$world->scheduleDelayedBlockUpdate($this->position, 1);
 			}
+		}
+	}
 
-			$changed = false;
-			foreach(BrewingStandSlot::cases() as $slot){
-				$occupied = !$brewing->getInventory()->isSlotEmpty($slot->getSlotNumber());
-				if($occupied !== $this->hasSlot($slot)){
-					$this->setSlot($slot, $occupied);
-					$changed = true;
-				}
+	public function onContainerUpdate(Inventory $inventory) : void{
+		$world = $this->position->getWorld();
+		$changed = false;
+		foreach(BrewingStandSlot::cases() as $slot){
+			$occupied = !$inventory->isSlotEmpty($slot->getSlotNumber());
+			if($occupied !== $this->hasSlot($slot)){
+				$this->setSlot($slot, $occupied);
+				$changed = true;
 			}
+		}
 
-			if($changed){
-				$world->setBlock($this->position, $this);
-			}
+		if($changed){
+			$world->setBlock($this->position, $this);
 		}
 	}
 }
