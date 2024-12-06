@@ -35,7 +35,7 @@ final class BlockPosition implements \Stringable{
 		public readonly int $x,
 		public readonly int $y,
 		public readonly int $z,
-		public ?World $world //TODO: make this non-nullable (requires Blocks not to reference positions)
+		private ?World $world //TODO: make this non-nullable (requires Blocks not to reference positions)
 	){}
 
 	/**
