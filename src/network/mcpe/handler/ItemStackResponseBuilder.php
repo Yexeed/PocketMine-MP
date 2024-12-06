@@ -94,6 +94,7 @@ final class ItemStackResponseBuilder{
 					$item->getCount(),
 					$itemStackInfo->getStackId(),
 					$item->getCustomName(),
+					$item->getCustomName(),
 					$item instanceof Durable ? $item->getDamage() : 0,
 				);
 			}
