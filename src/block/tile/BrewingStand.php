@@ -41,11 +41,11 @@ use pocketmine\world\World;
 use function array_map;
 use function count;
 
-class BrewingStand extends Spawnable implements Container, Nameable{
+class BrewingStand extends Spawnable implements ContainerTile, Nameable{
 	use NameableTrait {
 		addAdditionalSpawnData as addNameSpawnData;
 	}
-	use ContainerTrait;
+	use ContainerTileTrait;
 
 	public const BREW_TIME_TICKS = 400; // Brew time in ticks
 

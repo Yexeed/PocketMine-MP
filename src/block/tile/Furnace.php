@@ -41,9 +41,9 @@ use pocketmine\world\World;
 use function array_map;
 use function max;
 
-abstract class Furnace extends Spawnable implements Container, Nameable{
+abstract class Furnace extends Spawnable implements ContainerTile, Nameable{
 	use NameableTrait;
-	use ContainerTrait;
+	use ContainerTileTrait;
 
 	public const TAG_BURN_TIME = "BurnTime";
 	public const TAG_COOK_TIME = "CookTime";

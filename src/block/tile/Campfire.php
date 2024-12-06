@@ -34,8 +34,8 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\world\World;
 
-class Campfire extends Spawnable implements Container{
-	use ContainerTrait;
+class Campfire extends Spawnable implements ContainerTile{
+	use ContainerTileTrait;
 
 	private const TAG_FIRST_INPUT_ITEM = "Item1"; //TAG_Compound
 	private const TAG_SECOND_INPUT_ITEM = "Item2"; //TAG_Compound

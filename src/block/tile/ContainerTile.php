@@ -25,7 +25,7 @@ namespace pocketmine\block\tile;
 
 use pocketmine\inventory\InventoryHolder;
 
-interface Container extends InventoryHolder{
+interface ContainerTile extends InventoryHolder{
 	public const TAG_ITEMS = "Items";
 	public const TAG_LOCK = "Lock";
 

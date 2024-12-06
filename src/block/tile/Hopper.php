@@ -29,9 +29,9 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\world\World;
 
-class Hopper extends Spawnable implements Container, Nameable{
+class Hopper extends Spawnable implements ContainerTile, Nameable{
 
-	use ContainerTrait;
+	use ContainerTileTrait;
 	use NameableTrait;
 
 	private const TAG_TRANSFER_COOLDOWN = "TransferCooldown";

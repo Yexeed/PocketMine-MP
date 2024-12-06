@@ -35,11 +35,11 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\world\World;
 
-class ShulkerBox extends Spawnable implements Container, Nameable{
+class ShulkerBox extends Spawnable implements ContainerTile, Nameable{
 	use NameableTrait {
 		addAdditionalSpawnData as addNameSpawnData;
 	}
-	use ContainerTrait;
+	use ContainerTileTrait;
 
 	public const TAG_FACING = "facing";
 

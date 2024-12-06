@@ -33,11 +33,11 @@ use pocketmine\world\format\Chunk;
 use pocketmine\world\World;
 use function abs;
 
-class Chest extends Spawnable implements Container, Nameable{
+class Chest extends Spawnable implements ContainerTile, Nameable{
 	use NameableTrait {
 		addAdditionalSpawnData as addNameSpawnData;
 	}
-	use ContainerTrait {
+	use ContainerTileTrait {
 		onBlockDestroyedHook as containerTraitBlockDestroyedHook;
 	}
 

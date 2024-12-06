@@ -33,14 +33,14 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\world\Position;
 
 /**
- * This trait implements most methods in the {@link Container} interface. It should only be used by Tiles.
+ * This trait implements most methods in the {@link ContainerTile} interface. It should only be used by Tiles.
  */
-trait ContainerTrait{
+trait ContainerTileTrait{
 	/** @var string|null */
 	private $lock = null;
 
 	protected function loadItems(CompoundTag $tag) : void{
-		if(($inventoryTag = $tag->getTag(Container::TAG_ITEMS)) instanceof ListTag && $inventoryTag->getTagType() === NBT::TAG_Compound){
+		if(($inventoryTag = $tag->getTag(ContainerTile::TAG_ITEMS)) instanceof ListTag && $inventoryTag->getTagType() === NBT::TAG_Compound){
 			$inventory = $this->getInventory();
 			$listeners = $inventory->getListeners()->toArray();
 			$inventory->getListeners()->remove(...$listeners); //prevent any events being fired by initialization
@@ -61,7 +61,7 @@ trait ContainerTrait{
 			$inventory->getListeners()->add(...$listeners);
 		}
 
-		if(($lockTag = $tag->getTag(Container::TAG_LOCK)) instanceof StringTag){
+		if(($lockTag = $tag->getTag(ContainerTile::TAG_LOCK)) instanceof StringTag){
 			$this->lock = $lockTag->getValue();
 		}
 	}
@@ -72,15 +72,15 @@ trait ContainerTrait{
 			$items[] = $item->nbtSerialize($slot);
 		}
 
-		$tag->setTag(Container::TAG_ITEMS, new ListTag($items, NBT::TAG_Compound));
+		$tag->setTag(ContainerTile::TAG_ITEMS, new ListTag($items, NBT::TAG_Compound));
 
 		if($this->lock !== null){
-			$tag->setString(Container::TAG_LOCK, $this->lock);
+			$tag->setString(ContainerTile::TAG_LOCK, $this->lock);
 		}
 	}
 
 	/**
-	 * @see Container::canOpenWith()
+	 * @see ContainerTile::canOpenWith()
 	 */
 	public function canOpenWith(string $key) : bool{
 		return $this->lock === null || $this->lock === $key;

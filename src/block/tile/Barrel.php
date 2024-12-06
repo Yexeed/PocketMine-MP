@@ -29,9 +29,9 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\world\World;
 
-class Barrel extends Spawnable implements Container, Nameable{
+class Barrel extends Spawnable implements ContainerTile, Nameable{
 	use NameableTrait;
-	use ContainerTrait;
+	use ContainerTileTrait;
 
 	protected Inventory $inventory;
 
