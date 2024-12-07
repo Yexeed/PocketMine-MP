@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\block\inventory\CampfireInventory;
+use pocketmine\block\Campfire as BlockCampfire;
+use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
@@ -44,16 +45,16 @@ class Campfire extends Spawnable implements ContainerTile{
 	private const TAG_THIRD_COOKING_TIME = "ItemTime3"; //TAG_Int
 	private const TAG_FOURTH_COOKING_TIME = "ItemTime4"; //TAG_Int
 
-	protected CampfireInventory $inventory;
+	protected Inventory $inventory;
 	/** @var array<int, int> */
 	private array $cookingTimes = [];
 
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
-		$this->inventory = new CampfireInventory();
+		$this->inventory = BlockCampfire::createInventory();
 	}
 
-	public function getInventory() : CampfireInventory{
+	public function getInventory() : Inventory{
 		return $this->inventory;
 	}
 

@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\block\inventory\CampfireInventory;
 use pocketmine\block\tile\Campfire as TileCampfire;
 use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\block\utils\LightableTrait;
@@ -39,6 +38,7 @@ use pocketmine\event\block\CampfireCookEvent;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\inventory\Inventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Durable;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\item\Item;
@@ -72,13 +72,23 @@ class Campfire extends Transparent{
 	 * @deprecated This was added by mistake. It can't be relied on as the inventory won't be initialized if this block
 	 * has never been set in the world.
 	 */
-	protected CampfireInventory $inventory;
+	protected Inventory $inventory;
 
 	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
 		parent::__construct($idInfo, $name, $typeInfo);
 		//TODO: this should never have been in the block - it creates problems for setting blocks in different positions
 		//as inventories aren't designed to be cloned
-		$this->inventory = new CampfireInventory();
+		$this->inventory = self::createInventory();
+	}
+
+	/**
+	 * @internal
+	 * TODO: we need to explore why this is being created in multiple places
+	 */
+	public static function createInventory() : Inventory{
+		$result = new SimpleInventory(4);
+		$result->setMaxStackSize(1);
+		return $result;
 	}
 
 	/**
@@ -99,7 +109,7 @@ class Campfire extends Transparent{
 			$this->inventory = $tile->getInventory();
 			$this->cookingTimes = $tile->getCookingTimes();
 		}else{
-			$this->inventory = new CampfireInventory();
+			$this->inventory = self::createInventory();
 		}
 
 		return $this;
@@ -143,7 +153,7 @@ class Campfire extends Transparent{
 	 * @deprecated This was added by mistake. It can't be relied on as the inventory won't be initialized if this block
 	 * has never been set in the world.
 	 */
-	public function getInventory() : CampfireInventory{
+	public function getInventory() : Inventory{
 		return $this->inventory;
 	}
 
