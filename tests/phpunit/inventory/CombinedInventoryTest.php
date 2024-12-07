@@ -101,7 +101,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 
 	/**
 	 * @param Inventory[] $backing
-	 * @param Item[] $altItems
+	 * @param Item[]      $altItems
 	 *
 	 * @phpstan-param array<int, Inventory> $backing
 	 * @phpstan-param array<int, Item> $altItems
