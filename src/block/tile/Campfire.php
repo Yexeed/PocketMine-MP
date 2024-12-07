@@ -25,6 +25,7 @@ namespace pocketmine\block\tile;
 
 use pocketmine\block\Campfire as BlockCampfire;
 use pocketmine\inventory\Inventory;
+use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
@@ -51,7 +52,8 @@ class Campfire extends Spawnable implements ContainerTile{
 
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
-		$this->inventory = BlockCampfire::createInventory();
+		$this->inventory = new SimpleInventory(4);
+		$this->inventory->setMaxStackSize(1);
 	}
 
 	public function getInventory() : Inventory{

@@ -72,24 +72,7 @@ class Campfire extends Transparent{
 	 * @deprecated This was added by mistake. It can't be relied on as the inventory won't be initialized if this block
 	 * has never been set in the world.
 	 */
-	protected Inventory $inventory;
-
-	public function __construct(BlockIdentifier $idInfo, string $name, BlockTypeInfo $typeInfo){
-		parent::__construct($idInfo, $name, $typeInfo);
-		//TODO: this should never have been in the block - it creates problems for setting blocks in different positions
-		//as inventories aren't designed to be cloned
-		$this->inventory = self::createInventory();
-	}
-
-	/**
-	 * @internal
-	 * TODO: we need to explore why this is being created in multiple places
-	 */
-	public static function createInventory() : Inventory{
-		$result = new SimpleInventory(4);
-		$result->setMaxStackSize(1);
-		return $result;
-	}
+	protected ?Inventory $inventory = null;
 
 	/**
 	 * @var int[] slot => ticks
@@ -109,7 +92,8 @@ class Campfire extends Transparent{
 			$this->inventory = $tile->getInventory();
 			$this->cookingTimes = $tile->getCookingTimes();
 		}else{
-			$this->inventory = self::createInventory();
+			$this->inventory = null;
+			$this->cookingTimes = [];
 		}
 
 		return $this;
@@ -153,7 +137,7 @@ class Campfire extends Transparent{
 	 * @deprecated This was added by mistake. It can't be relied on as the inventory won't be initialized if this block
 	 * has never been set in the world.
 	 */
-	public function getInventory() : Inventory{
+	public function getInventory() : ?Inventory{
 		return $this->inventory;
 	}
 
@@ -216,10 +200,11 @@ class Campfire extends Transparent{
 			return true;
 		}
 
-		if($this->position->getWorld()->getServer()->getCraftingManager()->getFurnaceRecipeManager($this->getFurnaceType())->match($item) !== null){
+		$inventory = $this->inventory;
+		if($inventory !== null && $this->position->getWorld()->getServer()->getCraftingManager()->getFurnaceRecipeManager($this->getFurnaceType())->match($item) !== null){
 			$ingredient = clone $item;
 			$ingredient->setCount(1);
-			if(count($this->inventory->addItem($ingredient)) === 0){
+			if(count($inventory->addItem($ingredient)) === 0){
 				$item->pop();
 				$this->position->getWorld()->addSound($this->position, new ItemFrameAddItemSound());
 				return true;
@@ -254,8 +239,8 @@ class Campfire extends Transparent{
 	}
 
 	public function onScheduledUpdate() : void{
-		if($this->lit){
-			$items = $this->inventory->getContents();
+		if($this->lit && ($inventory = $this->inventory) !== null){
+			$items = $inventory->getContents();
 			$furnaceType = $this->getFurnaceType();
 			$maxCookDuration = $furnaceType->getCookDurationTicks();
 			foreach($items as $slot => $item){
@@ -273,7 +258,7 @@ class Campfire extends Transparent{
 						continue;
 					}
 
-					$this->inventory->setItem($slot, VanillaItems::AIR());
+					$inventory->setItem($slot, VanillaItems::AIR());
 					$this->setCookingTime($slot, 0);
 					$this->position->getWorld()->dropItem($this->position->add(0.5, 1, 0.5), $ev->getResult());
 				}
