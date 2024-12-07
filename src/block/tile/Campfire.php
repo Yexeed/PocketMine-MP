@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\block\Campfire as BlockCampfire;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\item\Item;
