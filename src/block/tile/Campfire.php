@@ -59,6 +59,10 @@ class Campfire extends Spawnable implements ContainerTile{
 		return $this->inventory;
 	}
 
+	public function getRealInventory() : Inventory{
+		return $this->inventory;
+	}
+
 	/**
 	 * @return int[]
 	 * @phpstan-return array<int, int>

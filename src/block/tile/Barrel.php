@@ -54,6 +54,10 @@ class Barrel extends Spawnable implements ContainerTile, Nameable{
 		return $this->inventory;
 	}
 
+	public function getRealInventory() : Inventory{
+		return $this->inventory;
+	}
+
 	public function getDefaultName() : string{
 		return "Barrel";
 	}

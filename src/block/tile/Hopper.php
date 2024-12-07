@@ -65,4 +65,8 @@ class Hopper extends Spawnable implements ContainerTile, Nameable{
 	public function getInventory() : Inventory{
 		return $this->inventory;
 	}
+
+	public function getRealInventory() : Inventory{
+		return $this->inventory;
+	}
 }

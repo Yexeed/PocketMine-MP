@@ -113,14 +113,15 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 		$this->containerTraitBlockDestroyedHook();
 	}
 
-	public function getInventory() : Inventory{
-		return $this->inventory;
+	public function getInventory() : Inventory|DoubleChestInventory{
+		if($this->isPaired() && $this->doubleInventory === null){
+			$this->checkPairing();
+		}
+		return $this->doubleInventory instanceof DoubleChestInventory ? $this->doubleInventory : $this->inventory;
 	}
 
-	public function getDoubleInventory() : ?DoubleChestInventory{ return $this->doubleInventory; }
-
-	public function setDoubleInventory(?DoubleChestInventory $doubleChestInventory) : void{
-		$this->doubleInventory = $doubleChestInventory;
+	public function getRealInventory() : Inventory{
+		return $this->inventory;
 	}
 
 	protected function checkPairing() : void{
@@ -131,7 +132,18 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 		}elseif(($pair = $this->getPair()) instanceof Chest){
 			if(!$pair->isPaired()){
 				$pair->createPair($this);
-				$this->doubleInventory = $pair->doubleInventory = null;
+				$pair->checkPairing();
+			}
+			if($this->doubleInventory === null){
+				if($pair->doubleInventory !== null){
+					$this->doubleInventory = $pair->doubleInventory;
+				}else{
+					if(($pair->position->x + ($pair->position->z << 15)) > ($this->position->x + ($this->position->z << 15))){ //Order them correctly
+						$this->doubleInventory = $pair->doubleInventory = new DoubleChestInventory($pair->inventory, $this->inventory);
+					}else{
+						$this->doubleInventory = $pair->doubleInventory = new DoubleChestInventory($this->inventory, $pair->inventory);
+					}
+				}
 			}
 		}else{
 			$this->doubleInventory = null;

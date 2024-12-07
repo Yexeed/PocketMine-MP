@@ -109,30 +109,22 @@ class Chest extends Transparent implements AnimatedContainer{
 			$world = $this->position->getWorld();
 			$chest = $world->getTile($this->position);
 			if($chest instanceof TileChest){
+				[$pairOnLeft, $pair] = $this->locatePair($this->position) ?? [false, null];
 				if(
 					!$this->getSide(Facing::UP)->isTransparent() ||
-					(($pair = $chest->getPair()) !== null && !$pair->getBlock()->getSide(Facing::UP)->isTransparent()) ||
+					($pair !== null && !$pair->getBlock()->getSide(Facing::UP)->isTransparent()) ||
 					!$chest->canOpenWith($item->getCustomName())
 				){
 					return true;
 				}
 
-				$window = null;
-				if($chest->isPaired()){
-					$info = $this->locatePair($this->position);
-					if($info !== null){
-						[$clockwise, $pair] = $info;
-						[$left, $right] = $clockwise ? [$pair, $chest] : [$chest, $pair];
+				if($pair !== null){
+					[$left, $right] = $pairOnLeft ? [$pair->getPosition(), $this->position] : [$this->position, $pair->getPosition()];
 
-						$doubleInventory = $left->getDoubleInventory() ?? $right->getDoubleInventory();
-						if($doubleInventory === null){
-							$doubleInventory = new DoubleChestInventory($left->getInventory(), $right->getInventory());
-							$left->setDoubleInventory($doubleInventory);
-							$right->setDoubleInventory($doubleInventory);
-						}
-
-						$window = new DoubleChestInventoryWindow($player, $doubleInventory, $left->getPosition(), $right->getPosition());
-					}
+					//TODO: we should probably construct DoubleChestInventory here directly too using the same logic
+					//right now it uses some weird logic in TileChest which produces incorrect results
+					//however I'm not sure if this is currently possible
+					$window = new DoubleChestInventoryWindow($player, $chest->getInventory(), $left, $right);
 				}
 
 				$player->setCurrentWindow($window ?? new BlockInventoryWindow($player, $chest->getInventory(), $this->position));
@@ -144,15 +136,6 @@ class Chest extends Transparent implements AnimatedContainer{
 
 	public function getFuelTime() : int{
 		return 300;
-	}
-
-	protected function getContainerViewerCount() : int{
-		$tile = $this->position->getWorld()->getTile($this->position);
-		if($tile instanceof TileChest){
-			$inventory = $tile->getDoubleInventory() ?? $tile->getInventory();
-			return count($inventory->getViewers());
-		}
-		return 0;
 	}
 
 	protected function getContainerOpenSound() : Sound{

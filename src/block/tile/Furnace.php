@@ -91,6 +91,10 @@ abstract class Furnace extends Spawnable implements ContainerTile, Nameable{
 		return $this->inventory;
 	}
 
+	public function getRealInventory() : Inventory{
+		return $this->getInventory();
+	}
+
 	protected function checkFuel(Item $fuel) : void{
 		$ev = new FurnaceBurnEvent($this, $fuel, $fuel->getFuelTime());
 		$ev->call();
