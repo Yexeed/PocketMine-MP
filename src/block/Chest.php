@@ -43,7 +43,6 @@ use pocketmine\world\Position;
 use pocketmine\world\sound\ChestCloseSound;
 use pocketmine\world\sound\ChestOpenSound;
 use pocketmine\world\sound\Sound;
-use function count;
 
 class Chest extends Transparent implements AnimatedContainer{
 	use AnimatedContainerTrait;
