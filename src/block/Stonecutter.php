@@ -37,7 +37,7 @@ class Stonecutter extends Transparent{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player !== null){
-			$player->setCurrentWindow(new StonecutterInventoryWindow($player, $this->position));
+			$player->setCurrentWindow(new StonecutterInventoryWindow($player, $this));
 		}
 		return true;
 	}

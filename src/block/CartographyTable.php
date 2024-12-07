@@ -32,7 +32,7 @@ final class CartographyTable extends Opaque{
 
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player !== null){
-			$player->setCurrentWindow(new CartographyTableInventoryWindow($player, $this->position));
+			$player->setCurrentWindow(new CartographyTableInventoryWindow($player, $this));
 		}
 
 		return true;

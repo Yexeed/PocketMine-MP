@@ -117,7 +117,7 @@ class Chest extends Transparent implements AnimatedContainer{
 				}
 
 				if($pair !== null){
-					[$left, $right] = $pairOnLeft ? [$pair->getPosition(), $this->position] : [$this->position, $pair->getPosition()];
+					[$left, $right] = $pairOnLeft ? [$pair->getBlock(), $this] : [$this, $pair->getBlock()];
 
 					//TODO: we should probably construct DoubleChestInventory here directly too using the same logic
 					//right now it uses some weird logic in TileChest which produces incorrect results
@@ -125,7 +125,7 @@ class Chest extends Transparent implements AnimatedContainer{
 					$window = new DoubleChestInventoryWindow($player, $chest->getInventory(), $left, $right);
 				}
 
-				$player->setCurrentWindow($window ?? new BlockInventoryWindow($player, $chest->getInventory(), $this->position));
+				$player->setCurrentWindow($window ?? new BlockInventoryWindow($player, $chest->getInventory(), $this));
 			}
 		}
 

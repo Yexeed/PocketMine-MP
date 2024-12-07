@@ -115,7 +115,7 @@ class ShulkerBox extends Opaque implements AnimatedContainer{
 					return true;
 				}
 
-				$player->setCurrentWindow(new BlockInventoryWindow($player, $shulker->getInventory(), $this->position));
+				$player->setCurrentWindow(new BlockInventoryWindow($player, $shulker->getInventory(), $this));
 			}
 		}
 
