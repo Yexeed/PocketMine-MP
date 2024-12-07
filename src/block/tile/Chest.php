@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\block\inventory\DoubleChestInventory;
+use pocketmine\inventory\CombinedInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\math\Vector3;
@@ -46,7 +46,7 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 	public const TAG_PAIR_LEAD = "pairlead";
 
 	protected Inventory $inventory;
-	protected ?DoubleChestInventory $doubleInventory = null;
+	protected ?CombinedInventory $doubleInventory = null;
 
 	private ?int $pairX = null;
 	private ?int $pairZ = null;
@@ -113,11 +113,11 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 		$this->containerTraitBlockDestroyedHook();
 	}
 
-	public function getInventory() : Inventory|DoubleChestInventory{
+	public function getInventory() : Inventory|CombinedInventory{
 		if($this->isPaired() && $this->doubleInventory === null){
 			$this->checkPairing();
 		}
-		return $this->doubleInventory instanceof DoubleChestInventory ? $this->doubleInventory : $this->inventory;
+		return $this->doubleInventory ?? $this->inventory;
 	}
 
 	public function getRealInventory() : Inventory{
@@ -139,9 +139,9 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 					$this->doubleInventory = $pair->doubleInventory;
 				}else{
 					if(($pair->position->x + ($pair->position->z << 15)) > ($this->position->x + ($this->position->z << 15))){ //Order them correctly
-						$this->doubleInventory = $pair->doubleInventory = new DoubleChestInventory($pair->inventory, $this->inventory);
+						$this->doubleInventory = $pair->doubleInventory = new CombinedInventory([$pair->inventory, $this->inventory]);
 					}else{
-						$this->doubleInventory = $pair->doubleInventory = new DoubleChestInventory($this->inventory, $pair->inventory);
+						$this->doubleInventory = $pair->doubleInventory = new CombinedInventory([$this->inventory, $pair->inventory]);
 					}
 				}
 			}
