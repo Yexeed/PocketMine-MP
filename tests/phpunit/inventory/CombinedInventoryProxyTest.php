@@ -23,12 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use PHPUnit\Framework\TestCase;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\VanillaItems;
 use function array_filter;
 
-final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
+final class CombinedInventoryProxyTest extends TestCase{
 
 	/**
 	 * @return Inventory[]
@@ -70,7 +71,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	}
 
 	public function testGetItem() : void{
-		$inventory = new CombinedInventory($this->createInventories());
+		$inventory = new CombinedInventoryProxy($this->createInventories());
 
 		$this->verifyReadItems([
 			$inventory->getItem(0),
@@ -84,7 +85,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	}
 
 	public function testGetContents() : void{
-		$inventory = new CombinedInventory($this->createInventories());
+		$inventory = new CombinedInventoryProxy($this->createInventories());
 
 		$this->verifyReadItems($inventory->getContents(includeEmpty: true));
 
@@ -123,7 +124,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 
 	public function testSetItem() : void{
 		$backing = $this->createInventories();
-		$inventory = new CombinedInventory($backing);
+		$inventory = new CombinedInventoryProxy($backing);
 
 		$altItems = self::getAltItems();
 		foreach($altItems as $slot => $item){
@@ -152,25 +153,25 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	 */
 	public function testSetContents(array $altItems) : void{
 		$backing = $this->createInventories();
-		$inventory = new CombinedInventory($backing);
+		$inventory = new CombinedInventoryProxy($backing);
 		$inventory->setContents($altItems);
 
 		$this->verifyWriteItems($backing, $altItems);
 	}
 
 	public function testGetSize() : void{
-		self::assertSame(4, (new CombinedInventory($this->createInventories()))->getSize());
+		self::assertSame(4, (new CombinedInventoryProxy($this->createInventories()))->getSize());
 	}
 
 	public function testGetMatchingItemCount() : void{
-		$inventory = new CombinedInventory($this->createInventories());
+		$inventory = new CombinedInventoryProxy($this->createInventories());
 		//we don't need to test the base functionality, only ensure that the correct delegate is called
 		self::assertSame(1, $inventory->getMatchingItemCount(3, VanillaItems::BONE(), true));
 		self::assertNotSame(1, $inventory->getMatchingItemCount(3, VanillaItems::PAPER(), true));
 	}
 
 	public function testIsSlotEmpty() : void{
-		$inventory = new CombinedInventory($this->createInventories());
+		$inventory = new CombinedInventoryProxy($this->createInventories());
 
 		self::assertTrue($inventory->isSlotEmpty(2));
 		self::assertFalse($inventory->isSlotEmpty(0));
@@ -179,7 +180,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	}
 
 	public function testListenersOnProxySlotUpdate() : void{
-		$inventory = new CombinedInventory($this->createInventories());
+		$inventory = new CombinedInventoryProxy($this->createInventories());
 
 		$numChanges = 0;
 		$inventory->getListeners()->add(new CallbackInventoryListener(
@@ -193,7 +194,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	}
 
 	public function testListenersOnProxyContentUpdate() : void{
-		$inventory = new CombinedInventory($this->createInventories());
+		$inventory = new CombinedInventoryProxy($this->createInventories());
 
 		$numChanges = 0;
 		$inventory->getListeners()->add(new CallbackInventoryListener(
@@ -208,7 +209,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 
 	public function testListenersOnBackingSlotUpdate() : void{
 		$backing = $this->createInventories();
-		$inventory = new CombinedInventory($backing);
+		$inventory = new CombinedInventoryProxy($backing);
 
 		$slotChangeDetected = null;
 		$numChanges = 0;
@@ -231,7 +232,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	 */
 	public function testListenersOnBackingContentUpdate() : void{
 		$backing = $this->createInventories();
-		$inventory = new CombinedInventory($backing);
+		$inventory = new CombinedInventoryProxy($backing);
 
 		$slotChanges = [];
 		$inventory->getListeners()->add(new CallbackInventoryListener(
@@ -253,7 +254,7 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 	 */
 	public function testListenersOnSingleBackingContentUpdate() : void{
 		$backing = new SimpleInventory(2);
-		$inventory = new CombinedInventory([$backing]);
+		$inventory = new CombinedInventoryProxy([$backing]);
 
 		$numChanges = 0;
 		$inventory->getListeners()->add(new CallbackInventoryListener(

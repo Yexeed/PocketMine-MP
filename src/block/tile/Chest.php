@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block\tile;
 
-use pocketmine\inventory\CombinedInventory;
+use pocketmine\inventory\CombinedInventoryProxy;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\SimpleInventory;
 use pocketmine\math\Vector3;
@@ -46,7 +46,7 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 	public const TAG_PAIR_LEAD = "pairlead";
 
 	protected Inventory $inventory;
-	protected ?CombinedInventory $doubleInventory = null;
+	protected ?CombinedInventoryProxy $doubleInventory = null;
 
 	private ?int $pairX = null;
 	private ?int $pairZ = null;
@@ -113,7 +113,7 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 		$this->containerTraitBlockDestroyedHook();
 	}
 
-	public function getInventory() : Inventory|CombinedInventory{
+	public function getInventory() : Inventory|CombinedInventoryProxy{
 		if($this->isPaired() && $this->doubleInventory === null){
 			$this->checkPairing();
 		}
@@ -139,9 +139,9 @@ class Chest extends Spawnable implements ContainerTile, Nameable{
 					$this->doubleInventory = $pair->doubleInventory;
 				}else{
 					if(($pair->position->x + ($pair->position->z << 15)) > ($this->position->x + ($this->position->z << 15))){ //Order them correctly
-						$this->doubleInventory = $pair->doubleInventory = new CombinedInventory([$pair->inventory, $this->inventory]);
+						$this->doubleInventory = $pair->doubleInventory = new CombinedInventoryProxy([$pair->inventory, $this->inventory]);
 					}else{
-						$this->doubleInventory = $pair->doubleInventory = new CombinedInventory([$this->inventory, $pair->inventory]);
+						$this->doubleInventory = $pair->doubleInventory = new CombinedInventoryProxy([$this->inventory, $pair->inventory]);
 					}
 				}
 			}

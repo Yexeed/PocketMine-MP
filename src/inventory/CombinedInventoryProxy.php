@@ -35,7 +35,7 @@ use function spl_object_id;
  * Allows interacting with several separate inventories via a unified interface
  * Mainly used for double chests, but could be used for other custom use cases
  */
-final class CombinedInventory extends BaseInventory{
+final class CombinedInventoryProxy extends BaseInventory{
 
 	private readonly int $size;
 
