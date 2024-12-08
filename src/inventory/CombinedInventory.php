@@ -24,8 +24,11 @@ declare(strict_types=1);
 namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
+use pocketmine\item\VanillaItems;
+use pocketmine\utils\AssumptionFailedError;
 use function array_fill_keys;
 use function array_keys;
+use function count;
 use function spl_object_id;
 
 /**
@@ -52,6 +55,9 @@ final class CombinedInventory extends BaseInventory{
 	 */
 	private array $inventoryToOffsetMap = [];
 
+	private InventoryListener $backingInventoryListener;
+	private bool $modifyingBackingInventory = false;
+
 	/**
 	 * @phpstan-param Inventory[] $backingInventories
 	 */
@@ -74,6 +80,45 @@ final class CombinedInventory extends BaseInventory{
 			$combinedSize += $size;
 		}
 		$this->size = $combinedSize;
+
+		$weakThis = \WeakReference::create($this);
+		$getThis = static fn() => $weakThis->get() ?? throw new AssumptionFailedError("Listener should've been unregistered in __destruct()");
+
+		$this->backingInventoryListener = new CallbackInventoryListener(
+			onSlotChange: static function(Inventory $inventory, int $slot, Item $oldItem) use ($getThis) : void{
+				$strongThis = $getThis();
+				if($strongThis->modifyingBackingInventory){
+					return;
+				}
+
+				$offset = $strongThis->inventoryToOffsetMap[spl_object_id($inventory)];
+				$strongThis->onSlotChange($offset + $slot, $oldItem);
+			},
+			onContentChange: static function(Inventory $inventory, array $oldContents) use ($getThis) : void{
+				$strongThis = $getThis();
+				if($strongThis->modifyingBackingInventory){
+					return;
+				}
+
+				if(count($strongThis->backingInventories) === 1){
+					$strongThis->onContentChange($oldContents);
+				}else{
+					$offset = $strongThis->inventoryToOffsetMap[spl_object_id($inventory)];
+					for($slot = 0, $limit = $inventory->getSize(); $slot < $limit; $slot++){
+						$strongThis->onSlotChange($offset + $slot, $oldContents[$slot] ?? VanillaItems::AIR());
+					}
+				}
+			}
+		);
+		foreach($this->backingInventories as $inventory){
+			$inventory->getListeners()->add($this->backingInventoryListener);
+		}
+	}
+
+	public function __destruct(){
+		foreach($this->backingInventories as $inventory){
+			$inventory->getListeners()->remove($this->backingInventoryListener);
+		}
 	}
 
 	/**
@@ -87,7 +132,14 @@ final class CombinedInventory extends BaseInventory{
 
 	protected function internalSetItem(int $index, Item $item) : void{
 		[$inventory, $actualSlot] = $this->getInventory($index);
-		$inventory->setItem($actualSlot, $item);
+
+		//Make sure our backing listener doesn't dispatch double updates to our own listeners
+		$this->modifyingBackingInventory = true;
+		try{
+			$inventory->setItem($actualSlot, $item);
+		}finally{
+			$this->modifyingBackingInventory = false;
+		}
 	}
 
 	protected function internalSetContents(array $items) : void{
@@ -98,7 +150,14 @@ final class CombinedInventory extends BaseInventory{
 		}
 		foreach($contentsByInventory as $splObjectId => $backingInventoryContents){
 			$backingInventory = $this->backingInventories[$splObjectId];
-			$backingInventory->setContents($backingInventoryContents);
+
+			//Make sure our backing listener doesn't dispatch double updates to our own listeners
+			$this->modifyingBackingInventory = true;
+			try{
+				$backingInventory->setContents($backingInventoryContents);
+			}finally{
+				$this->modifyingBackingInventory = false;
+			}
 		}
 	}
 

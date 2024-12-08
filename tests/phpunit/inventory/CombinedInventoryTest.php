@@ -177,4 +177,92 @@ final class CombinedInventoryTest extends \PHPUnit\Framework\TestCase{
 		self::assertFalse($inventory->isSlotEmpty(1));
 		self::assertFalse($inventory->isSlotEmpty(3));
 	}
+
+	public function testListenersOnProxySlotUpdate() : void{
+		$inventory = new CombinedInventory($this->createInventories());
+
+		$numChanges = 0;
+		$inventory->getListeners()->add(new CallbackInventoryListener(
+			onSlotChange: function(Inventory $inventory, int $slot, Item $before) use (&$numChanges) : void{
+				$numChanges++;
+			},
+			onContentChange: null
+		));
+		$inventory->setItem(0, VanillaItems::DIAMOND_SWORD());
+		self::assertSame(1, $numChanges, "Inventory listener detected wrong number of changes");
+	}
+
+	public function testListenersOnProxyContentUpdate() : void{
+		$inventory = new CombinedInventory($this->createInventories());
+
+		$numChanges = 0;
+		$inventory->getListeners()->add(new CallbackInventoryListener(
+			onSlotChange: null,
+			onContentChange: function(Inventory $inventory, array $oldItems) use (&$numChanges) : void{
+				$numChanges++;
+			}
+		));
+		$inventory->setContents(self::getAltItems());
+		self::assertSame(1, $numChanges, "Expected onContentChange to be called exactly 1 time");
+	}
+
+	public function testListenersOnBackingSlotUpdate() : void{
+		$backing = $this->createInventories();
+		$inventory = new CombinedInventory($backing);
+
+		$slotChangeDetected = null;
+		$numChanges = 0;
+		$inventory->getListeners()->add(new CallbackInventoryListener(
+			onSlotChange: function(Inventory $inventory, int $slot, Item $before) use (&$slotChangeDetected, &$numChanges) : void{
+				$slotChangeDetected = $slot;
+				$numChanges++;
+			},
+			onContentChange: null
+		));
+		$backing[2]->setItem(0, VanillaItems::DIAMOND_SWORD());
+		self::assertNotNull($slotChangeDetected, "Inventory listener didn't hear about backing inventory update");
+		self::assertSame(2, $slotChangeDetected, "Inventory listener detected unexpected slot change");
+		self::assertSame(1, $numChanges, "Inventory listener detected wrong number of changes");
+	}
+
+	/**
+	 * When a combined inventory has multiple backing inventories, content updates of the backing inventories must be
+	 * turned into slot updates on the proxy, to avoid syncing the entire proxy inventory.
+	 */
+	public function testListenersOnBackingContentUpdate() : void{
+		$backing = $this->createInventories();
+		$inventory = new CombinedInventory($backing);
+
+		$slotChanges = [];
+		$inventory->getListeners()->add(new CallbackInventoryListener(
+			onSlotChange: function(Inventory $inventory, int $slot, Item $before) use (&$slotChanges) : void{
+				$slotChanges[] = $slot;
+			},
+			onContentChange: null
+		));
+		$backing[2]->setContents([VanillaItems::DIAMOND_SWORD(), VanillaItems::DIAMOND()]);
+		self::assertCount(2, $slotChanges, "Inventory listener detected wrong number of changes");
+		self::assertSame([2, 3], $slotChanges, "Incorrect slots updated");
+	}
+
+	/**
+	 * If a combined inventory has only 1 backing inventory, content updates on the backing inventory can be directly
+	 * processed as content updates on the proxy inventory without modification. This allows optimizations when only 1
+	 * backing inventory is used.
+	 * This test verifies that this special case works as expected.
+	 */
+	public function testListenersOnSingleBackingContentUpdate() : void{
+		$backing = new SimpleInventory(2);
+		$inventory = new CombinedInventory([$backing]);
+
+		$numChanges = 0;
+		$inventory->getListeners()->add(new CallbackInventoryListener(
+			onSlotChange: null,
+			onContentChange: function(Inventory $inventory, array $oldItems) use (&$numChanges) : void{
+				$numChanges++;
+			}
+		));
+		$inventory->setContents([VanillaItems::DIAMOND_SWORD(), VanillaItems::DIAMOND()]);
+		self::assertSame(1, $numChanges, "Expected onContentChange to be called exactly 1 time");
+	}
 }
