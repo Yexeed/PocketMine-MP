@@ -191,6 +191,7 @@ use function strtolower;
  * @method static Opaque CHISELED_POLISHED_BLACKSTONE()
  * @method static SimplePillar CHISELED_QUARTZ()
  * @method static Opaque CHISELED_RED_SANDSTONE()
+ * @method static Opaque CHISELED_RESIN_BRICKS()
  * @method static Opaque CHISELED_SANDSTONE()
  * @method static Opaque CHISELED_STONE_BRICKS()
  * @method static Opaque CHISELED_TUFF()
@@ -590,6 +591,20 @@ use function strtolower;
  * @method static Flower OXEYE_DAISY()
  * @method static PackedIce PACKED_ICE()
  * @method static Opaque PACKED_MUD()
+ * @method static WoodenButton PALE_OAK_BUTTON()
+ * @method static WoodenDoor PALE_OAK_DOOR()
+ * @method static WoodenFence PALE_OAK_FENCE()
+ * @method static FenceGate PALE_OAK_FENCE_GATE()
+ * @method static Leaves PALE_OAK_LEAVES()
+ * @method static Wood PALE_OAK_LOG()
+ * @method static Planks PALE_OAK_PLANKS()
+ * @method static WoodenPressurePlate PALE_OAK_PRESSURE_PLATE()
+ * @method static FloorSign PALE_OAK_SIGN()
+ * @method static WoodenSlab PALE_OAK_SLAB()
+ * @method static WoodenStairs PALE_OAK_STAIRS()
+ * @method static WoodenTrapdoor PALE_OAK_TRAPDOOR()
+ * @method static WallSign PALE_OAK_WALL_SIGN()
+ * @method static Wood PALE_OAK_WOOD()
  * @method static DoublePlant PEONY()
  * @method static PinkPetals PINK_PETALS()
  * @method static Flower PINK_TULIP()
@@ -673,6 +688,12 @@ use function strtolower;
  * @method static Flower RED_TULIP()
  * @method static Opaque REINFORCED_DEEPSLATE()
  * @method static Reserved6 RESERVED6()
+ * @method static Opaque RESIN()
+ * @method static Opaque RESIN_BRICKS()
+ * @method static Slab RESIN_BRICK_SLAB()
+ * @method static Stair RESIN_BRICK_STAIRS()
+ * @method static Wall RESIN_BRICK_WALL()
+ * @method static ResinClump RESIN_CLUMP()
  * @method static DoublePlant ROSE_BUSH()
  * @method static Sand SAND()
  * @method static Opaque SANDSTONE()
@@ -1312,6 +1333,7 @@ final class VanillaBlocks{
 		self::registerBlocksR17();
 		self::registerBlocksR18();
 		self::registerMudBlocks();
+		self::registerResinBlocks();
 		self::registerTuffBlocks();
 
 		self::registerCraftingTables();
@@ -1359,6 +1381,7 @@ final class VanillaBlocks{
 				WoodType::CRIMSON => VanillaItems::CRIMSON_SIGN(...),
 				WoodType::WARPED => VanillaItems::WARPED_SIGN(...),
 				WoodType::CHERRY => VanillaItems::CHERRY_SIGN(...),
+				WoodType::PALE_OAK => VanillaItems::PALE_OAK_SIGN(...),
 			};
 			self::register($idName("sign"), fn(BID $id) => new FloorSign($id, $name . " Sign", $signBreakInfo, $woodType, $signAsItem), TileSign::class);
 			self::register($idName("wall_sign"), fn(BID $id) => new WallSign($id, $name . " Wall Sign", $signBreakInfo, $woodType, $signAsItem), TileSign::class);
@@ -1726,6 +1749,18 @@ final class VanillaBlocks{
 		self::register("mud_brick_slab", fn(BID $id) => new Slab($id, "Mud Brick", $mudBricksBreakInfo));
 		self::register("mud_brick_stairs", fn(BID $id) => new Stair($id, "Mud Brick Stairs", $mudBricksBreakInfo));
 		self::register("mud_brick_wall", fn(BID $id) => new Wall($id, "Mud Brick Wall", $mudBricksBreakInfo));
+	}
+
+	private static function registerResinBlocks() : void{
+		self::register("resin", fn(BID $id) => new Opaque($id, "Block of Resin", new Info(BreakInfo::instant())));
+		self::register("resin_clump", fn(BID $id) => new ResinClump($id, "Resin Clump", new Info(BreakInfo::instant())));
+
+		$resinBricksInfo = new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD));
+		self::register("resin_brick_slab", fn(BID $id) => new Slab($id, "Resin Brick", $resinBricksInfo));
+		self::register("resin_brick_stairs", fn(BID $id) => new Stair($id, "Resin Brick Stairs", $resinBricksInfo));
+		self::register("resin_brick_wall", fn(BID $id) => new Wall($id, "Resin Brick Wall", $resinBricksInfo));
+		self::register("resin_bricks", fn(BID $id) => new Opaque($id, "Resin Bricks", $resinBricksInfo));
+		self::register("chiseled_resin_bricks", fn(BID $id) => new Opaque($id, "Chiseled Resin Bricks", $resinBricksInfo));
 	}
 
 	private static function registerTuffBlocks() : void{

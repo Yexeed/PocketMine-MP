@@ -21,34 +21,34 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block\utils;
+namespace pocketmine\block;
 
-enum LeavesType{
-	case OAK;
-	case SPRUCE;
-	case BIRCH;
-	case JUNGLE;
-	case ACACIA;
-	case DARK_OAK;
-	case MANGROVE;
-	case AZALEA;
-	case FLOWERING_AZALEA;
-	case CHERRY;
-	case PALE_OAK;
+use pocketmine\block\utils\MultiAnySupportTrait;
+use pocketmine\block\utils\SupportType;
 
-	public function getDisplayName() : string{
-		return match($this){
-			self::OAK => "Oak",
-			self::SPRUCE => "Spruce",
-			self::BIRCH => "Birch",
-			self::JUNGLE => "Jungle",
-			self::ACACIA => "Acacia",
-			self::DARK_OAK => "Dark Oak",
-			self::MANGROVE => "Mangrove",
-			self::AZALEA => "Azalea",
-			self::FLOWERING_AZALEA => "Flowering Azalea",
-			self::CHERRY => "Cherry",
-			self::PALE_OAK => "Pale Oak",
-		};
+final class ResinClump extends Transparent{
+	use MultiAnySupportTrait;
+
+	public function isSolid() : bool{
+		return false;
+	}
+
+	public function getSupportType(int $facing) : SupportType{
+		return SupportType::NONE;
+	}
+
+	public function canBeReplaced() : bool{
+		return true;
+	}
+
+	/**
+	 * @return int[]
+	 */
+	protected function getInitialPlaceFaces(Block $blockReplace) : array{
+		return $blockReplace instanceof ResinClump ? $blockReplace->faces : [];
+	}
+
+	protected function recalculateCollisionBoxes() : array{
+		return [];
 	}
 }
