@@ -1615,25 +1615,6 @@ class World implements ChunkManager{
 	}
 
 	/**
-	 * @deprecated Use {@link World::getBlockCollisionBoxes()} instead (alongside {@link World::getCollidingEntities()}
-	 * if entity collision boxes are also required).
-	 *
-	 * @return AxisAlignedBB[]
-	 * @phpstan-return list<AxisAlignedBB>
-	 */
-	public function getCollisionBoxes(Entity $entity, AxisAlignedBB $bb, bool $entities = true) : array{
-		$collides = $this->getBlockCollisionBoxes($bb);
-
-		if($entities){
-			foreach($this->getCollidingEntities($bb->expandedCopy(0.25, 0.25, 0.25), $entity) as $ent){
-				$collides[] = clone $ent->boundingBox;
-			}
-		}
-
-		return $collides;
-	}
-
-	/**
 	 * Computes the percentage of a circle away from noon the sun is currently at. This can be multiplied by 2 * M_PI to
 	 * get an angle in radians, or by 360 to get an angle in degrees.
 	 */
