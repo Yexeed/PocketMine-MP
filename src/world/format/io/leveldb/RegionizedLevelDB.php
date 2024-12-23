@@ -104,20 +104,19 @@ final class RegionizedLevelDB extends BaseLevelDB{
 		return Binary::writeLong(morton2d_encode($chunkX, $chunkZ));
 	}
 
-	protected function getDBPathForCoords(int $chunkX, int $chunkZ) : string{
+	protected function getDBPathForRegionCoords(int $regionX, int $regionZ) : string{
 		return Path::join(self::dbRegionPath($this->path, $this->regionLength), sprintf(
 			"db.%d.%d",
-			(int) floor($chunkX / $this->regionLength),
-			(int) floor($chunkZ / $this->regionLength)
+			$regionX,
+			$regionZ
 		));
 	}
 
-	protected function getDBIndexForCoords(int $chunkX, int $chunkZ) : int{
-		return morton2d_encode((int) floor($chunkX / $this->regionLength), (int) floor($chunkZ / $this->regionLength));
-	}
-
-	protected function fetchDBForCoords(int $chunkX, int $chunkZ, bool $createIfMissing) : ?\LevelDB{
-		$index = $this->getDBIndexForCoords($chunkX, $chunkZ);
+	/**
+	 * @throws CorruptedChunkException
+	 */
+	protected function fetchDBForRegionCoords(int $regionX, int $regionZ, bool $createIfMissing) : ?\LevelDB{
+		$index = morton2d_encode($regionX, $regionZ);
 		$db = $this->databases[$index] ?? null;
 
 		if(
@@ -126,13 +125,13 @@ final class RegionizedLevelDB extends BaseLevelDB{
 		){
 			$options = self::DB_DEFAULT_OPTIONS;
 			$options["create_if_missing"] = $createIfMissing;
-			$dbPath = $this->getDBPathForCoords($chunkX, $chunkZ);
+			$dbPath = $this->getDBPathForRegionCoords($regionX, $regionZ);
 			try{
 				$this->databases[$index] = new \LevelDB($dbPath, $options);
 			}catch(\LevelDBException $e){
 				//no other way to detect error type :(
 				if(!str_contains($e->getMessage(), "(create_if_missing is false)")){
-					throw new CorruptedChunkException("Couldn't open LevelDB region $dbPath for $chunkX.$chunkZ: " . $e->getMessage(), 0, $e);
+					throw new CorruptedChunkException("Couldn't open LevelDB region $dbPath: " . $e->getMessage(), 0, $e);
 				}
 
 				//remember that this DB doesn't exist, so we don't have to hit the disk hundreds of times looking for it
@@ -142,15 +141,24 @@ final class RegionizedLevelDB extends BaseLevelDB{
 
 		$this->databasesLastUsed[$index] = time();
 		return $this->databases[$index];
+
+	}
+
+	protected function fetchDBForChunkCoords(int $chunkX, int $chunkZ, bool $createIfMissing) : ?\LevelDB{
+		return $this->fetchDBForRegionCoords(
+			(int) floor($chunkX / $this->regionLength),
+			(int) floor($chunkZ / $this->regionLength),
+			$createIfMissing
+		);
 	}
 
 	public function loadChunk(int $chunkX, int $chunkZ) : ?LoadedChunkData{
-		$db = $this->fetchDBForCoords($chunkX, $chunkZ, createIfMissing: false);
+		$db = $this->fetchDBForChunkCoords($chunkX, $chunkZ, createIfMissing: false);
 		return $db !== null ? $this->loadChunkFromDB($db, $chunkX, $chunkZ) : null;
 	}
 
 	public function saveChunk(int $chunkX, int $chunkZ, ChunkData $chunkData, int $dirtyFlags) : void{
-		$db = $this->fetchDBForCoords($chunkX, $chunkZ, createIfMissing: true) ??
+		$db = $this->fetchDBForChunkCoords($chunkX, $chunkZ, createIfMissing: true) ??
 			throw new AssumptionFailedError("We asked fetch to create a DB, it shouldn't return null");
 
 		$this->saveChunkToDB($db, $chunkX, $chunkZ, $chunkData, $dirtyFlags);
@@ -181,7 +189,7 @@ final class RegionizedLevelDB extends BaseLevelDB{
 				self::dbRegionPath($this->path, $this->regionLength),
 				\FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS
 			),
-			'/\/db\.(-?\d+)\.(-?\d+)\$/',
+			'/\/db\.(-?\d+)\.(-?\d+)$/',
 			\RegexIterator::GET_MATCH
 		);
 	}
@@ -192,15 +200,20 @@ final class RegionizedLevelDB extends BaseLevelDB{
 		/** @var string[] $region */
 		foreach($iterator as $region){
 			try{
-				$db = new \LevelDB($region[0], self::DB_DEFAULT_OPTIONS);
+				$regionX = (int) $region[1];
+				$regionZ = (int) $region[2];
+				$db = $this->fetchDBForRegionCoords($regionX, $regionZ, createIfMissing: false);
+				if($db === null){
+					throw new AssumptionFailedError("DB at $region[0] should definitely exist");
+				}
 
 				//TODO: we don't need the DB name coords for now, but we might in the future if the key format is
 				//changed to be relative
 				yield from $this->getAllChunksFromDB($db, $skipCorrupted, $logger);
-			}catch(\LevelDBException $e){
+			}catch(CorruptedChunkException $e){
 				//TODO: detect permission errors - although I'm not sure what we could do differently
 				if(!$skipCorrupted){
-					throw new CorruptedChunkException($e->getMessage(), 0, $e);
+					throw $e;
 				}
 				if($logger !== null){
 					$logger->error($e->getMessage());
@@ -216,7 +229,12 @@ final class RegionizedLevelDB extends BaseLevelDB{
 		/** @var string[] $region */
 		foreach($iterator as $region){
 			//TODO: calculateChunkCount has no accounting for corruption errors
-			$db = new \LevelDB($region[0], self::DB_DEFAULT_OPTIONS);
+			$regionX = (int) $region[1];
+			$regionZ = (int) $region[2];
+			$db = $this->fetchDBForRegionCoords($regionX, $regionZ, createIfMissing: false);
+			if($db === null){
+				throw new AssumptionFailedError("DB at $region[0] should definitely exist");
+			}
 
 			//TODO: we'd need a specialized calculate impl if we change the key length
 			$total += $this->calculateChunkCountInDB($db);
