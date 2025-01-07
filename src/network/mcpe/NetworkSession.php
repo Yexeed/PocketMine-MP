@@ -118,7 +118,6 @@ use pocketmine\world\Position;
 use pocketmine\world\World;
 use pocketmine\YmlServerProperties;
 use function array_map;
-use function array_values;
 use function base64_encode;
 use function bin2hex;
 use function count;
@@ -164,7 +163,10 @@ class NetworkSession{
 
 	private ?EncryptionContext $cipher = null;
 
-	/** @var string[] */
+	/**
+	 * @var string[]
+	 * @phpstan-var list<string>
+	 */
 	private array $sendBuffer = [];
 	/**
 	 * @var PromiseResolver[]
@@ -544,6 +546,7 @@ class NetworkSession{
 	 * @phpstan-return Promise<true>
 	 */
 	public function sendDataPacketWithReceipt(ClientboundPacket $packet, bool $immediate = false) : Promise{
+		/** @phpstan-var PromiseResolver<true> $resolver */
 		$resolver = new PromiseResolver();
 
 		if(!$this->sendDataPacketInternal($packet, $immediate, $resolver)){
@@ -1106,7 +1109,7 @@ class NetworkSession{
 					//work around a client bug which makes the original name not show when aliases are used
 					$aliases[] = $lname;
 				}
-				$aliasObj = new CommandEnum(ucfirst($command->getLabel()) . "Aliases", array_values($aliases));
+				$aliasObj = new CommandEnum(ucfirst($command->getLabel()) . "Aliases", $aliases);
 			}
 
 			$description = $command->getDescription();
