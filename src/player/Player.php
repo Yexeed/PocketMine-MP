@@ -148,7 +148,6 @@ use function count;
 use function explode;
 use function floor;
 use function get_class;
-use function is_int;
 use function max;
 use function mb_strlen;
 use function microtime;
@@ -831,7 +830,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			$X = null;
 			$Z = null;
 			World::getXZ($index, $X, $Z);
-			assert(is_int($X) && is_int($Z));
 
 			++$count;
 
@@ -1351,7 +1349,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			$this->nextChunkOrderRun = 0;
 		}
 
-		if(!$revert && $distanceSquared != 0){
+		if(!$revert && $distanceSquared !== 0.0){
 			$dx = $newPos->x - $oldPos->x;
 			$dy = $newPos->y - $oldPos->y;
 			$dz = $newPos->z - $oldPos->z;
@@ -2324,7 +2322,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 
 		$ev = new PlayerQuitEvent($this, $quitMessage ?? $this->getLeaveMessage(), $reason);
 		$ev->call();
-		if(($quitMessage = $ev->getQuitMessage()) != ""){
+		if(($quitMessage = $ev->getQuitMessage()) !== ""){
 			$this->server->broadcastMessage($quitMessage);
 		}
 		$this->save();
@@ -2465,7 +2463,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 			$this->xpManager->setXpAndProgress(0, 0.0);
 		}
 
-		if($ev->getDeathMessage() != ""){
+		if($ev->getDeathMessage() !== ""){
 			$this->server->broadcastMessage($ev->getDeathMessage());
 		}
 
