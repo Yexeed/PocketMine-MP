@@ -67,7 +67,6 @@ final class SurvivalBlockBreakHandler{
 		if(!$this->block->getBreakInfo()->isBreakable()){
 			return 0.0;
 		}
-
 		$breakTimePerTick = $this->block->getBreakInfo()->getBreakTime($this->player->getHotbar()->getHeldItem()) * 20;
 		if(!$this->player->isOnGround() && !$this->player->isFlying()){
 			$breakTimePerTick *= 5;
