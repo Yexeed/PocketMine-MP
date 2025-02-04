@@ -52,9 +52,6 @@ class EnderChest extends Transparent implements AnimatedContainer{
 		return 7;
 	}
 
-	/**
-	 * @return AxisAlignedBB[]
-	 */
 	protected function recalculateCollisionBoxes() : array{
 		//these are slightly bigger than in PC
 		return [AxisAlignedBB::one()->contract(0.025, 0, 0.025)->trim(Facing::UP, 0.05)];

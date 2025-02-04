@@ -111,7 +111,6 @@ class InventoryTransaction{
 	public function addAction(InventoryAction $action) : void{
 		if(!isset($this->actions[$hash = spl_object_id($action)])){
 			$this->actions[$hash] = $action;
-			$action->onAddToTransaction($this);
 			if($action instanceof SlotChangeAction && !isset($this->inventoryWindows[$inventoryId = spl_object_id($action->getInventoryWindow())])){
 				$this->inventoryWindows[$inventoryId] = $action->getInventoryWindow();
 			}
@@ -234,7 +233,7 @@ class InventoryTransaction{
 
 	/**
 	 * @param SlotChangeAction[] $possibleActions
-	 * @phpstan-param list<SlotChangeAction> $possibleActions
+	 * @phpstan-param array<int, SlotChangeAction> $possibleActions
 	 */
 	protected function findResultItem(Item $needOrigin, array $possibleActions) : ?Item{
 		assert(count($possibleActions) > 0);

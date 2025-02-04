@@ -123,6 +123,7 @@ class TimingsHandler{
 
 	/**
 	 * @return string[]
+	 * @phpstan-return list<string>
 	 */
 	private static function printFooter() : array{
 		$result = [];
@@ -136,19 +137,6 @@ class TimingsHandler{
 		$result[] = "Sample time $sampleTime (" . ($sampleTime / 1000000000) . "s)";
 
 		return $result;
-	}
-
-	/**
-	 * @deprecated This only collects timings from the main thread. Collecting timings from all threads is an async
-	 * operation, so it can't be done synchronously.
-	 *
-	 * @return string[]
-	 */
-	public static function printTimings() : array{
-		$records = self::printCurrentThreadRecords();
-		$footer = self::printFooter();
-
-		return [...$records, ...$footer];
 	}
 
 	/**
@@ -173,6 +161,7 @@ class TimingsHandler{
 			}
 		}
 
+		/** @phpstan-var PromiseResolver<list<string>> $resolver */
 		$resolver = new PromiseResolver();
 		Promise::all($otherThreadRecordPromises)->onCompletion(
 			function(array $promisedRecords) use ($resolver, $thisThreadRecords) : void{

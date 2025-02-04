@@ -21,20 +21,34 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\scheduler;
+namespace pocketmine\block;
 
-class PublishProgressRaceAsyncTask extends AsyncTask{
-	/** @var bool */
-	public static $success = false;
+use pocketmine\block\utils\MultiAnySupportTrait;
+use pocketmine\block\utils\SupportType;
 
-	public function onRun() : void{
-		$this->publishProgress("hello");
+final class ResinClump extends Transparent{
+	use MultiAnySupportTrait;
+
+	public function isSolid() : bool{
+		return false;
 	}
 
-	public function onProgressUpdate($progress) : void{
-		if($progress === "hello"){
-			// thread local on main thread
-			self::$success = true;
-		}
+	public function getSupportType(int $facing) : SupportType{
+		return SupportType::NONE;
+	}
+
+	public function canBeReplaced() : bool{
+		return true;
+	}
+
+	/**
+	 * @return int[]
+	 */
+	protected function getInitialPlaceFaces(Block $blockReplace) : array{
+		return $blockReplace instanceof ResinClump ? $blockReplace->faces : [];
+	}
+
+	protected function recalculateCollisionBoxes() : array{
+		return [];
 	}
 }
