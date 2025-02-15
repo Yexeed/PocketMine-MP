@@ -32,27 +32,15 @@ final class CreativeGroup{
 	public readonly Translatable|string $name;
 	public readonly ?Item $icon;
 
-	private function __construct(){
+	private function __construct(CreativeCategory $categoryId, Translatable|string $name, ?Item $icon){
 		//NOOP
 	}
 
 	public static function anonymous(CreativeCategory $categoryId) : self{
-		$result = new self();
-
-		$result->categoryId = $categoryId;
-		$result->name = "";
-		$result->icon = null;
-
-		return $result;
+		return new self($categoryId, "", null);
 	}
 
-	public static function named(CreativeCategory $categoryId, Translatable|string $name, Item $icon) : self{
-		$result = new self();
-
-		$result->categoryId = $categoryId;
-		$result->name = $name;
-		$result->icon = $icon;
-
-		return $result;
+	public static function named(CreativeCategory $categoryId, Translatable|string $name, ?Item $icon = null) : self{
+		return new self($categoryId, $name, $icon);
 	}
 }

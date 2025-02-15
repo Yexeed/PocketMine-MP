@@ -84,7 +84,7 @@ final class CreativeInventoryCache{
 
 				$groups[] = new CreativeGroupEntry(
 					$categoryId,
-					$group->name instanceof Translatable ? $group->name->getText() : (string) $group->name,
+					$group->name instanceof Translatable ? $group->name->getText() : $group->name,
 					$group->icon === null ? ItemStack::null() : $typeConverter->coreItemStackToNet($group->icon)
 				);
 			}
