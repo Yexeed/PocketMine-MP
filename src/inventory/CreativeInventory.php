@@ -27,6 +27,7 @@ use pocketmine\crafting\CraftingManagerFromDataHelper;
 use pocketmine\inventory\data\CreativeGroup;
 use pocketmine\inventory\json\CreativeGroupData;
 use pocketmine\item\Item;
+use pocketmine\lang\Translatable;
 use pocketmine\utils\DestructorCallbackTrait;
 use pocketmine\utils\ObjectSet;
 use pocketmine\utils\SingletonTrait;
@@ -54,11 +55,10 @@ final class CreativeInventory{
 	/** @phpstan-var ObjectSet<\Closure() : void> */
 	private ObjectSet $contentChangedCallbacks;
 
-	private CreativeGroup $defaultGroup;
+	private ?CreativeGroup $defaultGroup = null;
 
 	private function __construct(){
 		$this->contentChangedCallbacks = new ObjectSet();
-		$this->defaultGroup = CreativeGroup::anonymous(CreativeCategory::ITEMS);
 
 		foreach([
 			"construction" => CreativeCategory::CONSTRUCTION,
@@ -72,9 +72,9 @@ final class CreativeInventory{
 			);
 
 			foreach($groups as $groupData){
-				$group = new CreativeGroup(
+				$group = CreativeGroup::named(
 					$categoryId,
-					$groupData->group_name,
+					new Translatable($groupData->group_name),
 					$groupData->group_icon === null ? null : CraftingManagerFromDataHelper::deserializeItemStack($groupData->group_icon)
 				);
 				$items = array_filter(array_map(static fn($itemStack) => CraftingManagerFromDataHelper::deserializeItemStack($itemStack), $groupData->items));
@@ -105,10 +105,12 @@ final class CreativeInventory{
 	}
 
 	/**
+	 * Returns the group of every item indexed by the item index.
+	 *
 	 * @return CreativeGroup[]
 	 * @phpstan-return array<int, CreativeGroup>
 	 */
-	public function getItemGroup() : array{
+	public function getItemGroups() : array{
 		return $this->groups;
 	}
 
@@ -116,7 +118,10 @@ final class CreativeInventory{
 		return isset($this->items[$index]) ? clone $this->items[$index] : null;
 	}
 
-	public function getGroup(int $index) : ?CreativeGroup{
+	/**
+	 * @see CreativeInventory::getItemIndex()
+	 */
+	public function getItemGroupByIndex(int $index) : ?CreativeGroup{
 		return $this->groups[$index] ?? null;
 	}
 
@@ -136,12 +141,16 @@ final class CreativeInventory{
 	 */
 	public function add(Item $item, ?CreativeGroup $group = null) : void{
 		$this->items[] = $item;
-		$this->groups[] = $group ?? $this->defaultGroup;
-		$this->onContentChange();
 
-		if($group !== null){ // We need to create a new default group if another group is used.
-			$this->defaultGroup = CreativeGroup::anonymous(CreativeCategory::ITEMS);
+		if($group === null){
+			$this->defaultGroup ??= CreativeGroup::anonymous(CreativeCategory::ITEMS);
+			$this->groups[] = $this->defaultGroup;
+		}else{
+			$this->defaultGroup = null;
+			$this->groups[] = $group;
 		}
+
+		$this->onContentChange();
 	}
 
 	/**

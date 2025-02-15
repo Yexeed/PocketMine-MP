@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\cache;
 use pocketmine\inventory\CreativeCategory;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\inventory\data\CreativeGroup;
+use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\CreativeGroupEntry;
@@ -70,22 +71,21 @@ final class CreativeInventoryCache{
 		$typeConverter = TypeConverter::getInstance();
 
 		$index = 0;
-		$mappedGroups = array_reduce($inventory->getItemGroup(), function (array $carry, CreativeGroup $group) use ($typeConverter, &$index, &$groups) : array{
+		$mappedGroups = array_reduce($inventory->getItemGroups(), function (array $carry, CreativeGroup $group) use ($typeConverter, &$index, &$groups) : array{
 			if (!isset($carry[$id = spl_object_id($group)])) {
 				$carry[$id] = $index++;
 
-				$categoryId = match($group->getCategoryId()){
+				$categoryId = match($group->categoryId){
 					CreativeCategory::CONSTRUCTION => CreativeContentPacket::CATEGORY_CONSTRUCTION,
 					CreativeCategory::NATURE => CreativeContentPacket::CATEGORY_NATURE,
 					CreativeCategory::EQUIPMENT => CreativeContentPacket::CATEGORY_EQUIPMENT,
 					CreativeCategory::ITEMS => CreativeContentPacket::CATEGORY_ITEMS
 				};
 
-				$groupIcon = $group->getIcon();
 				$groups[] = new CreativeGroupEntry(
 					$categoryId,
-					$group->getName(),
-					$groupIcon === null ? ItemStack::null() : $typeConverter->coreItemStackToNet($groupIcon)
+					$group->name instanceof Translatable ? $group->name->getText() : (string) $group->name,
+					$group->icon === null ? ItemStack::null() : $typeConverter->coreItemStackToNet($group->icon)
 				);
 			}
 			return $carry;
@@ -96,7 +96,7 @@ final class CreativeInventoryCache{
 			$items[] = new CreativeItemEntry(
 				$k,
 				$typeConverter->coreItemStackToNet($item),
-				$mappedGroups[spl_object_id($inventory->getGroup($k) ?? throw new \AssertionError("Item group not found"))]
+				$mappedGroups[spl_object_id($inventory->getItemGroupByIndex($k) ?? throw new \AssertionError("Item group not found"))]
 			);
 		}
 

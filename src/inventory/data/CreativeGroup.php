@@ -25,43 +25,34 @@ namespace pocketmine\inventory\data;
 
 use pocketmine\inventory\CreativeCategory;
 use pocketmine\item\Item;
+use pocketmine\lang\Translatable;
 
 final class CreativeGroup{
-	private CreativeCategory $categoryId;
-	private string $name;
-	private ?Item $icon;
+	public readonly CreativeCategory $categoryId;
+	public readonly Translatable|string $name;
+	public readonly ?Item $icon;
 
-	public function __construct(CreativeCategory $categoryId, string $name, ?Item $icon = null){
-		$this->categoryId = $categoryId;
-		$this->name = $name;
-		$this->icon = $icon;
+	private function __construct(){
+		//NOOP
 	}
 
 	public static function anonymous(CreativeCategory $categoryId) : self{
-		return new self($categoryId, "");
+		$result = new self();
+
+		$result->categoryId = $categoryId;
+		$result->name = "";
+		$result->icon = null;
+
+		return $result;
 	}
 
-	public function getCategoryId() : CreativeCategory{
-		return $this->categoryId;
-	}
+	public static function named(CreativeCategory $categoryId, Translatable|string $name, Item $icon) : self{
+		$result = new self();
 
-	public function setCategoryId(CreativeCategory $categoryId) : void{
-		$this->categoryId = $categoryId;
-	}
+		$result->categoryId = $categoryId;
+		$result->name = $name;
+		$result->icon = $icon;
 
-	public function getName() : string{
-		return $this->name;
-	}
-
-	public function setName(string $name) : void{
-		$this->name = $name;
-	}
-
-	public function getIcon() : ?Item{
-		return $this->icon;
-	}
-
-	public function setIcon(?Item $icon) : void{
-		$this->icon = $icon;
+		return $result;
 	}
 }

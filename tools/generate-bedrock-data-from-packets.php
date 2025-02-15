@@ -291,7 +291,6 @@ class ParserPacketHandler extends PacketHandler{
 	public function handleCreativeContent(CreativeContentPacket $packet) : bool{
 		echo "updating creative inventory data\n";
 
-		/** @var array<int, ItemStackData[]> $groupItems */
 		$groupItems = array_reduce($packet->getItems(), function (array $carry, CreativeItemEntry $item) : array{
 			$carry[$item->getGroupId()][] = self::objectToOrderedArray($this->itemStackToJson($item->getItem()));
 			return $carry;
@@ -306,7 +305,6 @@ class ParserPacketHandler extends PacketHandler{
 			CreativeContentPacket::CATEGORY_ITEMS => "items",
 		];
 
-		/** @var array<int, CreativeGroupData[]> $groupCategories */
 		$groupCategories = array_reduce(array_keys($packet->getGroups()), function (array $carry, int $groupIndex) use ($typeMap, $groups, $groupItems) : array{
 			$group = $groups[$groupIndex];
 			if(!isset($typeMap[$group->getCategoryId()])){
