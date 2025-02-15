@@ -32,6 +32,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\CreativeGroupEntry;
 use pocketmine\network\mcpe\protocol\types\inventory\CreativeItemEntry;
 use pocketmine\network\mcpe\protocol\types\inventory\ItemStack;
 use pocketmine\utils\SingletonTrait;
+use function array_reduce;
 use function spl_object_id;
 
 final class CreativeInventoryCache{
@@ -95,7 +96,7 @@ final class CreativeInventoryCache{
 			$items[] = new CreativeItemEntry(
 				$k,
 				$typeConverter->coreItemStackToNet($item),
-				$mappedGroups[spl_object_id($inventory->getGroup($k))]
+				$mappedGroups[spl_object_id($inventory->getGroup($k) ?? throw new \AssertionError("Item group not found"))]
 			);
 		}
 

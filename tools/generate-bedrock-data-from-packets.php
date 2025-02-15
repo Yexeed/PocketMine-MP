@@ -35,7 +35,6 @@ use pocketmine\crafting\json\SmithingTrimRecipeData;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\ItemTypeNames;
-use pocketmine\inventory\json\CreativeCategoryData;
 use pocketmine\inventory\json\CreativeGroupData;
 use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\nbt\NBT;
@@ -319,8 +318,8 @@ class ParserPacketHandler extends PacketHandler{
 			return $carry;
 		}, []);
 
-		foreach(Utils::promoteKeys($groupCategories) as $category => $groups){
-			file_put_contents($this->bedrockDataPath . '/creative/' . $category . '.json', json_encode($groups, JSON_PRETTY_PRINT) . "\n");
+		foreach(Utils::promoteKeys($groupCategories) as $category => $categoryGroups){
+			file_put_contents($this->bedrockDataPath . '/creative/' . $category . '.json', json_encode($categoryGroups, JSON_PRETTY_PRINT) . "\n");
 		}
 
 		return true;

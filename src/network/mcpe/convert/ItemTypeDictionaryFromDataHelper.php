@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Utils;
-use function array_key_exists;
 use function base64_decode;
 use function is_array;
 use function is_bool;
