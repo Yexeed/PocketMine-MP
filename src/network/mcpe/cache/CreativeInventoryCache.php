@@ -23,7 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\cache;
 
+use pocketmine\inventory\CreativeCategory;
 use pocketmine\inventory\CreativeInventory;
+use pocketmine\inventory\data\CreativeGroup;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\CreativeGroupEntry;
@@ -65,13 +67,36 @@ final class CreativeInventoryCache{
 		$items = [];
 
 		$typeConverter = TypeConverter::getInstance();
-		foreach($inventory->getGroups() as $group){
-			$groups[] = new CreativeGroupEntry($group->categoryId, $group->categoryName, $group->icon === null ? ItemStack::null() : $typeConverter->coreItemStackToNet($group->icon));
-		}
+
+		$index = 0;
+		$mappedGroups = array_reduce($inventory->getItemGroup(), function (array $carry, CreativeGroup $group) use ($typeConverter, &$index, &$groups) : array{
+			if (!isset($carry[$id = spl_object_id($group)])) {
+				$carry[$id] = $index++;
+
+				$categoryId = match($group->getCategoryId()){
+					CreativeCategory::CONSTRUCTION => CreativeContentPacket::CATEGORY_CONSTRUCTION,
+					CreativeCategory::NATURE => CreativeContentPacket::CATEGORY_NATURE,
+					CreativeCategory::EQUIPMENT => CreativeContentPacket::CATEGORY_EQUIPMENT,
+					CreativeCategory::ITEMS => CreativeContentPacket::CATEGORY_ITEMS
+				};
+
+				$groupIcon = $group->getIcon();
+				$groups[] = new CreativeGroupEntry(
+					$categoryId,
+					$group->getName(),
+					$groupIcon === null ? ItemStack::null() : $typeConverter->coreItemStackToNet($groupIcon)
+				);
+			}
+			return $carry;
+		}, []);
 
 		//creative inventory may have holes if items were unregistered - ensure network IDs used are always consistent
-		foreach($inventory->getGroupedItems() as $k => $item){
-			$items[] = new CreativeItemEntry($k, $typeConverter->coreItemStackToNet($item->item), $item->groupId);
+		foreach($inventory->getAll() as $k => $item){
+			$items[] = new CreativeItemEntry(
+				$k,
+				$typeConverter->coreItemStackToNet($item),
+				$mappedGroups[spl_object_id($inventory->getGroup($k))]
+			);
 		}
 
 		return CreativeContentPacket::create($groups, $items);

@@ -21,13 +21,11 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\inventory\json;
+namespace pocketmine\inventory;
 
-use pocketmine\crafting\json\ItemStackData;
-
-final class CreativeItemData{
-	/** @required */
-	public ItemStackData $item;
-	/** @required */
-	public int $group_id;
+enum CreativeCategory{
+	case CONSTRUCTION;
+	case NATURE;
+	case EQUIPMENT;
+	case ITEMS;
 }

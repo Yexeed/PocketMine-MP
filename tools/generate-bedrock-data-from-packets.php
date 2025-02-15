@@ -35,8 +35,8 @@ use pocketmine\crafting\json\SmithingTrimRecipeData;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\ItemTypeNames;
+use pocketmine\inventory\json\CreativeCategoryData;
 use pocketmine\inventory\json\CreativeGroupData;
-use pocketmine\inventory\json\CreativeItemData;
 use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
@@ -81,7 +81,9 @@ use pocketmine\utils\Utils;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use Ramsey\Uuid\Exception\InvalidArgumentException;
 use Symfony\Component\Filesystem\Path;
+use function array_keys;
 use function array_map;
+use function array_reduce;
 use function array_values;
 use function asort;
 use function base64_decode;
@@ -139,21 +141,15 @@ class ParserPacketHandler extends PacketHandler{
 		return base64_encode((new LittleEndianNbtSerializer())->write(new TreeRoot($statePropertiesTag)));
 	}
 
-	private function creativeGroupEntryToJson(CreativeGroupEntry $entry) : CreativeGroupData{
+	/**
+	 * @param ItemStackData[] $items
+	 */
+	private function creativeGroupEntryToJson(CreativeGroupEntry $entry, array $items) : CreativeGroupData{
 		$data = new CreativeGroupData();
 
-		$data->category_id = $entry->getCategoryId();
-		$data->category_name = $entry->getCategoryName();
-		$data->icon = $entry->getIcon()->getId() === 0 ? null : $this->itemStackToJson($entry->getIcon());
-
-		return $data;
-	}
-
-	private function creativeItemEntryToJson(CreativeItemEntry $entry) : CreativeItemData{
-		$data = new CreativeItemData();
-
-		$data->group_id = $entry->getGroupId();
-		$data->item = $this->itemStackToJson($entry->getItem());
+		$data->group_name = $entry->getCategoryName();
+		$data->group_icon = $entry->getIcon()->getId() === 0 ? null : $this->itemStackToJson($entry->getIcon());
+		$data->items = $items;
 
 		return $data;
 	}
@@ -271,14 +267,16 @@ class ParserPacketHandler extends PacketHandler{
 		$emptyNBT = new CompoundTag();
 		$table = [];
 		foreach($packet->getEntries() as $entry){
-			$componentNBT = $entry->getComponentNbt()->getRoot();
-
 			$table[$entry->getStringId()] = [
 				"runtime_id" => $entry->getNumericId(),
 				"component_based" => $entry->isComponentBased(),
 				"version" => $entry->getVersion(),
-				"nbt" => $componentNBT->equals($emptyNBT) ? null : base64_encode((new LittleEndianNbtSerializer())->write(new TreeRoot($componentNBT)))
 			];
+
+			$componentNBT = $entry->getComponentNbt()->getRoot();
+			if(!$componentNBT->equals($emptyNBT)){
+				$table[$entry->getStringId()]["component_nbt"] = base64_encode((new LittleEndianNbtSerializer())->write(new TreeRoot($componentNBT)));
+			}
 		}
 		ksort($table, SORT_STRING);
 		file_put_contents($this->bedrockDataPath . '/required_item_list.json', json_encode($table, JSON_PRETTY_PRINT) . "\n");
@@ -293,16 +291,38 @@ class ParserPacketHandler extends PacketHandler{
 
 	public function handleCreativeContent(CreativeContentPacket $packet) : bool{
 		echo "updating creative inventory data\n";
-		$groups = array_map(function(CreativeGroupEntry $entry) : array{
-			return self::objectToOrderedArray($this->creativeGroupEntryToJson($entry));
-		}, $packet->getGroups());
-		$items = array_map(function(CreativeItemEntry $entry) : array{
-			return self::objectToOrderedArray($this->creativeItemEntryToJson($entry));
-		}, $packet->getItems());
-		file_put_contents($this->bedrockDataPath . '/creativeitems.json', json_encode([
-			'groups' => $groups,
-			'items' => $items,
-		], JSON_PRETTY_PRINT) . "\n");
+
+		/** @var array<int, ItemStackData[]> $groupItems */
+		$groupItems = array_reduce($packet->getItems(), function (array $carry, CreativeItemEntry $item) : array{
+			$carry[$item->getGroupId()][] = self::objectToOrderedArray($this->itemStackToJson($item->getItem()));
+			return $carry;
+		}, []);
+
+		$groups = $packet->getGroups();
+
+		static $typeMap = [
+			CreativeContentPacket::CATEGORY_CONSTRUCTION => "construction",
+			CreativeContentPacket::CATEGORY_NATURE => "nature",
+			CreativeContentPacket::CATEGORY_EQUIPMENT => "equipment",
+			CreativeContentPacket::CATEGORY_ITEMS => "items",
+		];
+
+		/** @var array<int, CreativeGroupData[]> $groupCategories */
+		$groupCategories = array_reduce(array_keys($packet->getGroups()), function (array $carry, int $groupIndex) use ($typeMap, $groups, $groupItems) : array{
+			$group = $groups[$groupIndex];
+			if(!isset($typeMap[$group->getCategoryId()])){
+				throw new \UnexpectedValueException("Unknown category ID " . $group->getCategoryId());
+			}
+
+			$mappedCategory = $typeMap[$group->getCategoryId()];
+			$carry[$mappedCategory][] = self::objectToOrderedArray($this->creativeGroupEntryToJson($group, $groupItems[$groupIndex]));
+			return $carry;
+		}, []);
+
+		foreach(Utils::promoteKeys($groupCategories) as $category => $groups){
+			file_put_contents($this->bedrockDataPath . '/creative/' . $category . '.json', json_encode($groups, JSON_PRETTY_PRINT) . "\n");
+		}
+
 		return true;
 	}
 
