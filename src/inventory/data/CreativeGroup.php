@@ -28,11 +28,11 @@ use pocketmine\item\Item;
 use pocketmine\lang\Translatable;
 
 final class CreativeGroup{
-	public readonly CreativeCategory $categoryId;
-	public readonly Translatable|string $name;
-	public readonly ?Item $icon;
-
-	private function __construct(CreativeCategory $categoryId, Translatable|string $name, ?Item $icon){
+	private function __construct(
+		public readonly CreativeCategory $categoryId,
+		public readonly Translatable|string $name,
+		public readonly ?Item $icon
+	){
 		//NOOP
 	}
 
